@@ -6,9 +6,9 @@ my_datacenter: CS PROD
 my_hostname: "{{ my_vct_servername | lower }}.{{ my_dns_domain }}"
 my_network_name: VM - cs-stmp-prd-devicemgmt
 my_netmask: 255.255.255.0
-my_gateway_address: 172.26.61.1
-my_dnsserver1: 172.26.57.52
-my_dnsserver2: 172.27.57.52
+my_gateway_address: 198.51.100.10
+my_dnsserver1: 198.51.100.10
+my_dnsserver2: 198.51.100.20
 my_dns_domain: services.stamp.tsa.dhs.gov
 my_guest_id: rhel8_64Guest
 my_datastore: Trusted Datastore Cluster (CS)

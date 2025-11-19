@@ -1,6 +1,6 @@
 ---
 _hosts: '{{ my_vct_servername }}'
-my_cluster: ajstsrvlpesx150
+my_cluster: cluster02.example.com
 my_folder: Linux/TIM/PRD
 my_datacenter: AJ PRD
 my_hostname: "{{ my_vct_servername | lower }}.{{ my_dns_domain }}"

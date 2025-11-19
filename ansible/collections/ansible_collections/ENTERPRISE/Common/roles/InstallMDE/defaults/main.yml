@@ -1,6 +1,6 @@
 ---
 # defaults file for InstallMDE
-sat_url: https://csstsrvlvsat151.services.stamp.tsa.dhs.gov/pulp/content/STA/Library/custom/STAMPLinuxBinaries/Software/
+sat_url: https://satellite.example.com/pulp/content/STA/Library/custom/STAMPLinuxBinaries/Software/
 repo_loc: pulp/content/STA/Library/custom/STAMPLinuxBinaries/Software
 mde_pkg: mdatp-101.25072.0003-1.x86_64.rpm
 stage_dir: /var/tmp/

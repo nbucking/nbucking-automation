@@ -57,7 +57,7 @@
 
 #   - name: Sending email to the VMWare team for awareness
 #     community.general.mail:
-#       host: 172.26.24.18
+#       host: 198.51.100.10
 #       port: 25
 #       to: STAMPVMAdmin@tsa.dhs.gov,StampAutomation@tsa.dhs.gov
 #       cc: "{{ tower_user_email | default(omit) }}"
@@ -121,7 +121,7 @@
 
   # - name: Sending email to the VMWare team for awareness
   #   community.general.mail:
-  #     host: 172.26.24.18
+  #     host: 198.51.100.10
   #     port: 25
   #     to: STAMPVMAdmin@tsa.dhs.gov,StampAutomation@tsa.dhs.gov
   #     cc: "{{ tower_user_email | default(omit) }}"

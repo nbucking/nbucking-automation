@@ -3,9 +3,9 @@
 _hosts: CSSTLABLVBLD55
 my_cluster: csssnonlpesx50.dev.example.com
 my_vct_servername: CSSTLABLVBLD55
-my_ip_address: 172.26.60.253
+my_ip_address: 198.51.100.10
 my_netmask: 255.255.255.0
-my_gateway_address: 172.26.60.1
+my_gateway_address: 198.51.100.10
 my_state: poweredon
 my_datacenter: CS NON-PROD
 my_folder: Automation/Templates

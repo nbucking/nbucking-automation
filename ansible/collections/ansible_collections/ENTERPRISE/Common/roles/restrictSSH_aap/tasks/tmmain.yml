@@ -25,11 +25,11 @@
     - 192.168.75.254 # CAPAM
     - 192.168.74.253 # CAPAM
     - 192.168.74.254 # CAPAM
-    - 172.26.0.199   # EPO
-    - 172.26.24.96   # solariwinds server
-    - 172.27.24.96   # solariwinds server
-    - 172.26.24.106  # solariwinds server
-    - 172.27.24.99   # solariwinds server
+    - 198.51.100.10   # EPO
+    - 198.51.100.10   # solariwinds server
+    - 198.51.100.20   # solariwinds server
+    - 198.51.100.10  # solariwinds server
+    - 198.51.100.20   # solariwinds server
   notify: "reload firewalld"
 - name: Disable ssh access in public zone
   firewalld:
@@ -49,7 +49,7 @@
   firewalld:
     zone: ssh_access
     permanent: yes
-    source: 172.27.0.155
+    source: 198.51.100.20
     state: enabled
   when: ansible_local['vmInfo']['datacenter'] == "AJNON"
   notify: "reload firewalld"
@@ -57,7 +57,7 @@
   firewalld:
     zone: ssh_access
     permanent: yes
-    source: 172.27.24.235
+    source: 198.51.100.20
     state: enabled
   when: ansible_local['vmInfo']['datacenter'] == "AJPRD"
   notify: "reload firewalld"
@@ -65,7 +65,7 @@
   firewalld:
     zone: ssh_access
     permanent: yes
-    source: 172.26.0.247
+    source: 198.51.100.10
     state: enabled
   when: ansible_local['vmInfo']['datacenter'] == "CSNON"
   notify: "reload firewalld"
@@ -73,7 +73,7 @@
   firewalld:
     zone: ssh_access
     permanent: yes
-    source: 172.26.24.226
+    source: 198.51.100.10
     state: enabled
   when: ansible_local['vmInfo']['datacenter'] == "CSPRD"
   notify: "reload firewalld"

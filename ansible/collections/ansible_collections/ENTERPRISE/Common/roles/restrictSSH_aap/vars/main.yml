@@ -11,24 +11,24 @@ NessusRules:
   - adapterName: GSS-NON-TRUSTED-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.27.0.251
+    source: 198.51.100.20
     immediate: yes
     state: enabled
-    network: 172.27.0.0
+    network: 198.51.100.20
   - adapterName: GSS-DEV-SEMI-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.26.2.130
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.2.0
+    network: 198.51.100.10
   - adapterName: GSS-NON-SEMI-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.27.2.10
+    source: 198.51.100.20
     immediate: yes
     state: enabled
-    network: 172.27.2.0
+    network: 198.51.100.20
   - adapterName: SG-NON-SEMI-120-AJ
     zone: ssh_access
     permanent: yes
@@ -53,10 +53,10 @@ NessusRules:
   - adapterName: GSS-NON-TRUSTED-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.27.0.200
+    source: 198.51.100.20
     immediate: yes
     state: enabled
-    network: 172.27.0.0
+    network: 198.51.100.20
   - adapterName: EA-NON-WKS-VIR-AJ
     zone: ssh_access
     permanent: yes
@@ -67,10 +67,10 @@ NessusRules:
   - adapterName: GSS-NON-PAAS-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.27.200.16
+    source: 198.51.100.20
     immediate: yes
     state: enabled
-    network: 172.27.200.0
+    network: 198.51.100.20
   - adapterName: GSS-NON-WKS-VIR-AJ
     zone: ssh_access
     permanent: yes
@@ -102,10 +102,10 @@ NessusRules:
   - adapterName: GSS-NON-REST-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.27.3.181
+    source: 198.51.100.20
     immediate: yes
     state: enabled
-    network: 172.27.3.0
+    network: 198.51.100.20
   - adapterName: SG-DEV-DB-105-AJ
     zone: ssh_access
     permanent: yes
@@ -123,38 +123,38 @@ NessusRules:
   - adapterName: GSS-PRD-TRUST-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.27.24.151
+    source: 198.51.100.20
     immediate: yes
     state: enabled
-    network: 172.27.24.0
+    network: 198.51.100.20
   - adapterName: EA-PRD-TRUST-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.27.32.4
+    source: 198.51.100.20
     immediate: yes
     state: enabled
-    network: 172.27.32.0
+    network: 198.51.100.20
   - adapterName: GSS-PRD-PAAS-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.27.202.16
+    source: 198.51.100.20
     immediate: yes
     state: enabled
-    network: 172.27.202.0
+    network: 198.51.100.20
   - adapterName: GSS-PRD-SEC-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.27.28.126
+    source: 198.51.100.20
     immediate: yes
     state: enabled
-    network: 172.27.28.0 
+    network: 198.51.100.20 
   - adapterName: GSS-PRD-SEMI-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.27.26.126
+    source: 198.51.100.20
     immediate: yes
     state: enabled
-    network: 172.27.26.0 
+    network: 198.51.100.20 
   - adapterName: SG-PRD-TRUST-AJ-50
     zone: ssh_access
     permanent: yes
@@ -179,10 +179,10 @@ NessusRules:
   - adapterName: GSS-PRD-SEMI-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.27.26.126
+    source: 198.51.100.20
     immediate: yes
     state: enabled
-    network: 172.27.26.0
+    network: 198.51.100.20
   - adapterName: TVS-PRD-TRUST-AJ
     zone: ssh_access
     permanent: yes
@@ -242,17 +242,17 @@ NessusRules:
   - adapterName: GSS-PRD-REST-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.27.27.81
+    source: 198.51.100.20
     immediate: yes
     state: enabled
-    network: 172.27.27.0
+    network: 198.51.100.20
   - adapterName: EA-PRD-Restricted-AJ-401
     zone: ssh_access
     permanent: yes
-    source: 172.27.33.4
+    source: 198.51.100.20
     immediate: yes
     state: enabled
-    network: 172.27.27.0
+    network: 198.51.100.20
   - adapterName: SG-PRD-REST-AJ
     zone: ssh_access
     permanent: yes
@@ -277,10 +277,10 @@ NessusRules:
   - adapterName: GSS-DEV-TRUST-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.0.191
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.0.0
+    network: 198.51.100.10
   - adapterName:  SG-DEV-RESTRICT-CS
     zone: ssh_access
     permanent: yes
@@ -410,80 +410,80 @@ NessusRules:
   - adapterName: GSS-DEV-TRUST-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.0.130
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.0.0
+    network: 198.51.100.10
   - adapterName: GSS-DEV-SEMI-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.26.2.226
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.2.128
+    network: 198.51.100.10
   - adapterName: GSS-DEV-SEMI-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.2.126
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.2.0
+    network: 198.51.100.10
   - adapterName: GSS-DEV-TRUST-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.26.1.126
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.1.0
+    network: 198.51.100.10
   - adapterName: GSS-DTS-SEMI-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.10.126
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.10.0
+    network: 198.51.100.10
   - adapterName: GSS-STS-SEMI-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.26.18.226 
+    source: 198.51.100.10 
     immediate: yes
     state: enabled
-    network: 172.26.18.128
+    network: 198.51.100.10
   - adapterName: GSS-STS-SEMI-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.18.126
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.18.0
+    network: 198.51.100.10
   - adapterName: GSS-STS-TRUST-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.26.17.126
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.17.0
+    network: 198.51.100.10
   - adapterName: GSS-STS-TRUST-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.16.126
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.16.0
+    network: 198.51.100.10
   - adapterName: GSS-DEV-TRUST-CS 
     zone: ssh_access
     permanent: yes
-    source: 172.26.200.16
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.200.0
+    network: 198.51.100.10
   - adapterName: GSS-NON-PAAS-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.200.16
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.200.0
+    network: 198.51.100.10
   - adapterName: TIM-DEV-TRUST-CS
     zone: ssh_access
     permanent: yes
@@ -522,10 +522,10 @@ NessusRules:
   - adapterName: GSS-DEV-TRUST-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.0.110
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.0.0
+    network: 198.51.100.10
   - adapterName: TVS-DEV-TRUST-AJ
     zone: ssh_access
     permanent: yes
@@ -585,31 +585,31 @@ NessusRules:
   - adapterName: GSS-DEV-TRUST-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.0.111
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.0.0
+    network: 198.51.100.10
   - adapterName: GSS-DTS-SEMI-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.26.10.226
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.10.0 
+    network: 198.51.100.10 
   - adapterName: GSS-DTS-TRUST-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.26.9.126
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.9.0
+    network: 198.51.100.10
   - adapterName: GSS-DTS-TRUST-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.8.126
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.8.0
+    network: 198.51.100.10
   - adapterName: GSS-NON-WKS-VIR
     zone: ssh_access
     permanent: yes
@@ -641,45 +641,45 @@ NessusRules:
   - adapterName: GSS-DEV-RESTICT-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.26.3.181
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.3.0
+    network: 198.51.100.10
   - adapterName: GSS-DEV-RESTICT-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.3.91
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.3.0
+    network: 198.51.100.10
   - adapterName: GSS-DTS-RESTICT-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.26.11.226
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.11.128
+    network: 198.51.100.10
   - adapterName: GSS-DTS-RESTICT-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.11.126
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.11.0
+    network: 198.51.100.10
   - adapterName: GSS-STS-RESTICT-AJ
     zone: ssh_access
     permanent: yes
-    source: 172.26.19.226
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.19.0
+    network: 198.51.100.10
   - adapterName: GSS-STS-RESTICT-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.19.126
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.19.0
+    network: 198.51.100.10
   - adapterName: TIM-DEV-RESTRICT-CS
     zone: ssh_access
     permanent: yes
@@ -746,10 +746,10 @@ NessusRules:
   - adapterName: GSS-PRD-TRUST-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.24.151
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.24.0
+    network: 198.51.100.10
   - adapterName: TIM-PRD-TRUST-CS 
     zone: ssh_access
     permanent: yes
@@ -788,10 +788,10 @@ NessusRules:
   - adapterName: GSS-PRD-TRUST-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.24.230
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.24.0 
+    network: 198.51.100.10 
   - adapterName: TVS-PRD-TRUST-CS
     zone: ssh_access
     permanent: yes
@@ -802,24 +802,24 @@ NessusRules:
   - adapterName: GSS-PRD-PAAS-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.202.16
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.202.0 
+    network: 198.51.100.10 
   - adapterName: GSS-PRD-SEC-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.28.226
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.28.0 
+    network: 198.51.100.10 
   - adapterName: GSS-PRD-SEMI-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.26.126 
+    source: 198.51.100.10 
     immediate: yes
     state: enabled
-    network: 172.26.26.0 
+    network: 198.51.100.10 
   - adapterName: TIM-PRD-SEMI-CS
     zone: ssh_access
     permanent: yes
@@ -837,10 +837,10 @@ NessusRules:
   - adapterName: GSS-PRD-REST-CS
     zone: ssh_access
     permanent: yes
-    source: 172.26.27.81
+    source: 198.51.100.10
     immediate: yes
     state: enabled
-    network: 172.26.27.0
+    network: 198.51.100.10
   - adapterName: TIM-PRD-REST-CS
     zone: ssh_access
     permanent: yes

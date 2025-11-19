@@ -5,12 +5,12 @@
     path: /etc/hosts
     marker: "# {mark} Added by Automation Build Script"
     block: |
-      172.26.58.41     csstsrvlvsat151.services.stamp.tsa.dhs.gov     csstsrvlvsat151
-      172.26.58.42     csstsrvlvcap151.services.stamp.tsa.dhs.gov     csstsrvlvcap151
-      172.27.58.42     ajstsrvlvcap151.services.stamp.tsa.dhs.gov     ajstsrvlvcap151
-      172.26.58.43     csstsrvlvcap152.services.stamp.tsa.dhs.gov     csstsrvlvcap152
-      172.27.58.43     ajstsrvlvcap152.services.stamp.tsa.dhs.gov     ajstsrvlvcap152
-      172.26.24.124    nexus.stamp.tsa.dhs.gov
+      198.51.100.10     satellite.example.com     csstsrvlvsat151
+      198.51.100.10     csstsrvlvcap151.services.stamp.tsa.dhs.gov     csstsrvlvcap151
+      198.51.100.20     ajstsrvlvcap151.services.stamp.tsa.dhs.gov     ajstsrvlvcap151
+      198.51.100.10     csstsrvlvcap152.services.stamp.tsa.dhs.gov     csstsrvlvcap152
+      198.51.100.20     ajstsrvlvcap152.services.stamp.tsa.dhs.gov     ajstsrvlvcap152
+      198.51.100.10    nexus.stamp.tsa.dhs.gov
 
 
 - name: Install katello-ca for RH SAT for AJNON RHEL8

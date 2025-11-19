@@ -1,7 +1,7 @@
 ---
 # vars file for Reinstall_McAfee
 #nexus_url: https://nexus.stamp.tsa.dhs.gov:9090/repository/STAMPLinuxBinaries/InstallFlexera/
-nexus_url: https://csstsrvlvsat151.services.stamp.tsa.dhs.gov/pulp/content/STA/Library/custom/STAMPLinuxBinaries/Software/
+nexus_url: https://satellite.example.com/pulp/content/STA/Library/custom/STAMPLinuxBinaries/Software/
 repo_loc: pulp/content/STA/Library/custom/STAMPLinuxBinaries/Software/
 prd_trellix_bin: install.sh
 non_trellix_bin: install.sh

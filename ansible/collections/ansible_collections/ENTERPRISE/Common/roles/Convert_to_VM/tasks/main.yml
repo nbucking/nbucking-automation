@@ -27,9 +27,9 @@
     - name: "{{ my_network_name | default('VM - GSS Quarantine (LACP)') }}"
       connected: true
       start_connected: true
-      ip: "{{ my_ip_address | default('172.26.60.254') }}"
+      ip: "{{ my_ip_address | default('198.51.100.10') }}"
       netmask: "{{ my_netmask | default('255.255.255.0') }}"
-      gateway: "{{ my_gateway_address | default('172.26.60.1') }}"
+      gateway: "{{ my_gateway_address | default('198.51.100.10') }}"
       device_type: vmxnet3
       type: static
     template: "{{ my_template }}"

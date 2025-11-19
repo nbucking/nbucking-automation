@@ -1,13 +1,13 @@
 ---
 _hosts: '{{ my_vct_servername }}'
-my_cluster: ajssnonlpesx50.dev.example.com
+my_cluster: cluster01.example.com
 my_folder: Linux/ENTERPRISE
 my_datacenter: AJ NON-PROD
 my_hostname: "{{ my_vct_servername | lower }}.{{ my_dns_domain }}"
 my_network_name: aj-stmp-ppd-linuxinf
 my_netmask: 255.255.255.0
-my_gateway_address: 172.27.158.1
-my_dnsserver1: 172.27.157.51
-my_dnsserver2: 172.26.157.51
+my_gateway_address: 198.51.100.20
+my_dnsserver1: 198.51.100.20
+my_dnsserver2: 198.51.100.10
 my_dns_domain: services.ppdstamp.example.com
 my_datastore: Trusted Datastore Cluster (AJ)

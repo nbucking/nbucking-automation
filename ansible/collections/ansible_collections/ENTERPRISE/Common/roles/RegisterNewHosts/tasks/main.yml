@@ -72,22 +72,22 @@
 
 #- name: Set CAP serve for AJNON
 #  set_fact:
-#    thiscapserverip: 172.27.58.43
+#    thiscapserverip: 198.51.100.20
 #  when: thisDC == "AJNON"
 #
 #- name: Set CAP serve for AJPRD
 #  set_fact:
-#    thiscapserverip: 172.27.58.42
+#    thiscapserverip: 198.51.100.20
 #  when: thisDC == "AJPRD"
 #
 #- name: Set CAP serve for CSNON
 #  set_fact:
-#    thiscapserverip: 172.26.58.43
+#    thiscapserverip: 198.51.100.10
 #  when: thisDC == "CSNON"
 #
 #- name: Set CAP serve for CSPRD
 #  set_fact:
-#    thiscapserverip: 172.26.58.42
+#    thiscapserverip: 198.51.100.10
 #  when: thisDC == "CSPRD"
 #
 #- name: Verify CAP server ip is defined

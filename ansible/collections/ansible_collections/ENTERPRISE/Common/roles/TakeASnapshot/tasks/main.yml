@@ -144,14 +144,10 @@
       unified_job_template: "{{ template_name }}"
       rrule: "{{ query('ansible.controller.schedule_rrule', 'none', start_date=time, timezone='US/Eastern') }}"        
       validate_certs: no
-      controller_host: prd-aap-controller-aap.apps.cs.oci.services.stamp.tsa.dhs.gov
+      controller_host: aap-controller.example.com
       controller_oauthtoken: !vault |
           $ANSIBLE_VAULT;1.1;AES256
-          39366165373564643538626565396466323335303664323539643632646130666362393135633137
-          3964323533393465353432643735636330623765393962340a623962613831333961393635643664
-          30633062626536373433623035626335663538613262626563646431636462313365663839326634
-          3062336238313565310a323934383638616264316138356230656233376237353136343566353261
-          64343037393237333433343439363063313665623534666166616165366561663634
+          EXAMPLE_ENCRYPTED_VALUE_REDACTED_FOR_PUBLIC_REPOSITORY
       extra_data: 
         _hosts: "{{ _hosts }}"
         are_you_sure: 'YES'
