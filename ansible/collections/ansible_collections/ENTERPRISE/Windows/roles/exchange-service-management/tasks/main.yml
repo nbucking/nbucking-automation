@@ -1,0 +1,8 @@
+---
+# Service management role - handles Exchange service status and starting
+- name: Manage services on target servers
+  ansible.builtin.include_tasks: server_service_management.yml
+  vars:
+    current_server: "{{ item }}"
+  loop: "{{ target_servers }}"
+  when: target_servers is defined

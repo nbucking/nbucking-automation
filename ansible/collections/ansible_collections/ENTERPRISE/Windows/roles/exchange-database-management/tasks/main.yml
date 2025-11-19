@@ -1,0 +1,191 @@
+---
+# Database management role - handles active database detection and movement
+- name: Get mailbox database copy status for all servers
+  ENTERPRISE.Windows.win_exchange:
+    command: "Get-MailboxDatabaseCopyStatus"
+    parameters:
+      Server: "{{ item }}"
+    output_format: "json"
+  register: db_status_results
+  loop: "{{ exchange_server_list }}"
+  when: exchange_server_list is defined
+
+- name: Find active database server
+  ansible.builtin.set_fact:
+    active_database_info: >-
+      {{
+        db_status_results.results
+        | selectattr('output', 'defined')
+        | map('extract', ['output'])
+        | map('from_json')
+        | flatten
+        | selectattr('Status', 'equalto', 'Mounted')
+        | selectattr('DatabaseName', 'equalto', database_name)
+        | list
+        | first
+      }}
+  when: 
+    - db_status_results is defined
+    - database_name is defined
+
+- name: Set active server fact
+  ansible.builtin.set_fact:
+    active_server: "{{ active_database_info.MailboxServer if active_database_info is defined else 'Unknown' }}"
+
+- name: Check if target servers contain active database server
+  ansible.builtin.set_fact:
+    servers_with_active_db: "{{ target_servers | intersect([active_server]) }}"
+  when: 
+    - target_servers is defined
+    - active_server is defined
+    - active_server != 'Unknown'
+
+- name: Display servers that have active database
+  ansible.builtin.debug:
+    msg: |
+      ⚠️ WARNING: The following target servers host the active database:
+      {{ servers_with_active_db | join(', ') }}
+      These servers cannot be put into maintenance mode without moving the database first.
+  when: 
+    - servers_with_active_db is defined 
+    - servers_with_active_db | length > 0
+
+# Determine if we need to move database automatically
+- name: Check auto-move database setting
+  ansible.builtin.set_fact:
+    auto_move_required: >-
+      {{
+        (auto_move_active_db | default(false)) and 
+        (servers_with_active_db is defined) and 
+        (servers_with_active_db | length > 0)
+      }}
+
+- name: Prompt for database move decision (interactive mode)
+  ansible.builtin.pause:
+    prompt: |
+      {% if servers_with_active_db is defined and servers_with_active_db | length > 0 %}
+      ⚠️ Active database is on target server(s): {{ servers_with_active_db | join(', ') }}
+      The database must be moved to put these servers in maintenance mode.
+      {% endif %}
+      Do you want to move the active database '{{ database_name }}'? (yes/no/auto)
+      - yes: Move database with manual server selection
+      - no: Skip servers with active database
+      - auto: Automatically move to best available server
+  register: move_decision
+  when: 
+    - interactive_mode | default(true)
+    - not auto_move_required
+
+- name: Set move decision from variable when not interactive
+  ansible.builtin.set_fact:
+    move_decision:
+      user_input: "{{ move_database | default('no') }}"
+  when: 
+    - not (interactive_mode | default(true))
+    - not auto_move_required
+
+- name: Set auto-move decision when auto-move is enabled
+  ansible.builtin.set_fact:
+    move_decision:
+      user_input: "auto"
+  when: auto_move_required
+
+# Auto-select best server for database move
+- name: Auto-select target server for database move
+  ansible.builtin.set_fact:
+    auto_target_server: >-
+      {{
+        exchange_server_list 
+        | difference(target_servers | default([])) 
+        | difference([active_server]) 
+        | first
+      }}
+  when: 
+    - move_decision.user_input | lower == 'auto'
+    - exchange_server_list | length > 1
+
+- name: Prompt for target server selection
+  ansible.builtin.pause:
+    prompt: "Enter the number of the server to move the database to (1-{{ exchange_server_list | length }})"
+  register: server_choice
+  when: 
+    - move_decision.user_input | lower == 'yes'
+    - interactive_mode | default(true)
+
+- name: Set target server from variable when not interactive
+  ansible.builtin.set_fact:
+    server_choice:
+      user_input: "{{ target_server_index | default('1') }}"
+  when: 
+    - move_decision.user_input | lower == 'yes'
+    - not (interactive_mode | default(true))
+
+- name: Set target server for manual selection
+  ansible.builtin.set_fact:
+    target_server: "{{ exchange_server_list[server_choice.user_input | int - 1] }}"
+  when: 
+    - move_decision.user_input | lower == 'yes'
+    - server_choice is defined
+
+- name: Set target server for auto selection
+  ansible.builtin.set_fact:
+    target_server: "{{ auto_target_server }}"
+  when: 
+    - move_decision.user_input | lower == 'auto'
+    - auto_target_server is defined
+
+- name: Move active mailbox database
+  ENTERPRISE.Windows.win_exchange:
+    command: "Move-ActiveMailboxDatabase"
+    parameters:
+      Identity: "{{ database_name }}"
+      ActivateOnServer: "{{ target_server }}"
+  register: move_result
+  when: 
+    - move_decision.user_input | lower in ['yes', 'auto']
+    - target_server is defined
+
+- name: Update active server after move
+  ansible.builtin.set_fact:
+    active_server: "{{ target_server }}"
+  when: 
+    - move_result is defined
+    - move_result.changed
+
+# Handle skipping servers with active database
+- name: Filter out servers with active database if not moving
+  ansible.builtin.set_fact:
+    filtered_target_servers: "{{ target_servers | difference(servers_with_active_db | default([])) }}"
+  when: 
+    - move_decision.user_input | lower == 'no'
+    - servers_with_active_db is defined
+    - servers_with_active_db | length > 0
+    - target_servers is defined
+
+- name: Display servers being skipped
+  ansible.builtin.debug:
+    msg: |
+      ⚠️ SKIPPING servers with active database: {{ servers_with_active_db | join(', ') }}
+      Maintenance will proceed on: {{ filtered_target_servers | join(', ') }}
+  when: 
+    - move_decision.user_input | lower == 'no'
+    - servers_with_active_db is defined
+    - servers_with_active_db | length > 0
+    - filtered_target_servers is defined
+
+- name: Update target servers list (skip active database servers)
+  ansible.builtin.set_fact:
+    target_servers: "{{ filtered_target_servers }}"
+  when: 
+    - move_decision.user_input | lower == 'no'
+    - filtered_target_servers is defined
+
+- name: Fail if no servers remain after filtering
+  ansible.builtin.fail:
+    msg: |
+      No servers remain for maintenance after filtering out active database servers.
+      Consider moving the database first or selecting different target servers.
+  when: 
+    - move_decision.user_input | lower == 'no'
+    - filtered_target_servers is defined
+    - filtered_target_servers | length == 0

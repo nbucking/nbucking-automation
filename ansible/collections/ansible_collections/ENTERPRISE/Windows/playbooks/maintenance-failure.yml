@@ -1,0 +1,195 @@
+---
+# Exchange Maintenance Failure Notification Playbook
+# Handle maintenance failures and send appropriate alerts
+
+- name: Exchange Maintenance Failure Handling
+  hosts: localhost
+  gather_facts: true
+  vars:
+    target_database: "{{ target_database | default('EXAMPLE-MB01') }}"
+    environment_type: "{{ environment_type | default('production') }}"
+    send_failure_alert: "{{ send_failure_alert | default(true) | bool }}"
+    escalate_to_oncall: "{{ escalate_to_oncall | default(false) | bool }}"
+    notification_email: "{{ notification_email | default('') }}"
+    failure_reason: "{{ ansible_failed_result.msg | default('Unknown failure during Exchange maintenance') }}"
+
+  tasks:
+    - name: Log maintenance failure details
+      debug:
+        msg: |
+          ===============================================
+          EXCHANGE MAINTENANCE FAILURE DETECTED
+          ===============================================
+          Environment: {{ environment_type | upper }}
+          Target Database: {{ target_database }}
+          Failure Time: {{ ansible_date_time.iso8601 }}
+          Failure Reason: {{ failure_reason }}
+          
+          IMMEDIATE ACTIONS REQUIRED:
+          1. Check Exchange server status
+          2. Verify services are running
+          3. Check if server is still in maintenance mode
+          4. Review system logs for errors
+          5. Consider emergency rollback if needed
+          ===============================================
+
+    - name: Determine failure severity
+      set_fact:
+        failure_severity: "{{ 'CRITICAL' if environment_type == 'production' else 'WARNING' }}"
+        requires_immediate_attention: "{{ environment_type == 'production' }}"
+
+    - name: Send failure notification using exchange-notification role
+      ansible.builtin.include_role:
+        name: ENTERPRISE.Windows.exchange-notification
+      vars:
+        notification_type: "failure"
+        target_database: "{{ target_database }}"
+        environment_type: "{{ environment_type }}"
+        failure_reason: "{{ failure_reason }}"
+        failure_severity: "{{ failure_severity }}"
+        tower_job_id: "{{ tower_job_id | default('N/A') }}"
+      when: send_failure_alert | bool
+
+    - name: Escalate to on-call team
+      block:
+        - name: Create escalation alert
+          debug:
+            msg: |
+              ESCALATING TO ON-CALL TEAM
+              
+              This is a {{ failure_severity }} failure requiring immediate attention:
+              - Environment: {{ environment_type | upper }}
+              - Database: {{ target_database }}
+              - Failure: {{ failure_reason }}
+              
+              On-call team should be notified via standard escalation procedures.
+
+        # In a real environment, you would integrate with your alerting system here
+        # Examples: PagerDuty, ServiceNow, Slack, etc.
+        - name: Trigger escalation (placeholder)
+          debug:
+            msg: |
+              INTEGRATION REQUIRED: Add your escalation system integration here
+              - PagerDuty incident creation
+              - ServiceNow ticket creation  
+              - Slack/Teams alerts
+              - SNMP traps
+              - Custom monitoring system alerts
+
+      when: escalate_to_oncall | bool or requires_immediate_attention | bool
+
+    - name: Generate failure report
+      set_fact:
+        failure_report:
+          timestamp: "{{ ansible_date_time.iso8601 }}"
+          environment: "{{ environment_type }}"
+          database: "{{ target_database }}"
+          severity: "{{ failure_severity }}"
+          reason: "{{ failure_reason }}"
+          job_id: "{{ tower_job_id | default('N/A') }}"
+          requires_immediate_attention: "{{ requires_immediate_attention }}"
+          notification_sent: "{{ send_failure_alert and notification_email != '' }}"
+          escalated: "{{ escalate_to_oncall or requires_immediate_attention }}"
+
+    - name: Log final failure summary
+      debug:
+        msg: |
+          ===============================================
+          MAINTENANCE FAILURE HANDLING COMPLETE
+          ===============================================
+          
+          Failure Report:
+          {{ failure_report | to_nice_yaml }}
+          
+          Next Steps:
+          1. Exchange administrators should investigate immediately
+          2. Check server status and maintenance mode
+          3. Verify service health and mail flow
+          4. Consider running emergency rollback workflow
+          5. Document findings and resolution steps
+          
+          Emergency Rollback Command:
+          ansible-playbook exchange-maintenance-rollback.yml -e target_database={{ target_database }}
+          ===============================================
+
+---
+# Exchange Maintenance Cancelled Playbook
+# Handle user cancellation of maintenance workflow
+
+- name: Exchange Maintenance Cancellation Handling
+  hosts: localhost
+  gather_facts: true
+  vars:
+    target_database: "{{ target_database | default('EXAMPLE-MB01') }}"
+    environment_type: "{{ environment_type | default('production') }}"
+    cancellation_reason: "{{ cancellation_reason | default('User cancelled maintenance workflow') }}"
+    send_notification: "{{ send_notification | default(true) | bool }}"
+    notification_email: "{{ notification_email | default('') }}"
+
+  tasks:
+    - name: Log maintenance cancellation
+      debug:
+        msg: |
+          ===============================================
+          EXCHANGE MAINTENANCE CANCELLED
+          ===============================================
+          Environment: {{ environment_type | upper }}
+          Target Database: {{ target_database }}
+          Cancellation Time: {{ ansible_date_time.iso8601 }}
+          Reason: {{ cancellation_reason }}
+          
+          The maintenance workflow has been cancelled by user request.
+          No changes should have been made to the Exchange environment.
+          ===============================================
+
+    - name: Send cancellation notification
+      block:
+        - name: Prepare cancellation notification
+          set_fact:
+            cancellation_notification_body: |
+              EXCHANGE MAINTENANCE CANCELLED
+              
+              Environment: {{ environment_type | upper }}
+              Database: {{ target_database }}
+              Time: {{ ansible_date_time.iso8601 }}
+              
+              Reason: {{ cancellation_reason }}
+              
+              Status:
+              The Exchange maintenance workflow was cancelled before making
+              any changes to the environment. The server should be in normal
+              operational state.
+              
+              No cleanup actions are required.
+              
+              Job ID: {{ tower_job_id | default('N/A') }}
+
+        - name: Send email notification (if configured)
+          mail:
+            to: "{{ notification_email }}"
+            subject: "[INFO] Exchange Maintenance Cancelled - {{ target_database }}"
+            body: "{{ cancellation_notification_body }}"
+            from: "ansible@{{ ansible_domain | default('company.com') }}"
+          when: 
+            - notification_email != ''
+            - send_notification | bool
+
+      when: send_notification | bool
+
+    - name: Log cancellation completion
+      debug:
+        msg: |
+          ===============================================
+          CANCELLATION HANDLING COMPLETE
+          ===============================================
+          
+          The Exchange maintenance workflow cancellation has been processed.
+          
+          Summary:
+          - Environment: {{ environment_type | upper }}
+          - Database: {{ target_database }}
+          - Reason: {{ cancellation_reason }}
+          - Notification: {{ 'Sent' if send_notification and notification_email != '' else 'Not configured' }}
+          
+          The Exchange server should remain in normal operational state.
+          ===============================================

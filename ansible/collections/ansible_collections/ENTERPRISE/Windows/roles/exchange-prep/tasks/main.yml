@@ -1,0 +1,27 @@
+---
+# Exchange preparation role - handles initial setup and cleanup
+- name: Clean old txt files from c:\temp
+  ansible.windows.win_shell: |
+    Remove-Item -Path "c:\temp\Queue_*.txt" -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "c:\temp\ServerComponentState_*.txt" -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "c:\temp\Services_*.txt" -Force -ErrorAction SilentlyContinue
+  ignore_errors: true
+
+- name: Ensure c:\temp directory exists
+  ansible.windows.win_file:
+    path: "c:\\temp"
+    state: directory
+
+- name: Load Exchange Management snap-in and get server list
+  ENTERPRISE.Windows.win_exchange:
+    command: "Get-ExchangeServer"
+    output_format: "json"
+  register: exchange_servers_raw
+
+- name: Parse Exchange servers
+  ansible.builtin.set_fact:
+    exchange_servers: "{{ (exchange_servers_raw.output | from_json) | map(attribute='Name') | list }}"
+
+- name: Set exchange servers as fact for other roles
+  ansible.builtin.set_fact:
+    exchange_server_list: "{{ exchange_servers }}"

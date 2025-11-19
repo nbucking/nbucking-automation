@@ -1,0 +1,66 @@
+---
+# Maintenance mode role - puts Exchange servers into maintenance mode
+- name: Prompt for redirect server selection
+  ansible.builtin.debug:
+    msg: |
+      Available servers for redirect operations:
+      {% for server in exchange_server_list %}
+      {{ loop.index }}: {{ server }}
+      {% endfor %}
+  when: interactive_mode | default(true)
+
+- name: Prompt for redirect server choice
+  ansible.builtin.pause:
+    prompt: "Enter the number of the server to be the redirect server (1-{{ exchange_server_list | length }})"
+  register: redirect_choice
+  when: interactive_mode | default(true)
+
+- name: Set redirect server from variable when not interactive
+  ansible.builtin.set_fact:
+    redirect_choice:
+      user_input: "{{ redirect_server_index | default('1') }}"
+  when: not (interactive_mode | default(true))
+
+- name: Set redirect server
+  ansible.builtin.set_fact:
+    redirect_server: "{{ exchange_server_list[redirect_choice.user_input | int - 1] }}"
+
+- name: Prompt for site selection
+  ansible.builtin.pause:
+    prompt: "Enter the site to run the maintenance on (localhost, AJ, or CS)"
+  register: site_choice
+  when: interactive_mode | default(true)
+
+- name: Set site from variable when not interactive
+  ansible.builtin.set_fact:
+    site_choice:
+      user_input: "{{ maintenance_site | default('localhost') }}"
+  when: not (interactive_mode | default(true))
+
+- name: Filter servers based on site selection
+  ansible.builtin.set_fact:
+    target_servers: >-
+      {%- if site_choice.user_input | lower == 'localhost' -%}
+        [{{ ansible_hostname }}]
+      {%- elif site_choice.user_input | upper in ['AJ', 'CS'] -%}
+        {{ exchange_server_list | select('match', '^' + site_choice.user_input | upper) | list }}
+      {%- else -%}
+        []
+      {%- endif -%}
+
+- name: Validate site selection
+  ansible.builtin.fail:
+    msg: "Invalid site selection. Please choose localhost, AJ, or CS."
+  when: 
+    - site_choice.user_input | lower not in ['localhost', 'aj', 'cs']
+    - target_servers | length == 0
+
+- name: Display target servers
+  ansible.builtin.debug:
+    msg: "Target servers for maintenance: {{ target_servers | join(', ') }}"
+
+- name: Put servers into maintenance mode
+  ansible.builtin.include_tasks: server_maintenance.yml
+  vars:
+    current_server: "{{ item }}"
+  loop: "{{ target_servers }}"

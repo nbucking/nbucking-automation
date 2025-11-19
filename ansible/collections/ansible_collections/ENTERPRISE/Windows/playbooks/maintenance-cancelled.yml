@@ -1,0 +1,58 @@
+---
+# Exchange Maintenance Cancelled Playbook
+# Handle user cancellation of maintenance workflow
+
+- name: Exchange Maintenance Cancellation Handling
+  hosts: localhost
+  gather_facts: true
+  vars:
+    target_database: "{{ target_database | default('EXAMPLE-MB01') }}"
+    environment_type: "{{ environment_type | default('production') }}"
+    cancellation_reason: "{{ cancellation_reason | default('User cancelled maintenance workflow') }}"
+    send_notification: "{{ send_notification | default(true) | bool }}"
+    notification_email: "{{ notification_email | default('') }}"
+
+  tasks:
+    - name: Log maintenance cancellation
+      debug:
+        msg: |
+          ===============================================
+          EXCHANGE MAINTENANCE CANCELLED
+          ===============================================
+          Environment: {{ environment_type | upper }}
+          Target Database: {{ target_database }}
+          Cancellation Time: {{ ansible_date_time.iso8601 }}
+          Reason: {{ cancellation_reason }}
+          
+          The maintenance workflow has been cancelled by user request.
+          No changes should have been made to the Exchange environment.
+          ===============================================
+
+    - name: Send cancellation notification using exchange-notification role
+      ansible.builtin.include_role:
+        name: ENTERPRISE.Windows.exchange-notification
+      vars:
+        notification_type: "cancellation"
+        target_database: "{{ target_database }}"
+        environment_type: "{{ environment_type }}"
+        cancellation_reason: "{{ cancellation_reason }}"
+        tower_job_id: "{{ tower_job_id | default('N/A') }}"
+      when: send_notification | bool
+
+    - name: Log cancellation completion
+      debug:
+        msg: |
+          ===============================================
+          CANCELLATION HANDLING COMPLETE
+          ===============================================
+          
+          The Exchange maintenance workflow cancellation has been processed.
+          
+          Summary:
+          - Environment: {{ environment_type | upper }}
+          - Database: {{ target_database }}
+          - Reason: {{ cancellation_reason }}
+          - Notification: {{ 'Sent' if send_notification and notification_email != '' else 'Not configured' }}
+          
+          The Exchange server should remain in normal operational state.
+          ===============================================

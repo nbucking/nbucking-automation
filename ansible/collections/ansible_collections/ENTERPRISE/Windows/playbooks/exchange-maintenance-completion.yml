@@ -1,0 +1,83 @@
+---
+# Exchange Maintenance Completion Playbook
+# Final steps to complete maintenance and restore normal operations
+
+- name: Exchange Maintenance Completion
+  hosts: "{{ target_exchange_server | default(groups['exchange_servers'] | default(['localhost'])) }}"
+  gather_facts: true
+  vars:
+    target_database: "{{ target_database | default('EXAMPLE-MB01') }}"
+    environment_type: "{{ environment_type | default('production') }}"
+    exchange_exit_maintenance_mode: "{{ exchange_exit_maintenance_mode | default(true) | bool }}"
+    exchange_final_status_check: "{{ exchange_final_status_check | default(true) | bool }}"
+
+  tasks:
+    - name: Display completion phase start
+      debug:
+        msg: |
+          ===============================================
+          EXCHANGE MAINTENANCE COMPLETION PHASE
+          ===============================================
+          Environment: {{ environment_type | upper }}
+          Target Database: {{ target_database }}
+          Server: {{ ansible_hostname }}
+          Exit Maintenance Mode: {{ exchange_exit_maintenance_mode }}
+          Final Status Check: {{ exchange_final_status_check }}
+          ===============================================
+
+    - name: Exit Exchange maintenance mode
+      include_role:
+        name: exchange-maintenance-mode
+      vars:
+        exchange_maintenance_action: "exit"
+      when: exchange_exit_maintenance_mode | bool
+
+    - name: Perform final status check
+      block:
+        - name: Check Exchange services status
+          include_role:
+            name: exchange-service-management
+          vars:
+            exchange_check_services: true
+            exchange_start_services: false
+
+        - name: Check database status
+          include_role:
+            name: exchange-database-management
+          vars:
+            exchange_check_database_status: true
+            exchange_move_database: false
+
+        - name: Verify server health
+          win_exchange:
+            command: "Get-ServerHealth"
+            server: "{{ ansible_hostname }}"
+          register: server_health_result
+
+        - name: Display server health summary
+          debug:
+            msg: |
+              Server Health Check Results:
+              {{ server_health_result.output | default('Health check completed') }}
+
+      when: exchange_final_status_check | bool
+
+    - name: Log maintenance completion
+      debug:
+        msg: |
+          ===============================================
+          EXCHANGE MAINTENANCE COMPLETED SUCCESSFULLY
+          ===============================================
+          Server: {{ ansible_hostname }}
+          Database: {{ target_database }}
+          Environment: {{ environment_type | upper }}
+          Completion Time: {{ ansible_date_time.iso8601 }}
+          
+          Status:
+          - Maintenance mode: {{ 'EXITED' if exchange_exit_maintenance_mode else 'MANUAL EXIT REQUIRED' }}
+          - Services: {{ 'CHECKED' if exchange_final_status_check else 'MANUAL CHECK REQUIRED' }}
+          - Database: {{ 'VERIFIED' if exchange_final_status_check else 'MANUAL VERIFICATION REQUIRED' }}
+          
+          The Exchange server maintenance workflow has completed.
+          Normal operations should be restored.
+          ===============================================

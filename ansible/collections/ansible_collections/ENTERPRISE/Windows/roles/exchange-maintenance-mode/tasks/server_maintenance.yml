@@ -1,0 +1,124 @@
+---
+# Individual server maintenance tasks
+- name: Set HubTransport state to Draining on {{ current_server }}
+  ENTERPRISE.Windows.win_exchange:
+    command: "Set-ServerComponentState"
+    parameters:
+      Identity: "{{ current_server }}"
+      Component: "HubTransport"
+      State: "Draining"
+      Requester: "Maintenance"
+  delegate_to: "{{ current_server }}"
+
+- name: Restart MSExchangeTransport service on {{ current_server }}
+  ENTERPRISE.Windows.win_exchange:
+    command: "Restart-Service"
+    parameters:
+      Name: "MSExchangeTransport"
+  delegate_to: "{{ current_server }}"
+
+- name: Redirect messages from {{ current_server }} to {{ redirect_server }}
+  ENTERPRISE.Windows.win_exchange:
+    command: "Redirect-Message"
+    parameters:
+      Server: "{{ current_server }}"
+      Target: "{{ redirect_server }}"
+  delegate_to: "{{ current_server }}"
+
+- name: Suspend cluster node {{ current_server }}
+  ENTERPRISE.Windows.win_exchange:
+    command: "Suspend-ClusterNode"
+    parameters:
+      Name: "{{ current_server }}"
+  delegate_to: "{{ current_server }}"
+
+- name: Get current DatabaseCopyAutoActivationPolicy on {{ current_server }}
+  ENTERPRISE.Windows.win_exchange:
+    command: "Get-MailboxServer"
+    parameters:
+      Identity: "{{ current_server }}"
+    output_format: "json"
+  register: current_policy
+  delegate_to: "{{ current_server }}"
+
+- name: Display current DatabaseCopyAutoActivationPolicy
+  ansible.builtin.debug:
+    msg: "Current DatabaseCopyAutoActivationPolicy on {{ current_server }}: {{ (current_policy.output | from_json).DatabaseCopyAutoActivationPolicy }}"
+
+- name: Set DatabaseCopyAutoActivationPolicy to Blocked on {{ current_server }}
+  ENTERPRISE.Windows.win_exchange:
+    command: "Set-MailboxServer"
+    parameters:
+      Identity: "{{ current_server }}"
+      DatabaseCopyAutoActivationPolicy: "Blocked"
+  delegate_to: "{{ current_server }}"
+
+- name: Get mounted mailbox database copy status on {{ current_server }}
+  ENTERPRISE.Windows.win_exchange:
+    command: "Get-MailboxDatabaseCopyStatus"
+    parameters:
+      Server: "{{ current_server }}"
+    output_format: "json"
+  register: mounted_dbs
+  delegate_to: "{{ current_server }}"
+
+- name: Display mounted databases
+  ansible.builtin.debug:
+    msg: |
+      Mounted databases on {{ current_server }}:
+      {% for db in (mounted_dbs.output | from_json) %}
+      {% if db.Status == 'Mounted' %}
+      - {{ db.DatabaseName }} ({{ db.Status }})
+      {% endif %}
+      {% endfor %}
+
+- name: Set ServerWideOffline state to Inactive on {{ current_server }}
+  ENTERPRISE.Windows.win_exchange:
+    command: "Set-ServerComponentState"
+    parameters:
+      Identity: "{{ current_server }}"
+      Component: "ServerWideOffline"
+      State: "Inactive"
+      Requester: "Maintenance"
+  delegate_to: "{{ current_server }}"
+
+- name: Set monitoring state to InActive on {{ current_server }}
+  ENTERPRISE.Windows.win_exchange:
+    command: "Set-ServerComponentState"
+    parameters:
+      Identity: "{{ current_server }}"
+      Component: "monitoring"
+      State: "InActive"
+      Requester: "Maintenance"
+  delegate_to: "{{ current_server }}"
+
+- name: Set RecoveryActionsEnabled state to InActive on {{ current_server }}
+  ENTERPRISE.Windows.win_exchange:
+    command: "Set-ServerComponentState"
+    parameters:
+      Identity: "{{ current_server }}"
+      Component: "RecoveryActionsEnabled"
+      State: "InActive"
+      Requester: "Maintenance"
+  delegate_to: "{{ current_server }}"
+
+- name: Get ServerComponentState on {{ current_server }}
+  ENTERPRISE.Windows.win_exchange:
+    command: "Get-ServerComponentState"
+    parameters:
+      Identity: "{{ current_server }}"
+    output_format: "table"
+  register: server_component_state
+  delegate_to: "{{ current_server }}"
+
+- name: Display ServerComponentState
+  ansible.builtin.debug:
+    msg: |
+      ServerComponentState on {{ current_server }}:
+      {{ server_component_state.output }}
+
+- name: Export ServerComponentState to file
+  ansible.windows.win_copy:
+    content: "{{ server_component_state.output }}"
+    dest: "c:\\temp\\ServerComponentState_{{ current_server }}.txt"
+  delegate_to: "{{ current_server }}"

@@ -1,0 +1,102 @@
+---
+# aws-install-adds.yml
+# Installs AD DS and promotes AWS EC2 Windows Server to Domain Controller
+# This version is optimized for AWS EC2 instances
+#
+# Usage: ansible-playbook -i inventory/hosts-aws aws-install-adds.yml
+
+- name: Install AD DS and promote to Domain Controller
+  hosts: windows_dc
+  gather_facts: no
+  vars:
+    domain_name: "services.sandbox.local"
+    netbios_name: "SERVICES"
+    safe_mode_password: "{{ lookup('env', 'AD_DS_DSRM_PASSWORD') | default('P@ssw0rd!DSRM', true) }}"
+    computer_name: "DC01"
+  
+  tasks:
+    - name: Wait for WinRM to be available
+      wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts
+      setup:
+
+    - name: Check if AD DS is already installed
+      win_feature:
+        name: AD-Domain-Services
+      register: adds_check
+
+    - name: Install AD DS feature
+      win_feature:
+        name: AD-Domain-Services
+        state: present
+        include_management_tools: yes
+      register: adds_install
+      when: adds_check.state != 'installed'
+
+    - name: Set computer name if needed
+      win_hostname:
+        name: "{{ computer_name }}"
+      register: rename_result
+
+    - name: Reboot if hostname changed
+      win_reboot:
+        msg: "Rebooting after hostname change"
+        pre_reboot_delay: 5
+        post_reboot_delay: 60
+      when: rename_result.reboot_required
+
+    - name: Wait for system to come back online after hostname change
+      wait_for_connection:
+        timeout: 600
+      when: rename_result.reboot_required
+
+    - name: Check if domain already exists
+      win_shell: |
+        try {
+          Get-ADDomain -ErrorAction Stop
+          Write-Output "exists"
+        } catch {
+          Write-Output "not_exists"
+        }
+      register: domain_check
+      ignore_errors: yes
+
+    - name: Promote to new forest services.sandbox.local
+      win_domain:
+        dns_domain_name: "{{ domain_name }}"
+        domain_netbios_name: "{{ netbios_name }}"
+        safe_mode_password: "{{ safe_mode_password }}"
+        domain_mode: WinThreshold
+        forest_mode: WinThreshold
+        install_dns: yes
+        reboot: yes
+      register: domain_result
+      when: domain_check.stdout is not defined or 'not_exists' in domain_check.stdout
+
+    - name: Wait for domain promotion reboot
+      wait_for_connection:
+        timeout: 1200
+      when: domain_result.changed
+
+    - name: Verify domain promotion
+      win_shell: |
+        Import-Module ActiveDirectory
+        Get-ADDomain | Select-Object Name, DomainMode, Forest | ConvertTo-Json
+      register: domain_info
+
+    - name: Display domain information
+      debug:
+        msg: "{{ domain_info.stdout | from_json }}"
+      when: domain_info.stdout is defined
+
+    - name: Output completion message
+      debug:
+        msg: |
+          Domain Controller promotion complete!
+          Domain: {{ domain_name }}
+          NetBIOS: {{ netbios_name }}
+          Computer: {{ computer_name }}
+          
+          Ready for OU structure creation.

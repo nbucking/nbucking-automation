@@ -1,0 +1,62 @@
+---
+# Exchange Notification Role - Send maintenance notifications via email
+# Supports: success, failure, cancellation notification types
+
+- name: Validate notification parameters
+  ansible.builtin.assert:
+    that:
+      - notification_type is defined
+      - notification_type in ['success', 'failure', 'cancellation']
+    fail_msg: "notification_type must be defined and one of: success, failure, cancellation"
+
+- name: Set default notification variables
+  ansible.builtin.set_fact:
+    smtp_server: "{{ smtp_server | default(notifications.smtp_server) }}"
+    smtp_port: "{{ smtp_port | default(notifications.smtp_port | default(25)) }}"
+    from_address: "{{ from_address | default(notifications.from_address) }}"
+    recipient_emails: "{{ recipient_emails | default(notifications.default_contacts) }}"
+
+- name: Build email subject and body for success notification
+  ansible.builtin.set_fact:
+    email_subject: "[SUCCESS] Exchange Server Maintenance Completed - {{ target_database }}"
+    email_body: "{{ lookup('template', 'success_notification.j2') }}"
+  when: notification_type == 'success'
+
+- name: Build email subject and body for failure notification
+  ansible.builtin.set_fact:
+    email_subject: "[{{ failure_severity | default('ERROR') }}] Exchange Server Maintenance Failed - {{ target_database }}"
+    email_body: "{{ lookup('template', 'failure_notification.j2') }}"
+  when: notification_type == 'failure'
+
+- name: Build email subject and body for cancellation notification
+  ansible.builtin.set_fact:
+    email_subject: "[CANCELLED] Exchange Server Maintenance Cancelled - {{ target_database }}"
+    email_body: "{{ lookup('template', 'cancellation_notification.j2') }}"
+  when: notification_type == 'cancellation'
+
+- name: Send notification email to all recipients
+  community.general.mail:
+    host: "{{ smtp_server }}"
+    port: "{{ smtp_port }}"
+    to: "{{ item }}"
+    subject: "{{ email_subject }}"
+    body: "{{ email_body }}"
+    subtype: "html"
+    from_addr: "{{ from_address }}"
+  loop: "{{ recipient_emails }}"
+  register: email_result
+  when:
+    - recipient_emails | length > 0
+    - notifications.email_enabled | default(true) | bool
+
+- name: Log notification send status
+  ansible.builtin.debug:
+    msg: |
+      ===============================================
+      NOTIFICATION SENT
+      ===============================================
+      Type: {{ notification_type | upper }}
+      Recipients: {{ recipient_emails | join(', ') }}
+      Subject: {{ email_subject }}
+      Status: {{ 'Success' if email_result is not skipped else 'Skipped (email disabled)' }}
+      ===============================================

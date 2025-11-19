@@ -1,0 +1,56 @@
+---
+# Global variables for Exchange maintenance
+# Authentication - set these securely in your environment
+# ansible_user: "DOMAIN\\username"
+# ansible_password: "your_password"
+
+# Database configuration
+databases:
+  ppdstamp:
+    name: "PREPROD-MB01"
+    description: "Pre-Production database PREPROD-MB01"
+  stamp:
+    name: "EXAMPLE-MB01"
+    description: "Production database EXAMPLE-MB01"
+
+# Default database selection (can be overridden)
+selected_database: "PREPROD-MB01"
+
+# Database move behavior
+database_move_options:
+  # Skip servers with active database instead of failing
+  skip_active_db_servers: true
+  # Automatically move active database if on target servers
+  auto_move_when_required: false
+  # Move database behavior: 'no', 'yes', 'auto'
+  default_move_behavior: 'no'
+
+# Maintenance configuration
+maintenance_config:
+  temp_directory: "c:\\temp"
+  file_patterns:
+    queue: "Queue_*.txt"
+    server_state: "ServerComponentState_*.txt"
+    services: "Services_*.txt"
+
+# Exchange component states for maintenance
+maintenance_components:
+  - name: "HubTransport"
+    state: "Draining"
+  - name: "ServerWideOffline"
+    state: "Inactive"
+  - name: "monitoring"
+    state: "InActive"
+  - name: "RecoveryActionsEnabled"
+    state: "InActive"
+
+# Service restart configuration
+service_config:
+  restart_services:
+    - "MSExchangeTransport"
+  
+# Site configuration
+sites:
+  - "localhost"
+  - "AJ"
+  - "CS"

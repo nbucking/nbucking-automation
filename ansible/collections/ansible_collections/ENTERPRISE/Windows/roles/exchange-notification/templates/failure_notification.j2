@@ -1,0 +1,84 @@
+<html>
+<body style="font-family: Arial, sans-serif; font-size: 12px; color: #333;">
+  <h2 style="color: {% if environment_type == 'production' %}#DC143C{% else %}#FF8C00{% endif %};">✗ Exchange Server Maintenance Failed</h2>
+  
+  <table style="border-collapse: collapse; width: 100%; margin: 20px 0;">
+    <tr style="background-color: #f0f0f0;">
+      <td style="padding: 8px; font-weight: bold; width: 30%;">Severity:</td>
+      <td style="padding: 8px; color: {% if environment_type == 'production' %}#DC143C{% else %}#FF8C00{% endif %}; font-weight: bold;">{{ failure_severity | default('ERROR') }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; font-weight: bold;">Environment:</td>
+      <td style="padding: 8px;">{{ environment_type | upper }}</td>
+    </tr>
+    <tr style="background-color: #f0f0f0;">
+      <td style="padding: 8px; font-weight: bold;">Database:</td>
+      <td style="padding: 8px;">{{ target_database }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; font-weight: bold;">Failure Time:</td>
+      <td style="padding: 8px;">{{ ansible_date_time.iso8601 }}</td>
+    </tr>
+    <tr style="background-color: #f0f0f0;">
+      <td style="padding: 8px; font-weight: bold;">Job ID:</td>
+      <td style="padding: 8px;">{{ tower_job_id | default('N/A') }}</td>
+    </tr>
+  </table>
+
+  <h3 style="color: #DC143C;">Failure Reason:</h3>
+  <div style="background-color: #fff3cd; padding: 10px; border-left: 4px solid #DC143C; margin: 10px 0;">
+    {{ failure_reason | default('Unknown failure during Exchange maintenance') }}
+  </div>
+
+  {% if environment_type == 'production' %}
+  <div style="background-color: #ffe0e0; padding: 15px; margin: 20px 0; border: 2px solid #DC143C; border-radius: 4px;">
+    <strong style="color: #DC143C;">⚠️ CRITICAL - PRODUCTION ENVIRONMENT ⚠️</strong><br>
+    This failure occurred in the production environment and may affect live Exchange services.
+  </div>
+  {% endif %}
+
+  <h3 style="color: #DC143C;">Immediate Actions Required:</h3>
+  <ol>
+    <li>Check Exchange server status and services</li>
+    <li>Verify if server is stuck in maintenance mode</li>
+    <li>Review Event Logs and Exchange logs for errors</li>
+    <li>Check mail flow and user connectivity</li>
+    <li>Determine if emergency rollback is needed</li>
+  </ol>
+
+  <h3 style="color: #0066cc;">Troubleshooting Steps:</h3>
+  <ul>
+    <li>Log into the affected Exchange server</li>
+    <li>Run: <code>Get-ServerComponentState -Identity &lt;server&gt;</code> to check maintenance mode status</li>
+    <li>Review: <code>C:\ExchangeMaintenance\Logs\</code> for detailed error logs</li>
+    <li>If stuck in maintenance, run: <code>Set-ServerComponentState -Identity &lt;server&gt; -Component ServerWideOffline -State Active -Requester Maintenance</code></li>
+    <li>For assistance, contact: {{ notifications.default_contacts | join(', ') }}</li>
+  </ul>
+
+  <h3 style="color: #0066cc;">Failure Report:</h3>
+  <table style="border-collapse: collapse; width: 100%; border: 1px solid #ccc;">
+    <tr style="background-color: #f0f0f0;">
+      <td style="padding: 8px; border: 1px solid #ccc; font-weight: bold;">Timestamp:</td>
+      <td style="padding: 8px; border: 1px solid #ccc;">{{ ansible_date_time.iso8601 }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; border: 1px solid #ccc; font-weight: bold;">Environment:</td>
+      <td style="padding: 8px; border: 1px solid #ccc;">{{ environment_type }}</td>
+    </tr>
+    <tr style="background-color: #f0f0f0;">
+      <td style="padding: 8px; border: 1px solid #ccc; font-weight: bold;">Requires Attention:</td>
+      <td style="padding: 8px; border: 1px solid #ccc;">{% if environment_type == 'production' %}YES - PRIORITY{% else %}YES - Standard{% endif %}</td>
+    </tr>
+  </table>
+
+  <div style="background-color: #f0f0f0; padding: 15px; margin: 20px 0; border-left: 4px solid #DC143C;">
+    <strong>Next Steps:</strong> Exchange administrators should investigate immediately and take corrective action. Consider running the emergency rollback workflow if the server is stuck in maintenance mode.
+  </div>
+
+  <hr style="margin: 20px 0; border: none; border-top: 1px solid #ccc;">
+  <p style="font-size: 11px; color: #666;">
+    This is an automated notification from the STAMP Exchange Maintenance Automation system.<br>
+    For support, contact: {{ notifications.default_contacts | join(', ') }}
+  </p>
+</body>
+</html>

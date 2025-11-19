@@ -1,0 +1,15 @@
+[windows_dc]
+# This will be automatically populated by Terraform output
+# Or manually set the public IP from AWS console
+dc01 ansible_host=TERRAFORM_OUTPUT_PUBLIC_IP
+
+[windows_dc:vars]
+ansible_user=Administrator
+# Set password via environment variable or command line:
+# export ANSIBLE_PASSWORD="YourPassword"
+# ansible-playbook -e 'ansible_password=YourPassword' ...
+ansible_connection=winrm
+ansible_winrm_transport=basic
+ansible_winrm_server_cert_validation=ignore
+ansible_port=5985
+ansible_winrm_scheme=http

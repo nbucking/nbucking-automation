@@ -1,0 +1,133 @@
+---
+# Exchange Maintenance Workflow Survey Specification
+# This survey collects user inputs when launching the workflow
+
+survey_spec:
+  name: "Exchange Server Maintenance Survey"
+  description: "Collect parameters for Exchange server maintenance workflow"
+  spec:
+    - question_name: "Target Database"
+      question_description: "Select the Exchange database to perform maintenance on"
+      required: true
+      type: "multiplechoice"
+      variable: "target_database"
+      choices:
+        - "PREPROD-MB01"  # Pre-production
+        - "EXAMPLE-MB01"     # Production
+      default: "PREPROD-MB01"
+
+    - question_name: "Target Exchange Server"
+      question_description: "Enter the hostname of the Exchange server to maintain (leave blank to auto-detect from database)"
+      required: false
+      type: "text"
+      variable: "target_exchange_server"
+      default: ""
+      min_length: 0
+      max_length: 50
+
+    - question_name: "Environment Type"
+      question_description: "Confirm the environment type based on your database selection"
+      required: true
+      type: "multiplechoice"
+      variable: "environment_type"
+      choices:
+        - "preproduction"
+        - "production"
+      default: "preproduction"
+
+    - question_name: "Skip Database Movement"
+      question_description: "Skip automatic database movement (only use if you manually moved databases)"
+      required: false
+      type: "multiplechoice"
+      variable: "exchange_skip_database_movement"
+      choices:
+        - "false"
+        - "true"
+      default: "false"
+
+    - question_name: "Maintenance Window Duration"
+      question_description: "Expected maintenance window duration in minutes"
+      required: true
+      type: "integer"
+      variable: "maintenance_window_duration"
+      default: 120
+      min: 30
+      max: 480  # 8 hours max
+
+    - question_name: "Notification Email"
+      question_description: "Email address for maintenance notifications (optional)"
+      required: false
+      type: "text"
+      variable: "notification_email"
+      default: ""
+      min_length: 0
+      max_length: 100
+
+    - question_name: "Change Request Number"
+      question_description: "Change request or ticket number for this maintenance"
+      required: false
+      type: "text"
+      variable: "change_request_number"
+      default: ""
+      min_length: 0
+      max_length: 50
+
+    - question_name: "Maintenance Reason"
+      question_description: "Brief description of the maintenance being performed"
+      required: true
+      type: "textarea"
+      variable: "maintenance_reason"
+      default: "Exchange server maintenance - Windows updates, patches, or configuration changes"
+      min_length: 10
+      max_length: 500
+
+
+    - question_name: "Queue Export Path"
+      question_description: "Custom path for queue export files (optional)"
+      required: false
+      type: "text"
+      variable: "queue_export_path"
+      default: "C:\\ExchangeMaintenance\\QueueExports"
+      min_length: 0
+      max_length: 200
+
+    - question_name: "Rollback Plan"
+      question_description: "Describe your rollback plan if maintenance fails"
+      required: true
+      type: "textarea"
+      variable: "rollback_plan"
+      default: "1. Exit maintenance mode\n2. Restart Exchange services\n3. Move databases back if needed\n4. Notify team of issues"
+      min_length: 20
+      max_length: 1000
+
+# Survey validation rules
+survey_validation:
+  - condition: "target_database == 'EXAMPLE-MB01'"
+    then_require:
+      - variable: "change_request_number"
+        message: "Change request number is recommended for production maintenance"
+      - variable: "rollback_plan"
+        min_length: 50
+        message: "Detailed rollback plan is required for production maintenance"
+
+# Survey help text
+survey_help:
+  general: |
+    This workflow will perform comprehensive Exchange server maintenance including:
+    - Database movement (if needed)
+    - Maintenance mode activation
+    - Queue monitoring and export
+    - Service management
+    - Proper cleanup and exit from maintenance mode
+    
+    The workflow runs automatically with structured maintenance windows.
+  
+  database_selection: |
+    PREPROD-MB01: Pre-production environment for testing
+    EXAMPLE-MB01: Production environment - use with caution
+  
+  safety_notes: |
+    - Both environments execute with the same safety checks
+    - Manual confirmation required during maintenance window
+    - Emergency rollback procedures available if needed
+    - Always have a rollback plan ready

@@ -1,0 +1,116 @@
+---
+# Exchange Maintenance Rollback Playbook
+# Emergency rollback procedures for failed maintenance
+
+- name: Exchange Maintenance Emergency Rollback
+  hosts: "{{ target_exchange_server | default(groups['exchange_servers'] | default(['localhost'])) }}"
+  gather_facts: true
+  vars:
+    target_database: "{{ target_database | default('EXAMPLE-MB01') }}"
+    environment_type: "{{ environment_type | default('production') }}"
+    exchange_emergency_rollback: "{{ exchange_emergency_rollback | default(true) | bool }}"
+    exchange_exit_maintenance_mode: "{{ exchange_exit_maintenance_mode | default(true) | bool }}"
+
+  tasks:
+    - name: Display rollback start
+      debug:
+        msg: |
+          ===============================================
+          EMERGENCY EXCHANGE MAINTENANCE ROLLBACK
+          ===============================================
+          Environment: {{ environment_type | upper }}
+          Target Database: {{ target_database }}
+          Server: {{ ansible_hostname }}
+          Rollback Time: {{ ansible_date_time.iso8601 }}
+          ===============================================
+
+    - name: Emergency exit maintenance mode
+      block:
+        - name: Force exit maintenance mode
+          include_role:
+            name: exchange-maintenance-mode
+          vars:
+            exchange_maintenance_action: "exit"
+            exchange_force_exit: true
+
+        - name: Log maintenance mode exit
+          debug:
+            msg: "Emergency exit from maintenance mode completed"
+
+      rescue:
+        - name: Manual maintenance mode exit required
+          debug:
+            msg: |
+              WARNING: Automated exit from maintenance mode failed!
+              Manual intervention required:
+              1. Run: Set-ServerComponentState {{ ansible_hostname }} -Component ServerWideOffline -State Active -Requester Maintenance
+              2. Run: Resume-ClusterNode {{ ansible_hostname }}
+              3. Run: Set-MailboxServer {{ ansible_hostname }} -DatabaseCopyActivationDisabledAndMoveNow $false
+
+      when: exchange_exit_maintenance_mode | bool
+
+    - name: Emergency service recovery
+      block:
+        - name: Attempt to start Exchange services
+          include_role:
+            name: exchange-service-management
+          vars:
+            exchange_start_services: true
+            exchange_force_start: true
+
+        - name: Log service recovery
+          debug:
+            msg: "Emergency service recovery completed"
+
+      rescue:
+        - name: Manual service recovery required
+          debug:
+            msg: |
+              WARNING: Automated service recovery failed!
+              Manual intervention required:
+              1. Check Windows Event Logs for service errors
+              2. Manually start Exchange services via Services console
+              3. Verify Exchange functionality
+
+    - name: Check database status after rollback
+      block:
+        - name: Verify database accessibility
+          include_role:
+            name: exchange-database-management
+          vars:
+            exchange_check_database_status: true
+
+        - name: Log database status
+          debug:
+            msg: "Database status check completed after rollback"
+
+      rescue:
+        - name: Database recovery may be needed
+          debug:
+            msg: |
+              WARNING: Database status check failed after rollback!
+              Manual database recovery may be required:
+              1. Check database mount status
+              2. Verify database copies are healthy
+              3. Consider manual database failover if needed
+
+    - name: Log rollback completion
+      debug:
+        msg: |
+          ===============================================
+          EMERGENCY ROLLBACK COMPLETED
+          ===============================================
+          Server: {{ ansible_hostname }}
+          Database: {{ target_database }}
+          Environment: {{ environment_type | upper }}
+          Rollback Time: {{ ansible_date_time.iso8601 }}
+          
+          MANUAL VERIFICATION REQUIRED:
+          1. Verify Exchange services are running
+          2. Check database mount status
+          3. Test mail flow
+          4. Monitor for any issues
+          5. Review Event Logs for errors
+          
+          If problems persist, escalate to Exchange administrators.
+          ===============================================

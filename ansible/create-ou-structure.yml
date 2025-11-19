@@ -1,0 +1,47 @@
+---
+# create-ou-structure.yml
+# Copies and executes the PowerShell script to create the services.sandbox.local OU structure
+#
+# Usage: ansible-playbook -i ansible/inventory/hosts create-ou-structure.yml
+
+- name: Create Active Directory OU Structure
+  hosts: windows_dc
+  gather_facts: no
+  vars:
+    ps_script_local: "../powershell/New-ServicesSandboxDomain.ps1"
+    ps_script_remote: "C:\\Temp\\New-ServicesSandboxDomain.ps1"
+
+  tasks:
+    - name: Ensure C:\Temp directory exists
+      win_file:
+        path: C:\Temp
+        state: directory
+
+    - name: Copy OU creation script to DC
+      win_copy:
+        src: "{{ ps_script_local }}"
+        dest: "{{ ps_script_remote }}"
+
+    - name: Execute OU structure creation script
+      win_shell: |
+        PowerShell.exe -ExecutionPolicy Bypass -File {{ ps_script_remote }}
+      register: ps_output
+
+    - name: Display PowerShell script output
+      debug:
+        var: ps_output.stdout_lines
+
+    - name: Display any errors
+      debug:
+        var: ps_output.stderr_lines
+      when: ps_output.stderr_lines is defined and ps_output.stderr_lines | length > 0
+
+    - name: Verify OU creation (query a few OUs)
+      win_shell: |
+        Import-Module ActiveDirectory
+        Get-ADOrganizationalUnit -Filter * | Select-Object Name, DistinguishedName | ConvertTo-Json
+      register: ou_verification
+
+    - name: Display created OUs
+      debug:
+        msg: "{{ ou_verification.stdout | from_json }}"

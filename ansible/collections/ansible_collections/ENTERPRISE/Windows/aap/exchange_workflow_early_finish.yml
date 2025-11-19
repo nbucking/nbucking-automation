@@ -1,0 +1,87 @@
+---
+# Ansible Automation Platform Workflow Job Template
+# Exchange Server Maintenance Early Finish Workflow
+#
+# This workflow allows completing maintenance early if manual work
+# finishes before the scheduled window ends
+
+- workflow_job_template:
+    name: "Windows: Exchange Server Maintenance Early Finish"
+    description: "Complete Exchange maintenance early - exits maintenance mode and restores monitoring"
+    organization: "Credentialing"
+    schema: |
+      [
+        {
+          "id": 1,
+          "identifier": "service_management",
+          "unified_job_template": {
+            "name": "Windows: Exchange Maintenance - Service Management",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 2
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 99
+              }
+            ]
+          }
+        },
+        {
+          "id": 2,
+          "identifier": "maintenance_completion",
+          "unified_job_template": {
+            "name": "Windows: Exchange Maintenance - Completion Phase",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 3
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 3
+              }
+            ]
+          }
+        },
+        {
+          "id": 3,
+          "identifier": "solarwinds_unmute_alerts",
+          "unified_job_template": {
+            "name": "Common: SolarWinds Node MX Mode - Exchange Maintenance",
+            "type": "job_template"
+          },
+          "extra_data": {
+            "nodestatus": "unmute"
+          },
+          "related": {
+            "success_nodes": [],
+            "failure_nodes": []
+          }
+        },
+        {
+          "id": 99,
+          "identifier": "early_finish_failure",
+          "unified_job_template": {
+            "name": "Windows: Exchange Maintenance - Failure Notification",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [],
+            "failure_nodes": []
+          }
+        }
+      ]
+    survey_enabled: false
+    ask_variables_on_launch: false
+    ask_inventory_on_launch: true
+    ask_credential_on_launch: false
+    webhook_service: ""
+    webhook_credential: null

@@ -1,0 +1,13 @@
+---
+# Variables specific to PREPROD-MB01 database operations
+# PPD = Pre-Production Environment
+selected_database: "PREPROD-MB01"
+database_name: "PREPROD-MB01"
+
+# Specific configuration for PREPROD environment
+environment_type: "pre-production"
+maintenance_window: "standard"
+
+# Override defaults for this database if needed
+# move_database: "no"
+# maintenance_site: "localhost"

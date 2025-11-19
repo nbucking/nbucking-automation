@@ -1,0 +1,20 @@
+---
+namespace: ENTERPRISE
+name: Windows
+role_name: exchange-notification
+version: 1.0.0
+author: ENTERPRISE Automation Team
+description: |
+  Sends HTML email notifications for Exchange maintenance events
+  (success, failure, cancellation). Reusable role for all notification needs.
+license:
+  - MIT
+min_ansible_version: 2.9
+platforms:
+  - name: EL
+    versions:
+      - all
+  - name: Ubuntu
+    versions:
+      - all
+dependencies: []

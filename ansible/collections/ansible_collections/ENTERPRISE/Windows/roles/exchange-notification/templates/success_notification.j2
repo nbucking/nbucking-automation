@@ -1,0 +1,61 @@
+<html>
+<body style="font-family: Arial, sans-serif; font-size: 12px; color: #333;">
+  <h2 style="color: #228B22;">✓ Exchange Server Maintenance Completed Successfully</h2>
+  
+  <table style="border-collapse: collapse; width: 100%; margin: 20px 0;">
+    <tr style="background-color: #f0f0f0;">
+      <td style="padding: 8px; font-weight: bold; width: 30%;">Environment:</td>
+      <td style="padding: 8px;">{{ environment_type | upper }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; font-weight: bold;">Database:</td>
+      <td style="padding: 8px;">{{ target_database }}</td>
+    </tr>
+    <tr style="background-color: #f0f0f0;">
+      <td style="padding: 8px; font-weight: bold;">Completion Time:</td>
+      <td style="padding: 8px;">{{ completion_time | default(ansible_date_time.iso8601) }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; font-weight: bold;">Job ID:</td>
+      <td style="padding: 8px;">{{ tower_job_id | default('N/A') }}</td>
+    </tr>
+  </table>
+
+  <h3 style="color: #0066cc;">Maintenance Summary:</h3>
+  <ul>
+    <li>Database maintenance mode: <strong>EXITED</strong></li>
+    <li>Exchange services: <strong>VERIFIED</strong></li>
+    <li>Mail flow: <strong>RESTORED</strong></li>
+    <li>Server health: <strong>NORMAL</strong></li>
+  </ul>
+
+  {% if maintenance_reason is defined %}
+  <h3 style="color: #0066cc;">Maintenance Reason:</h3>
+  <p>{{ maintenance_reason }}</p>
+  {% endif %}
+
+  <h3 style="color: #0066cc;">Performed Actions:</h3>
+  <ul>
+    <li>Preparation and environment checks completed</li>
+    <li>Active database moved (if applicable)</li>
+    <li>Maintenance mode activated and exited</li>
+    <li>Queue monitoring and export completed</li>
+    <li>Exchange services verified and running</li>
+    <li>Alert monitoring restored</li>
+  </ul>
+
+  <div style="background-color: #f0f0f0; padding: 15px; margin: 20px 0; border-left: 4px solid #228B22;">
+    <strong>Status:</strong> All maintenance tasks completed successfully. The Exchange server is operating normally.
+  </div>
+
+  {% if change_request_number is defined and change_request_number %}
+  <p><strong>Change Request:</strong> {{ change_request_number }}</p>
+  {% endif %}
+
+  <hr style="margin: 20px 0; border: none; border-top: 1px solid #ccc;">
+  <p style="font-size: 11px; color: #666;">
+    This is an automated notification from the STAMP Exchange Maintenance Automation system.<br>
+    For support, contact: {{ notifications.default_contacts | join(', ') }}
+  </p>
+</body>
+</html>

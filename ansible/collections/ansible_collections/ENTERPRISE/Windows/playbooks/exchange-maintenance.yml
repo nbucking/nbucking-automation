@@ -1,0 +1,75 @@
+---
+- name: Exchange Maintenance Automation
+  hosts: exchange_servers
+  gather_facts: yes
+  vars:
+    # Default configuration - can be overridden
+    interactive_mode: true
+    database_name: "{{ selected_database | default('PREPROD-MB01') }}"
+    
+    # Auto-move active database if it's on target servers
+    auto_move_active_db: "{{ auto_move_database | default(false) }}"
+    
+  tasks:
+    - name: Display maintenance banner
+      ansible.builtin.debug:
+        msg: |
+          ====================================
+          Exchange Maintenance Automation
+          ====================================
+          Database: {{ database_name }}
+          Interactive Mode: {{ interactive_mode }}
+          ====================================
+
+    - name: Phase 1 - Exchange Environment Preparation
+      ansible.builtin.include_role:
+        name: ENTERPRISE.Windows.exchange-prep
+      tags:
+        - prep
+        - preparation
+
+    - name: Phase 2 - Database Management
+      ansible.builtin.include_role:
+        name: ENTERPRISE.Windows.exchange-database-management
+      tags:
+        - database
+        - db-management
+
+    - name: Phase 3 - Server Maintenance Mode
+      ansible.builtin.include_role:
+        name: ENTERPRISE.Windows.exchange-maintenance-mode
+      tags:
+        - maintenance
+        - maintenance-mode
+
+    - name: Phase 4 - Queue Monitoring
+      ansible.builtin.include_role:
+        name: ENTERPRISE.Windows.exchange-queue-monitoring
+      tags:
+        - queue
+        - monitoring
+
+    - name: Phase 5 - Service Management
+      ansible.builtin.include_role:
+        name: ENTERPRISE.Windows.exchange-service-management
+      tags:
+        - services
+        - service-management
+
+    - name: Display completion summary
+      ansible.builtin.debug:
+        msg: |
+          ====================================
+          Exchange Maintenance Completed
+          ====================================
+          Database: {{ database_name }}
+          Active Server: {{ active_server | default('Unknown') }}
+          Target Servers: {{ target_servers | default([]) | join(', ') }}
+          Redirect Server: {{ redirect_server | default('Unknown') }}
+          ====================================
+          
+          Files created in c:\temp:
+          - Queue_*.txt (per server)
+          - ServerComponentState_*.txt (per server)  
+          - Services_*.txt (per server)
+          ====================================

@@ -1,0 +1,16 @@
+---
+requires_ansible: '>=2.9'
+
+plugin_routing:
+  modules:
+    # Custom Exchange module routing
+    win_exchange:
+      redirect: ENTERPRISE.Windows.win_exchange
+
+action_groups:
+  # Define action groups for easier bulk imports
+  windows_core:
+    - ENTERPRISE.Windows.win_exchange
+  
+  exchange_maintenance:
+    - ENTERPRISE.Windows.win_exchange

@@ -1,0 +1,261 @@
+---
+# Individual Job Templates for Exchange Maintenance Workflow
+# These templates define each step in the workflow process
+# Organization: Credentialing
+# Project: Automation Repo
+
+# Common Collection Templates
+
+# 1. Create VM Snapshot
+- job_template:
+    name: "Common: Create a VM Snapshot - Exchange Maintenance"
+    description: "Create VMware snapshot using ENTERPRISE.Common.TakeASnapshot role for Exchange maintenance"
+    job_type: "run"
+    inventory: "Exchange Servers"
+    project: "Automation Repo"
+    playbook: "playbooks/common-snapshot.yml"
+    credential: "VMware vCenter"
+    organization: "Credentialing"
+    extra_vars:
+      my_snapshot_name: "Exchange-PreMaint-{{ ansible_date_time.date }}"
+      my_description: "Pre-maintenance snapshot taken before Exchange Server maintenance"
+      snapshot_retention_days: 7  # Days until snapshot removal (default 7 days)
+      remove_prev_snapshots: true
+      # Note: my_snapshot_removal_date is calculated in the playbook:
+      # my_snapshot_removal_date: "{{ '%m/%d/%Y' | strftime(ansible_date_time.epoch | int + (snapshot_retention_days * 86400)) }}"
+    become_enabled: false
+    ask_variables_on_launch: true
+    verbosity: 1
+
+# 2. SolarWinds Node Maintenance Mode
+- job_template:
+    name: "Common: SolarWinds Node MX Mode - Exchange Maintenance"
+    description: "Manage SolarWinds node maintenance mode using ENTERPRISE.Common.Solarwinds_MxMode role for Exchange maintenance"
+    job_type: "run"
+    inventory: "Exchange Servers"
+    project: "Automation Repo"
+    playbook: "playbooks/common-solarwinds-mx.yml"
+    credential: "SolarWinds API"
+    organization: "Credentialing"
+    extra_vars:
+      nodestatus: "mute"  # Override with 'mute' or 'unmute'
+      maintenance_window_duration: 120  # Minutes (default 120 = 2 hours)
+      hours: "{{ (maintenance_window_duration | default(120) / 60) | round(0, 'ceil') | int }}"  # Calculated from maintenance_window_duration
+    become_enabled: false
+    ask_variables_on_launch: true
+    verbosity: 1
+
+# Windows Collection Templates
+
+# 3. Preparation Phase
+- job_template:
+    name: "Windows: Exchange Maintenance - Preparation Phase"
+    description: "Initialize Exchange maintenance session and prepare environment"
+    job_type: "run"
+    inventory: "Exchange Servers"
+    project: "Automation Repo"
+    playbook: "playbooks/exchange-maintenance-aap.yml"
+    credential: "Windows Domain Admin"
+    organization: "Credentialing"
+    extra_vars:
+      exchange_maintenance_phase: "preparation"
+      exchange_skip_database_movement: true
+      exchange_skip_maintenance_mode: true
+      exchange_skip_queue_monitoring: true
+      exchange_skip_service_management: true
+    become_enabled: false
+    ask_variables_on_launch: false
+    ask_inventory_on_launch: false
+    ask_credential_on_launch: false
+    verbosity: 1
+
+# 4. Database Check
+- job_template:
+    name: "Windows: Exchange Maintenance - Database Check"
+    description: "Check database status and determine if movement is needed"
+    job_type: "run"
+    inventory: "Exchange Servers"
+    project: "Automation Repo"
+    playbook: "playbooks/exchange-maintenance-aap.yml"
+    credential: "Windows Domain Admin"
+    organization: "Credentialing"
+    extra_vars:
+      exchange_maintenance_phase: "database_check"
+      exchange_skip_preparation: true
+      exchange_skip_maintenance_mode: true
+      exchange_skip_queue_monitoring: true
+      exchange_skip_service_management: true
+    become_enabled: false
+    ask_variables_on_launch: false
+    verbosity: 1
+
+# Standalone Templates
+
+# Standalone: Exchange Database Backup
+- job_template:
+    name: "Windows: Exchange Database Backup (Standalone)"
+    description: "Standalone backup of Exchange database files from active database holder (preference: 1)"
+    job_type: "run"
+    inventory: "Exchange Servers"
+    project: "Automation Repo"
+    playbook: "playbooks/exchange-maintenance.yml"
+    credential: "Windows Domain Admin"
+    organization: "Credentialing"
+    extra_vars:
+      exchange_maintenance_phase: "backup"
+      target_database: "{{ target_database | default('EXAMPLE-MB01') }}"
+      environment_type: "{{ environment_type | default('production') }}"
+    become_enabled: false
+    ask_variables_on_launch: true
+    verbosity: 1
+    timeout: 21600  # 6 hour timeout for backups (realistic for large databases)
+
+# 5. Database Movement
+- job_template:
+    name: "Windows: Exchange Maintenance - Database Movement"
+    description: "Move active databases away from target server if needed"
+    job_type: "run"
+    inventory: "Exchange Servers"
+    project: "Automation Repo"
+    playbook: "playbooks/exchange-maintenance-aap.yml"
+    credential: "Windows Domain Admin"
+    organization: "Credentialing"
+    extra_vars:
+      exchange_maintenance_phase: "database_movement"
+      exchange_skip_preparation: true
+      exchange_skip_maintenance_mode: true
+      exchange_skip_queue_monitoring: true
+      exchange_skip_service_management: true
+    become_enabled: false
+    ask_variables_on_launch: false
+    verbosity: 1
+
+# 6. Enable Maintenance Mode
+- job_template:
+    name: "Windows: Exchange Maintenance - Enable Maintenance Mode"
+    description: "Put Exchange server into maintenance mode"
+    job_type: "run"
+    inventory: "Exchange Servers"
+    project: "Automation Repo"
+    playbook: "playbooks/exchange-maintenance-aap.yml"
+    credential: "Windows Domain Admin"
+    organization: "Credentialing"
+    extra_vars:
+      exchange_maintenance_phase: "maintenance_mode"
+      exchange_skip_preparation: true
+      exchange_skip_database_movement: true
+      exchange_skip_queue_monitoring: true
+      exchange_skip_service_management: true
+    become_enabled: false
+    ask_variables_on_launch: false
+    verbosity: 1
+
+# 7. Queue Monitoring
+- job_template:
+    name: "Windows: Exchange Maintenance - Queue Monitoring"
+    description: "Monitor and export queue status before maintenance"
+    job_type: "run"
+    inventory: "Exchange Servers"
+    project: "Automation Repo"
+    playbook: "playbooks/exchange-maintenance-aap.yml"
+    credential: "Windows Domain Admin"
+    organization: "Credentialing"
+    extra_vars:
+      exchange_maintenance_phase: "queue_monitoring"
+      exchange_skip_preparation: true
+      exchange_skip_database_movement: true
+      exchange_skip_maintenance_mode: true
+      exchange_skip_service_management: true
+    become_enabled: false
+    ask_variables_on_launch: false
+    verbosity: 1
+
+# 8. Manual Maintenance Window
+- job_template:
+    name: "Windows: Manual Maintenance Window"
+    description: "Manual maintenance window - perform your maintenance tasks now"
+    job_type: "run"
+    inventory: "Exchange Servers"
+    project: "Automation Repo"
+    playbook: "playbooks/manual-maintenance-window.yml"
+    credential: "Windows Domain Admin"
+    organization: "Credentialing"
+    extra_vars:
+      maintenance_window_duration: 120  # 2 hours default
+      maintenance_instructions: "Perform your Exchange server maintenance tasks now. The server is in maintenance mode and ready for updates."
+    become_enabled: false
+    ask_variables_on_launch: true
+    timeout: 7200  # 2 hour timeout
+
+# 9. Service Management
+- job_template:
+    name: "Windows: Exchange Maintenance - Service Management"
+    description: "Check and start Exchange services after maintenance"
+    job_type: "run"
+    inventory: "Exchange Servers"
+    project: "Automation Repo"
+    playbook: "playbooks/exchange-maintenance-aap.yml"
+    credential: "Windows Domain Admin"
+    organization: "Credentialing"
+    extra_vars:
+      exchange_maintenance_phase: "service_management"
+      exchange_skip_preparation: true
+      exchange_skip_database_movement: true
+      exchange_skip_maintenance_mode: true
+      exchange_skip_queue_monitoring: true
+    become_enabled: false
+    ask_variables_on_launch: false
+    verbosity: 1
+
+# 10. Completion Phase
+- job_template:
+    name: "Windows: Exchange Maintenance - Completion Phase"
+    description: "Complete maintenance process and exit maintenance mode"
+    job_type: "run"
+    inventory: "Exchange Servers"
+    project: "Automation Repo"
+    playbook: "playbooks/exchange-maintenance-completion.yml"
+    credential: "Windows Domain Admin"
+    organization: "Credentialing"
+    extra_vars:
+      exchange_exit_maintenance_mode: true
+      exchange_final_status_check: true
+    become_enabled: false
+    ask_variables_on_launch: false
+    verbosity: 1
+
+# Rollback Templates
+
+# 11. Rollback Maintenance Mode
+- job_template:
+    name: "Windows: Exchange Maintenance - Rollback Maintenance Mode"
+    description: "Emergency rollback - exit maintenance mode immediately"
+    job_type: "run"
+    inventory: "Exchange Servers"
+    project: "Automation Repo"
+    playbook: "playbooks/exchange-maintenance-rollback.yml"
+    credential: "Windows Domain Admin"
+    organization: "Credentialing"
+    extra_vars:
+      exchange_emergency_rollback: true
+      exchange_exit_maintenance_mode: true
+    become_enabled: false
+    ask_variables_on_launch: false
+    verbosity: 1
+
+# 12. Failure Notification
+- job_template:
+    name: "Windows: Exchange Maintenance - Failure Notification"
+    description: "Handle maintenance failure and send alerts"
+    job_type: "run"
+    inventory: "Exchange Servers"
+    project: "Automation Repo"
+    playbook: "playbooks/maintenance-failure.yml"
+    credential: "Windows Domain Admin"
+    organization: "Credentialing"
+    extra_vars:
+      send_failure_alert: true
+      escalate_to_oncall: true
+    become_enabled: false
+    ask_variables_on_launch: false
+    verbosity: 1

@@ -1,0 +1,32 @@
+---
+# Recursive queue recheck loop
+- name: Continue queue monitoring decision
+  ansible.builtin.pause:
+    prompt: "Do you want to continue or check the queue again on {{ current_server }}? (continue/check)"
+  register: continue_decision
+
+- name: Recheck queue again if requested
+  block:
+    - name: Get queue status again on {{ current_server }}
+      ENTERPRISE.Windows.win_exchange:
+        command: "Get-queue"
+        output_format: "table"
+      register: recheck_queue
+      delegate_to: "{{ current_server }}"
+
+    - name: Display rechecked queue status on {{ current_server }}
+      ansible.builtin.debug:
+        msg: |
+          Rechecked queue status on {{ current_server }}:
+          {{ recheck_queue.output }}
+
+    - name: Update queue file again
+      ansible.windows.win_copy:
+        content: "{{ recheck_queue.output }}"
+        dest: "c:\\temp\\Queue_{{ current_server }}.txt"
+      delegate_to: "{{ current_server }}"
+
+    - name: Continue recursive checking
+      ansible.builtin.include_tasks: queue_recheck_loop.yml
+
+  when: continue_decision.user_input | lower == 'check'

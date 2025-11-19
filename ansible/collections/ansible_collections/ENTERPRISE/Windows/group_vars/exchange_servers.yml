@@ -1,0 +1,138 @@
+---
+# Group variables for all Exchange servers
+# These settings apply to both production and pre-production
+
+# Collection settings
+collections:
+  - ansible.builtin
+  - ansible.windows
+  - community.windows
+  - microsoft.ad
+  - ENTERPRISE.Windows
+
+# Exchange server configuration
+exchange_services:
+  - "MSExchangeServiceHost"
+  - "MSExchangeADTopology"
+  - "MSExchangeIS"
+  - "MSExchangeRPC"
+  - "MSExchangeTransport"
+  - "MSExchangeTransportLogSearch"
+  - "MSExchangeFrontEndTransport"
+  - "MSExchangeDelivery"
+  - "MSExchangeSubmission"
+  - "MSExchangeMailboxReplication"
+  - "MSExchangeRepl"
+  - "MSExchangeMailboxAssistants"
+  - "MSExchangeThrottling"
+
+# PowerShell configuration
+powershell_execution_policy: "RemoteSigned"
+powershell_module_path: "C:\\Program Files\\Microsoft\\Exchange Server\\V15\\bin"
+
+# File paths and directories
+exchange_install_path: "C:\\Program Files\\Microsoft\\Exchange Server\\V15"
+exchange_log_path: "C:\\Program Files\\Microsoft\\Exchange Server\\V15\\Logging"
+exchange_bin_path: "C:\\Program Files\\Microsoft\\Exchange Server\\V15\\bin"
+
+# Maintenance configuration
+maintenance_temp_path: "C:\\temp"
+queue_export_path: "C:\\ExchangeMaintenance\\QueueExports"
+maintenance_log_path: "C:\\ExchangeMaintenance\\Logs"
+
+# Default maintenance settings (can be overridden per environment)
+default_maintenance_settings:
+  timeout_minutes: 300
+  retry_count: 3
+  retry_delay_seconds: 30
+  force_restart_services: false
+  create_backup: true
+  enable_logging: true
+  verbose_output: false
+
+# Exchange database settings
+exchange_databases:
+  production:
+    name: "EXAMPLE-MB01"
+    description: "Production mailbox database"
+    environment: "production"
+    priority: 1
+  preproduction:
+    name: "PREPROD-MB01" 
+    description: "Pre-production mailbox database"
+    environment: "preproduction"
+    priority: 2
+
+# Security settings
+security_settings:
+  require_ssl: true
+  certificate_validation: false
+  kerberos_authentication: true
+  ntlm_fallback: false
+
+# Monitoring and alerting
+monitoring:
+  enabled: true
+  check_interval_minutes: 5
+  alert_thresholds:
+    cpu_percent: 80
+    memory_percent: 85
+    disk_space_percent: 90
+    queue_count: 1000
+    
+# Notification settings
+notifications:
+  email_enabled: true
+  smtp_server: "smtp.services.stamp.tsa.dhs.gov"
+  smtp_port: 25
+  from_address: "ansible-automation@stamp.tsa.dhs.gov"
+  
+  # Shared contacts for both environments
+  default_contacts:
+    - "stampwinsysadmin@tsa.dhs.gov"
+    - "stampautomation@tsa.dhs.gov"
+  
+  # Deprecated - use default_contacts
+  production_contacts:
+    - "stampwinsysadmin@tsa.dhs.gov"
+    - "stampautomation@tsa.dhs.gov"
+  
+  preproduction_contacts:
+    - "stampwinsysadmin@tsa.dhs.gov"
+    - "stampautomation@tsa.dhs.gov"
+
+# Backup and maintenance windows
+backup_settings:
+  enabled: true
+  backup_only_active_database: true  # Only backup the server with exchange_database_preference: 1
+  edb_path: "edbfilepath"  # Exchange database file path
+  log_path: "logfolderpath"  # Exchange log file path
+  backup_locations:
+    preproduction: "\\\\services.ppstamp.example.com\\stamp\\Admin_Area\\Exchange\\Backups"
+    production: "\\\\services.stamp.tsa.dhs.gov\\Stamp\\Admin Area\\Exchange\\Backups"
+  retention_policy: "cycle_logs_after_backup"
+  schedule: "before_maintenance_window"
+
+maintenance_windows:
+  production:
+    schedule: "2nd Tuesday Patch Tuesday + Wednesday following week"
+    weekday: "Wednesday"
+    start_time: "19:00"  # 1900 MT
+    end_time: "23:00"    # 2300 MT
+    duration_hours: 4
+    timezone: "Mountain Standard Time"
+  
+  preproduction:
+    schedule: "2nd Tuesday Patch Tuesday + Thursday same week"
+    weekday: "Thursday"
+    start_time: "09:00"  # 0900 MT
+    end_time: "15:00"    # 1500 MT
+    duration_hours: 6
+    timezone: "Mountain Standard Time"
+
+# Performance tuning
+performance_settings:
+  max_concurrent_jobs: 4
+  powershell_session_timeout: 300
+  winrm_timeout: 180
+  operation_timeout: 600

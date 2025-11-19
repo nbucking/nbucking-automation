@@ -1,0 +1,311 @@
+---
+# Ansible Automation Platform Workflow Job Template
+# Exchange Server Maintenance Workflow
+#
+# This workflow orchestrates the complete Exchange maintenance process
+# with decision points, approval gates, snapshots, and monitoring integration
+
+- workflow_job_template:
+    name: "Windows: Exchange Server Maintenance Workflow"
+    description: "Comprehensive Exchange Server maintenance workflow with safety checks, snapshots, and SolarWinds integration"
+    organization: "Credentialing"
+    schema: |
+      [
+        {
+          "id": 1,
+          "identifier": "exchange_maintenance_start",
+          "unified_job_template": {
+            "name": "Windows: Exchange Maintenance - Preparation Phase",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 2
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 99
+              }
+            ]
+          }
+        },
+        {
+          "id": 2,
+          "identifier": "solarwinds_mute_alerts",
+          "unified_job_template": {
+            "name": "Common: SolarWinds Node MX Mode - Exchange Maintenance",
+            "type": "job_template"
+          },
+          "extra_data": {
+            "nodestatus": "mute",
+            "hours": "{{ (maintenance_window_duration | default(120) / 60) | round(0, 'ceil') | int }}"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 3
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 99
+              }
+            ]
+          }
+        },
+        {
+          "id": 3,
+          "identifier": "take_vm_snapshot",
+          "unified_job_template": {
+            "name": "Common: Create a VM Snapshot - Exchange Maintenance",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 4
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 98
+              }
+            ]
+          }
+        },
+        {
+          "id": 4,
+          "identifier": "database_check",
+          "unified_job_template": {
+            "name": "Windows: Exchange Maintenance - Database Check",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 5
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 98
+              }
+            ]
+          }
+        },
+        {
+          "id": 5,
+          "identifier": "database_movement",
+          "unified_job_template": {
+            "name": "Windows: Exchange Maintenance - Database Movement",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 6
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 98
+              }
+            ]
+          }
+        },
+        {
+          "id": 6,
+          "identifier": "maintenance_mode",
+          "unified_job_template": {
+            "name": "Windows: Exchange Maintenance - Enable Maintenance Mode",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 7
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 97
+              }
+            ]
+          }
+        },
+        {
+          "id": 7,
+          "identifier": "queue_monitoring",
+          "unified_job_template": {
+            "name": "Windows: Exchange Maintenance - Queue Monitoring",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 8
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 97
+              }
+            ]
+          }
+        },
+        {
+          "id": 8,
+          "identifier": "manual_maintenance_window",
+          "unified_job_template": {
+            "name": "Windows: Manual Maintenance Window",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 9
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 97
+              }
+            ]
+          }
+        },
+        {
+          "id": 9,
+          "identifier": "service_management",
+          "unified_job_template": {
+            "name": "Windows: Exchange Maintenance - Service Management",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 10
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 10
+              }
+            ]
+          }
+        },
+        {
+          "id": 10,
+          "identifier": "maintenance_completion",
+          "unified_job_template": {
+            "name": "Windows: Exchange Maintenance - Completion Phase",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 11
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 11
+              }
+            ]
+          }
+        },
+        {
+          "id": 11,
+          "identifier": "solarwinds_unmute_alerts",
+          "unified_job_template": {
+            "name": "Windows: Exchange Maintenance - Success Notification",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 14
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 14
+              }
+            ]
+          }
+        },
+          "unified_job_template": {
+            "name": "Common: SolarWinds Node MX Mode - Exchange Maintenance",
+            "type": "job_template"
+          },
+          "extra_data": {
+            "nodestatus": "unmute"
+          },
+          "related": {
+            "success_nodes": [],
+            "failure_nodes": []
+          }
+        },
+        {
+          "id": 97,
+          "identifier": "rollback_maintenance_mode",
+          "unified_job_template": {
+            "name": "Windows: Exchange Maintenance - Rollback Maintenance Mode",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 11
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 11
+              }
+            ]
+          }
+        },
+        {
+          "id": 98,
+          "identifier": "rollback_snapshot_and_alerts",
+          "unified_job_template": {
+            "name": "Common: SolarWinds Node MX Mode - Exchange Maintenance",
+            "type": "job_template"
+          },
+          "extra_data": {
+            "nodestatus": "unmute"
+          },
+          "related": {
+            "success_nodes": [
+              {
+                "id": 99
+              }
+            ],
+            "failure_nodes": [
+              {
+                "id": 99
+              }
+            ]
+          }
+        },
+        {
+          "id": 99,
+          "identifier": "maintenance_failed",
+          "unified_job_template": {
+            "name": "Windows: Exchange Maintenance - Failure Notification",
+            "type": "job_template"
+          },
+          "related": {
+            "success_nodes": [],
+            "failure_nodes": []
+          }
+        }
+      ]
+    survey_enabled: true
+    ask_variables_on_launch: true
+    ask_inventory_on_launch: false
+    ask_credential_on_launch: false
+    webhook_service: ""
+    webhook_credential: null

@@ -1,0 +1,25 @@
+---
+# Job Template to Import Exchange Maintenance Templates
+# This allows you to run the import process from within AAP itself
+
+- job_template:
+    name: "Admin: Import Exchange Maintenance Templates"
+    description: "Import all Exchange Server maintenance job templates and workflows into AAP"
+    job_type: "run"
+    inventory: "localhost"  # Change to your localhost inventory
+    project: "Automation Repo"
+    playbook: "collections/ansible_collections/ENTERPRISE/Windows/aap/import-templates.yml"
+    credential: "AAP Controller Credential"  # Change to your AAP credential name
+    organization: "Credentialing"
+    extra_vars:
+      # Replace with your AAP server URL
+      controller_host: "https://your-aap-server.com"
+      # Credentials will come from the AAP Controller Credential
+      # The credential provides controller_username and controller_password automatically
+      validate_certs: false
+    become_enabled: false
+    ask_variables_on_launch: false
+    ask_inventory_on_launch: false
+    ask_credential_on_launch: false
+    verbosity: 1
+    timeout: 600  # 10 minutes

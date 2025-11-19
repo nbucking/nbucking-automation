@@ -1,0 +1,34 @@
+# Copy this file to terraform.tfvars and customize
+
+# AWS Region (use region closest to you or with free tier availability)
+aws_region = "us-east-1"
+
+# Project naming
+project_name = "ad-lab"
+
+# Networking
+vpc_cidr    = "10.0.0.0/16"
+subnet_cidr = "10.0.1.0/24"
+
+# Instance configuration
+# t2.micro = Free tier (1 vCPU, 1GB RAM) - minimal but works for basic AD
+# t3.small = Better performance (2 vCPU, 2GB RAM) - recommended
+# t3.medium = Good performance (2 vCPU, 4GB RAM) - for AD + Exchange
+instance_type = "t2.micro"
+
+# Storage (30GB minimum for Windows Server)
+root_volume_size = 30
+
+# Security - IMPORTANT: Restrict these to your IP address!
+# Get your IP: curl -s ifconfig.me
+# allowed_rdp_cidr   = ["YOUR.IP.ADDRESS/32"]
+# allowed_winrm_cidr = ["YOUR.IP.ADDRESS/32"]
+allowed_rdp_cidr   = ["152.70.131.162/32"]
+allowed_winrm_cidr = ["152.70.131.162/32"]
+
+# Windows Administrator password
+# Must meet complexity requirements: uppercase, lowercase, number, special char
+windows_admin_password = "AD-Lab-2025!Sandbox"
+
+# Elastic IP (recommended to keep same IP on stop/start)
+use_elastic_ip = true

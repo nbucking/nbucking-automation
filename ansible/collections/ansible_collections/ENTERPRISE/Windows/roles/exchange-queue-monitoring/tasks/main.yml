@@ -1,0 +1,8 @@
+---
+# Queue monitoring role - handles queue monitoring with interactive checks
+- name: Monitor queues on target servers
+  ansible.builtin.include_tasks: server_queue_monitoring.yml
+  vars:
+    current_server: "{{ item }}"
+  loop: "{{ target_servers }}"
+  when: target_servers is defined

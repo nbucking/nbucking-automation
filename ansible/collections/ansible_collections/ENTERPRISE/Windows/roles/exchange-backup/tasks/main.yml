@@ -1,0 +1,182 @@
+---
+# Exchange Backup Role - Backup only the active database holder
+# Tasks:
+# 1. Identify the server with exchange_database_preference: 1
+# 2. Move the active database to another server if needed
+# 3. Backup edbfilepath and logfolderpath to DFS share
+# 4. Cycle logs after successful backup
+
+- name: Validate backup configuration
+  ansible.builtin.assert:
+    that:
+      - backup_settings.enabled | default(false) | bool
+      - backup_settings.backup_locations is defined
+      - environment_type is defined
+    fail_msg: "Backup settings not properly configured in group_vars"
+
+- name: Display backup phase start
+  ansible.builtin.debug:
+    msg: |
+      ===============================================
+      EXCHANGE DATABASE BACKUP PHASE
+      ===============================================
+      Environment: {{ environment_type | upper }}
+      Target Database: {{ target_database | default('Unknown') }}
+      Active Only: {{ backup_settings.backup_only_active_database | default(false) }}
+      ===============================================
+
+- name: Identify backup target server (active database holder)
+  ansible.builtin.set_fact:
+    backup_target_server: "{{ item }}"
+    backup_target_preference: "{{ hostvars[item].get('exchange_database_preference', 999) }}"
+  loop: "{{ groups.get('exchange_servers', []) }}"
+  when:
+    - hostvars[item].get('exchange_database_preference', 999) == 1
+    - hostvars[item].ansible_host is defined
+  register: backup_target_result
+
+- name: Validate backup target was found
+  ansible.builtin.assert:
+    that:
+      - backup_target_server is defined
+    fail_msg: "No server found with exchange_database_preference: 1. Cannot perform backup."
+
+- name: Log backup target
+  ansible.builtin.debug:
+    msg: "Backup target server: {{ backup_target_server }} (preference: 1)"
+
+- name: Set backup location based on environment
+  ansible.builtin.set_fact:
+    backup_share_path: "{{ backup_settings.backup_locations[environment_type] }}"
+
+- name: Validate backup share path exists
+  ansible.builtin.assert:
+    that:
+      - backup_share_path is defined
+      - backup_share_path | length > 0
+    fail_msg: "Backup share path not defined for environment {{ environment_type }}"
+
+- name: Block - Perform backup on target server
+  block:
+    - name: Check if active database is on backup target server
+      ansible.builtin.set_fact:
+        active_db_on_target: "{{ backup_target_server in (active_server | default('Unknown') if active_server is defined else []) }}"
+
+    - name: Move active database if it's on the backup target
+      block:
+        - name: Find alternate server for database move
+          ansible.builtin.set_fact:
+            database_move_target: "{{ item }}"
+          loop: "{{ groups.get('exchange_servers', []) }}"
+          when:
+            - item != backup_target_server
+            - hostvars[item].get('exchange_database_preference', 999) != 1
+          limit: 1
+
+        - name: Display database move warning
+          ansible.builtin.debug:
+            msg: |
+              WARNING: Active database is on backup target server {{ backup_target_server }}.
+              Moving database to {{ database_move_target }} to allow backup.
+
+        - name: Move active mailbox database
+          ENTERPRISE.Windows.win_exchange:
+            command: "Move-ActiveMailboxDatabase"
+            parameters:
+              Identity: "{{ target_database }}"
+              ActivateOnServer: "{{ database_move_target }}"
+          when: database_move_target is defined
+          register: move_result
+
+        - name: Wait for database move to complete
+          ansible.builtin.pause:
+            seconds: 30
+          when: move_result is defined and move_result.changed
+
+      when: active_db_on_target | default(false) | bool
+
+    - name: Check database files on backup target server
+      ansible.builtin.debug:
+        msg: |
+          Backup will include:
+          - EDB Files: {{ backup_settings.edb_path }}
+          - Log Files: {{ backup_settings.log_path }}
+          - Destination: {{ backup_share_path }}
+
+    - name: Ensure backup target directory exists
+      ansible.windows.win_file:
+        path: "{{ backup_share_path }}"
+        state: directory
+      delegate_to: "{{ backup_target_server }}"
+
+    - name: Generate backup timestamp
+      ansible.builtin.set_fact:
+        backup_timestamp: "{{ ansible_date_time.strftime('%Y%m%d_%H%M%S') }}"
+        backup_date: "{{ ansible_date_time.date }}"
+
+    - name: Create dated backup subdirectory
+      ansible.builtin.set_fact:
+        backup_subdirectory: "{{ backup_share_path }}\\{{ backup_date }}_{{ backup_timestamp }}"
+
+    - name: Run Windows Backup using wbadmin
+      ansible.windows.win_shell: |
+        wbadmin start backup -backupTarget:"{{ backup_subdirectory }}" -include:"{{ backup_settings.edb_path }}","{{ backup_settings.log_path }}" -vssFull -quiet
+      delegate_to: "{{ backup_target_server }}"
+      register: wbadmin_result
+      timeout: 21600  # 6 hour timeout
+
+    - name: Check Windows Backup result
+      ansible.builtin.assert:
+        that:
+          - wbadmin_result.rc == 0
+        fail_msg: |
+          Windows Backup failed with return code {{ wbadmin_result.rc }}
+          Error: {{ wbadmin_result.stderr | default('No error details available') }}
+          Check Event Logs for detailed backup failure information.
+
+    - name: Windows Backup automatically truncates logs
+      ansible.builtin.debug:
+        msg: "Windows Backup (wbadmin) with VSS Full automatically truncates logs as part of the backup process. No additional log cycling required."
+
+    - name: Create backup manifest
+      ansible.builtin.copy:
+        dest: "{{ backup_subdirectory }}\\BACKUP_MANIFEST_{{ backup_timestamp }}.txt"
+        content: |
+          Exchange Database Backup Manifest
+          ==================================
+          Timestamp: {{ backup_timestamp }}
+          Date: {{ backup_date }}
+          Environment: {{ environment_type }}
+          Database: {{ target_database }}
+          Server: {{ backup_target_server }}
+          
+          Backup Contents:
+          - EDB Files: {{ backup_subdirectory }}\EDB_{{ backup_timestamp }}
+          - Log Files: {{ backup_subdirectory }}\LOGS_{{ backup_timestamp }}
+          
+          Retention: {{ backup_settings.retention_policy | default('N/A') }}
+          
+          Backup completed successfully.
+      delegate_to: "{{ backup_target_server }}"
+
+  when: backup_target_server is defined
+
+- name: Log backup completion
+  ansible.builtin.debug:
+    msg: |
+      ===============================================
+      BACKUP COMPLETED SUCCESSFULLY
+      ===============================================
+      Server: {{ backup_target_server }}
+      Database: {{ target_database }}
+      Timestamp: {{ backup_timestamp }}
+      Location: {{ backup_subdirectory }}
+      
+      Backup Method: Windows Backup (wbadmin) with VSS Full
+      Includes:
+      - EDB Files: {{ backup_settings.edb_path }}
+      - Log Files: {{ backup_settings.log_path }}
+      - Log Truncation: Automatic (via Windows Backup VSS Full)
+      
+      Return Code: {{ wbadmin_result.rc }}
+      ===============================================

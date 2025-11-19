@@ -1,0 +1,46 @@
+namespace: ENTERPRISE
+name: Windows
+version: 1.0.0
+readme: README.md
+authors:
+  - ENTERPRISE Automation Team
+  - Nicholas Buckingham <nicholas.buckingham@company.com>
+description: >-
+  ENTERPRISE Windows automation collection including Exchange Server maintenance,
+  Active Directory operations, and Windows system management tools.
+  
+  This collection provides comprehensive Exchange Server maintenance automation
+  with support for Exchange 2016, 2019, and Subscription Edition environments.
+license:
+  - GPL-3.0-or-later
+tags:
+  - windows
+  - exchange
+  - exchange-2016
+  - exchange-2019
+  - exchange-se
+  - maintenance
+  - automation
+  - tsa
+  - stamp
+  - active-directory
+  - powershell
+dependencies:
+  "ansible.windows": ">=1.10.0"
+  "community.windows": "*"
+  "microsoft.ad": "*"
+repository: https://github.com/your-org/stamp-windows-collection
+documentation: https://your-docs-site.com/stamp-windows
+homepage: https://your-homepage.com/stamp-automation
+issues: https://github.com/your-org/stamp-windows-collection/issues
+build_ignore:
+  - "*.pyc"
+  - ".git"
+  - ".gitignore"
+  - ".DS_Store"
+  - "Thumbs.db"
+  - ".pytest_cache"
+  - "__pycache__"
+  - "tests/output"
+  - ".vscode"
+  - ".idea"

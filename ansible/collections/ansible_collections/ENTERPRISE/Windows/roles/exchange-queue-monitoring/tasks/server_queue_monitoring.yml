@@ -1,0 +1,49 @@
+---
+# Individual server queue monitoring tasks
+- name: Initial queue check on {{ current_server }}
+  ENTERPRISE.Windows.win_exchange:
+    command: "Get-queue"
+    output_format: "table"
+  register: initial_queue_check
+  delegate_to: "{{ current_server }}"
+
+- name: Export initial queue status to file
+  ansible.windows.win_copy:
+    content: "{{ initial_queue_check.output }}"
+    dest: "c:\\temp\\Queue_{{ current_server }}.txt"
+  delegate_to: "{{ current_server }}"
+
+- name: Interactive queue monitoring loop
+  block:
+    - name: Check if we should continue or check queue again
+      ansible.builtin.pause:
+        prompt: "Do you want to continue or check the queue again on {{ current_server }}? (continue/check)"
+      register: queue_decision
+      when: interactive_mode | default(true)
+
+    - name: Set queue decision from variable when not interactive
+      ansible.builtin.set_fact:
+        queue_decision:
+          user_input: "{{ queue_check_decision | default('continue') }}"
+      when: not (interactive_mode | default(true))
+
+    - name: Recheck queue if requested
+      block:
+        - name: Get updated queue status on {{ current_server }}
+          ENTERPRISE.Windows.win_exchange:
+            command: "Get-queue"
+            output_format: "table"
+          register: updated_queue_check
+          delegate_to: "{{ current_server }}"
+
+        - name: Update queue file with latest status
+          ansible.windows.win_copy:
+            content: "{{ updated_queue_check.output }}"
+            dest: "c:\\temp\\Queue_{{ current_server }}.txt"
+          delegate_to: "{{ current_server }}"
+
+        - name: Recursive queue check
+          ansible.builtin.include_tasks: queue_recheck_loop.yml
+          when: interactive_mode | default(true)
+
+      when: queue_decision.user_input | lower == 'check'

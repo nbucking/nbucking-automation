@@ -1,0 +1,64 @@
+<html>
+<body style="font-family: Arial, sans-serif; font-size: 12px; color: #333;">
+  <h2 style="color: #0066cc;">⊘ Exchange Server Maintenance Cancelled</h2>
+  
+  <table style="border-collapse: collapse; width: 100%; margin: 20px 0;">
+    <tr style="background-color: #f0f0f0;">
+      <td style="padding: 8px; font-weight: bold; width: 30%;">Status:</td>
+      <td style="padding: 8px; color: #0066cc; font-weight: bold;">CANCELLED</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; font-weight: bold;">Environment:</td>
+      <td style="padding: 8px;">{{ environment_type | upper }}</td>
+    </tr>
+    <tr style="background-color: #f0f0f0;">
+      <td style="padding: 8px; font-weight: bold;">Database:</td>
+      <td style="padding: 8px;">{{ target_database }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px; font-weight: bold;">Cancellation Time:</td>
+      <td style="padding: 8px;">{{ ansible_date_time.iso8601 }}</td>
+    </tr>
+    <tr style="background-color: #f0f0f0;">
+      <td style="padding: 8px; font-weight: bold;">Job ID:</td>
+      <td style="padding: 8px;">{{ tower_job_id | default('N/A') }}</td>
+    </tr>
+  </table>
+
+  <h3 style="color: #0066cc;">Cancellation Details:</h3>
+  <div style="background-color: #e6f3ff; padding: 10px; border-left: 4px solid #0066cc; margin: 10px 0;">
+    {% if cancellation_reason is defined %}
+    <strong>Reason:</strong> {{ cancellation_reason }}
+    {% else %}
+    <strong>Reason:</strong> User cancelled maintenance workflow
+    {% endif %}
+  </div>
+
+  <h3 style="color: #228B22;">Status Summary:</h3>
+  <ul>
+    <li>✓ Maintenance workflow was cancelled successfully</li>
+    <li>✓ No changes were applied to the Exchange environment</li>
+    <li>✓ Server remains in normal operational state</li>
+    <li>✓ All services are running normally</li>
+    <li>✓ No cleanup actions required</li>
+  </ul>
+
+  <div style="background-color: #f0f0f0; padding: 15px; margin: 20px 0; border-left: 4px solid #228B22;">
+    <strong>Important:</strong> The Exchange server was not affected by this cancelled maintenance workflow. All systems are operating normally and no manual intervention is required.
+  </div>
+
+  <h3 style="color: #0066cc;">Next Steps:</h3>
+  <ul>
+    <li>The maintenance window has been released</li>
+    <li>The scheduled maintenance may be rescheduled for a later date</li>
+    <li>No urgent action is required at this time</li>
+    <li>Contact the team to reschedule if necessary</li>
+  </ul>
+
+  <hr style="margin: 20px 0; border: none; border-top: 1px solid #ccc;">
+  <p style="font-size: 11px; color: #666;">
+    This is an automated notification from the STAMP Exchange Maintenance Automation system.<br>
+    For support or to reschedule maintenance, contact: {{ notifications.default_contacts | join(', ') }}
+  </p>
+</body>
+</html>

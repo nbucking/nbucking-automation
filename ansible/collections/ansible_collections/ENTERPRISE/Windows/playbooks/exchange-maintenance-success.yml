@@ -1,0 +1,47 @@
+---
+# Exchange Maintenance Success Playbook
+# Send success notification after maintenance completion
+
+- name: Exchange Maintenance Success Notification
+  hosts: localhost
+  gather_facts: true
+  vars:
+    target_database: "{{ target_database | default('EXAMPLE-MB01') }}"
+    environment_type: "{{ environment_type | default('production') }}"
+    completion_time: "{{ ansible_date_time.iso8601 }}"
+
+  tasks:
+    - name: Display success notification banner
+      ansible.builtin.debug:
+        msg: |
+          ===============================================
+          EXCHANGE MAINTENANCE - SUCCESS
+          ===============================================
+          Environment: {{ environment_type | upper }}
+          Database: {{ target_database }}
+          Completion Time: {{ completion_time }}
+          ===============================================
+
+    - name: Send success notification using exchange-notification role
+      ansible.builtin.include_role:
+        name: ENTERPRISE.Windows.exchange-notification
+      vars:
+        notification_type: "success"
+        target_database: "{{ target_database }}"
+        environment_type: "{{ environment_type }}"
+        completion_time: "{{ completion_time }}"
+        change_request_number: "{{ change_request_number | default('') }}"
+        maintenance_reason: "{{ maintenance_reason | default('Exchange server maintenance') }}"
+        tower_job_id: "{{ tower_job_id | default('N/A') }}"
+
+    - name: Log success notification completion
+      ansible.builtin.debug:
+        msg: |
+          ===============================================
+          SUCCESS NOTIFICATION COMPLETED
+          ===============================================
+          Email(s) sent to: {{ notifications.default_contacts | join(', ') }}
+          Database: {{ target_database }}
+          Environment: {{ environment_type }}
+          Time: {{ completion_time }}
+          ===============================================

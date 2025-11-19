@@ -1,0 +1,57 @@
+---
+# aws-deploy-complete-ad.yml
+# Master orchestration playbook for AWS AD DS deployment
+#
+# Prerequisites:
+# 1. AWS account with free tier
+# 2. AWS CLI configured (run setup-aws-tools.sh)
+# 3. Terraform deployed (in terraform/aws-windows-server/)
+# 4. Windows Server EC2 instance running
+#
+# Usage:
+#   ansible-playbook -i inventory/hosts-aws aws-deploy-complete-ad.yml -e 'ansible_password=YourPassword'
+
+- name: Install AD DS and Promote to DC
+  import_playbook: aws-install-adds.yml
+  tags:
+    - adds
+
+- name: Create OU Structure
+  import_playbook: create-ou-structure.yml
+  tags:
+    - ou_structure
+
+- name: Deployment Complete
+  hosts: localhost
+  gather_facts: no
+  tags:
+    - always
+  tasks:
+    - name: Display completion message
+      debug:
+        msg: |
+          ========================================
+          AWS Active Directory Deployment Complete!
+          ========================================
+          
+          Domain: services.sandbox.local
+          DC: DC01
+          Location: AWS EC2 (Free Tier)
+          
+          Your Active Directory environment is ready with the complete OU structure.
+          
+          Next steps:
+          1. RDP to the server (use output from 'terraform output rdp_connection')
+          2. Open Active Directory Users and Computers (dsa.msc)
+          3. Verify the OU structure (130+ OUs created)
+          4. Start adding users, groups, and computers
+          5. Configure Group Policies
+          
+          To manage from this Fedora host:
+          - Use Ansible playbooks for automation
+          - Use RSAT tools via RDP
+          
+          Cost management:
+          - Stop the instance when not in use (Elastic IP prevents IP change)
+          - Monitor your AWS Free Tier usage at: https://console.aws.amazon.com/billing/
+          - Free tier includes 750 hours/month (enough for 24/7 operation)

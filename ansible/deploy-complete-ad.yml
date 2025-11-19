@@ -1,0 +1,63 @@
+---
+# deploy-complete-ad.yml
+# Master orchestration playbook - deploys complete AD DS environment with OU structure
+#
+# Prerequisites:
+# 1. KVM/libvirt installed and configured (run ansible/setup-kvm-host.sh)
+# 2. Windows Server 2019 ISO downloaded to /var/lib/libvirt/isos/
+# 3. WinRM configured on Windows Server after installation
+# 4. ansible/inventory/hosts updated with DC IP address
+#
+# Usage: 
+#   # Step 1: Provision VM (requires sudo)
+#   sudo ansible-playbook deploy-complete-ad.yml --tags provision
+#
+#   # After Windows installation and WinRM configuration:
+#   # Step 2: Install AD DS and create OU structure
+#   ansible-playbook -i ansible/inventory/hosts deploy-complete-ad.yml --tags configure -e 'ansible_password=YourPassword'
+
+- name: Step 1 - Provision Windows Server 2019 VM
+  import_playbook: provision-windows-vm.yml
+  tags:
+    - provision
+    - never  # Only run when explicitly tagged
+
+- name: Step 2 - Install AD DS and Promote to DC
+  import_playbook: install-adds.yml
+  tags:
+    - configure
+    - adds
+
+- name: Step 3 - Create OU Structure
+  import_playbook: create-ou-structure.yml
+  tags:
+    - configure
+    - ou_structure
+
+- name: Complete deployment summary
+  hosts: localhost
+  gather_facts: no
+  tags:
+    - configure
+  tasks:
+    - name: Display completion message
+      debug:
+        msg: |
+          ========================================
+          Active Directory Deployment Complete!
+          ========================================
+          
+          Domain: services.sandbox.local
+          DC: DC01
+          
+          Your Active Directory environment is ready with the complete OU structure.
+          
+          Next steps:
+          1. Connect to the DC: virt-viewer ws2019-dc01
+          2. Open Active Directory Users and Computers (dsa.msc)
+          3. Verify the OU structure
+          4. Start adding users, groups, and computers to appropriate OUs
+          5. Configure Group Policies as needed
+          
+          For remote management from this Fedora host:
+          - Install RSAT tools or use Ansible for further automation

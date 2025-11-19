@@ -1,0 +1,40 @@
+# Ansible
+*.retry
+ansible/.vault_pass
+ansible/inventory/hosts
+*.log
+
+# PowerShell
+*.ps1.bak
+
+# General
+.DS_Store
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Secrets and credentials
+*.pem
+*.key
+*.cer
+*.pfx
+credentials.yml
+secrets.yml
+vault.yml
+
+# Project-specific files (DO NOT commit to public repo)
+project-specific/
+*-production.yml
+*-prod.yml
+*_production.yml
+*_prod.yml
+host_vars/
+group_vars/production/
+group_vars/prod/
+
+# Output and temp files
+*.tmp
+output/
+logs/

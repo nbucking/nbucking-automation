@@ -1,0 +1,19 @@
+---
+namespace: ENTERPRISE
+name: Windows
+role_name: exchange-backup
+version: 1.0.0
+author: ENTERPRISE Automation Team
+description: |
+  Backs up Exchange database files (EDB and logs) from the active database holder.
+  Handles database movement if needed and cycles logs after backup to reclaim disk space.
+license:
+  - MIT
+min_ansible_version: 2.9
+platforms:
+  - name: Windows
+    versions:
+      - 2016
+      - 2019
+      - 2022
+dependencies: []

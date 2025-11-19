@@ -1,0 +1,88 @@
+---
+# Individual server service management tasks
+- name: Get MSExchange services status on {{ current_server }}
+  ansible.windows.win_shell:
+    Get-Service | Where-Object {($_.Name -like 'MSExchange*') -and ($_.Status -ne 'Running')} | 
+    Select-Object Name, Status, DisplayName | ConvertTo-Json -Depth 3
+  register: stopped_services_raw
+  delegate_to: "{{ current_server }}"
+
+- name: Parse stopped services
+  ansible.builtin.set_fact:
+    stopped_services: "{{ stopped_services_raw.stdout | from_json if stopped_services_raw.stdout and stopped_services_raw.stdout != 'null' else [] }}"
+
+- name: Display stopped MSExchange services on {{ current_server }}
+  ansible.builtin.debug:
+    msg: |
+      Stopped MSExchange services on {{ current_server }}:
+      {% if stopped_services | length > 0 %}
+      {% for service in stopped_services %}
+      - {{ service.Name }} ({{ service.Status }}) - {{ service.DisplayName }}
+      {% endfor %}
+      {% else %}
+      All MSExchange services are running.
+      {% endif %}
+
+- name: Export service status to file
+  ansible.windows.win_copy:
+    content: |
+      Stopped MSExchange services on {{ current_server }}:
+      {% if stopped_services | length > 0 %}
+      {% for service in stopped_services %}
+      {{ service.Name }} - {{ service.Status }} - {{ service.DisplayName }}
+      {% endfor %}
+      {% else %}
+      All MSExchange services are running.
+      {% endif %}
+    dest: "c:\\temp\\Services_{{ current_server }}.txt"
+  delegate_to: "{{ current_server }}"
+
+- name: Start stopped MSExchange services on {{ current_server }}
+  ansible.windows.win_service:
+    name: "{{ item.Name }}"
+    state: started
+  register: service_start_result
+  failed_when: false
+  delegate_to: "{{ current_server }}"
+  loop: "{{ stopped_services }}"
+  when: stopped_services | length > 0
+
+- name: Display service start results
+  ansible.builtin.debug:
+    msg: |
+      Service start results on {{ current_server }}:
+      {% for result in service_start_result.results %}
+      {% if result.changed %}
+      - Successfully started {{ result.item.Name }}
+      {% else %}
+      - Failed to start {{ result.item.Name }}: {{ result.msg | default('Unknown error') }}
+      {% endif %}
+      {% endfor %}
+  when: 
+    - stopped_services | length > 0
+    - service_start_result is defined
+
+- name: Re-check service status after start attempts
+  ansible.windows.win_shell:
+    Get-Service | Where-Object {($_.Name -like 'MSExchange*') -and ($_.Status -ne 'Running')} | 
+    Select-Object Name, Status, DisplayName | ConvertTo-Json -Depth 3
+  register: final_services_check
+  delegate_to: "{{ current_server }}"
+  when: stopped_services | length > 0
+
+- name: Display final service status
+  ansible.builtin.debug:
+    msg: |
+      Final MSExchange service status on {{ current_server }}:
+      {% set final_stopped = final_services_check.stdout | from_json if final_services_check.stdout and final_services_check.stdout != 'null' else [] %}
+      {% if final_stopped | length > 0 %}
+      Still stopped services:
+      {% for service in final_stopped %}
+      - {{ service.Name }} ({{ service.Status }}) - {{ service.DisplayName }}
+      {% endfor %}
+      {% else %}
+      All MSExchange services are now running.
+      {% endif %}
+  when: 
+    - stopped_services | length > 0
+    - final_services_check is defined

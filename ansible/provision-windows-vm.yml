@@ -1,0 +1,122 @@
+---
+# provision-windows-vm.yml
+# Creates a Windows Server 2019 VM using KVM/libvirt
+#
+# Usage: ansible-playbook provision-windows-vm.yml
+
+- name: Provision Windows Server 2019 VM for Active Directory
+  hosts: localhost
+  gather_facts: yes
+  become: yes
+  
+  vars:
+    vm_name: "ws2019-dc01"
+    vm_vcpus: 4
+    vm_ram_mb: 8192
+    vm_disk_size: 80G
+    iso_path: "/var/lib/libvirt/isos/windows_server_2019.iso"
+    virtio_iso_path: "/var/lib/libvirt/isos/virtio-win.iso"
+    vm_network: "default"
+    vm_disk_path: "/var/lib/libvirt/images/{{ vm_name }}.qcow2"
+    
+  tasks:
+    - name: Check if Windows Server 2019 ISO exists
+      stat:
+        path: "{{ iso_path }}"
+      register: win_iso
+      
+    - name: Fail if Windows ISO not found
+      fail:
+        msg: |
+          Windows Server 2019 ISO not found at {{ iso_path }}
+          Please download the ISO first:
+          
+          Evaluation ISO: https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2019
+          
+          Or if you have it elsewhere, update the iso_path variable.
+      when: not win_iso.stat.exists
+      
+    - name: Check if VirtIO drivers ISO exists
+      stat:
+        path: "{{ virtio_iso_path }}"
+      register: virtio_iso
+        
+    - name: Download VirtIO drivers if not present
+      get_url:
+        url: "https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso"
+        dest: "{{ virtio_iso_path }}"
+        mode: '0644'
+      when: not virtio_iso.stat.exists
+      
+    - name: Check if VM already exists
+      community.libvirt.virt:
+        command: list_vms
+      register: all_vms
+      
+    - name: Display existing VMs
+      debug:
+        msg: "Existing VMs: {{ all_vms.list_vms }}"
+        
+    - name: Fail if VM already exists
+      fail:
+        msg: "VM '{{ vm_name }}' already exists. Remove it first with: virsh undefine {{ vm_name }} --remove-all-storage"
+      when: vm_name in all_vms.list_vms
+      
+    - name: Create VM disk
+      command: >
+        qemu-img create -f qcow2 {{ vm_disk_path }} {{ vm_disk_size }}
+      args:
+        creates: "{{ vm_disk_path }}"
+        
+    - name: Create Windows Server 2019 VM
+      command: >
+        virt-install
+        --name {{ vm_name }}
+        --ram {{ vm_ram_mb }}
+        --vcpus {{ vm_vcpus }}
+        --disk path={{ vm_disk_path }},format=qcow2,bus=virtio
+        --cdrom {{ iso_path }}
+        --disk path={{ virtio_iso_path }},device=cdrom
+        --network network={{ vm_network }},model=virtio
+        --os-variant win2k19
+        --graphics vnc,listen=0.0.0.0
+        --video qxl
+        --channel spicevmc
+        --console pty,target_type=serial
+        --noautoconsole
+      register: vm_creation
+      
+    - name: Display VM creation result
+      debug:
+        var: vm_creation
+        
+    - name: Get VM info
+      community.libvirt.virt:
+        command: info
+        name: "{{ vm_name }}"
+      register: vm_info
+      
+    - name: Display VM information
+      debug:
+        msg: |
+          VM '{{ vm_name }}' has been created successfully!
+          
+          Status: {{ vm_info[vm_name]['state'] }}
+          
+          Next steps:
+          1. Connect to the VM console to complete Windows installation:
+             virt-viewer {{ vm_name }}
+             
+          2. During Windows installation:
+             - Choose "Windows Server 2019 Datacenter (Desktop Experience)"
+             - Load VirtIO drivers when prompted for disk (browse second CD)
+             - Set Administrator password
+             
+          3. After Windows installation completes, configure networking:
+             - Set static IP or note DHCP-assigned IP
+             - Enable WinRM for Ansible
+             
+          4. Update ansible/inventory/hosts with the VM's IP address
+          
+          5. Run the AD DS installation playbook:
+             ansible-playbook ansible/install-adds.yml

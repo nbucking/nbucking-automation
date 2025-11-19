@@ -1,0 +1,13 @@
+---
+# Variables specific to EXAMPLE-MB01 database operations
+# ENTERPRISE = Production Environment
+selected_database: "EXAMPLE-MB01"
+database_name: "EXAMPLE-MB01"
+
+# Specific configuration for ENTERPRISE environment
+environment_type: "production"
+maintenance_window: "standard"
+
+# Override defaults for this database if needed
+# move_database: "no"
+# maintenance_site: "localhost"

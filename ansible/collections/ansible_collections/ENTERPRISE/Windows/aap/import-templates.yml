@@ -1,0 +1,137 @@
+---
+- name: Import Exchange Maintenance Job Templates to AAP
+  hosts: localhost
+  gather_facts: false
+  vars:
+    # Auto-detect AAP controller when running as job template, fall back to environment variables
+    # Supports both custom credential injection and built-in AAP credential types
+    _controller_host: "{{ controller_host | default(tower_host) | default(lookup('env', 'CONTROLLER_HOST')) | default(lookup('env', 'TOWER_HOST')) }}"
+    _controller_username: "{{ controller_username | default(tower_username) | default(lookup('env', 'CONTROLLER_USERNAME')) | default(lookup('env', 'TOWER_USERNAME')) | default(omit) }}"
+    _controller_password: "{{ controller_password | default(tower_password) | default(lookup('env', 'CONTROLLER_PASSWORD')) | default(lookup('env', 'TOWER_PASSWORD')) | default(omit) }}"
+    _controller_oauthtoken: "{{ controller_oauthtoken | default(tower_oauthtoken) | default(lookup('env', 'CONTROLLER_OAUTH_TOKEN')) | default(lookup('env', 'TOWER_OAUTH_TOKEN')) | default(omit) }}"
+    _validate_certs: "{{ validate_certs | default(tower_verify_ssl) | default(false) }}"
+  
+  tasks:
+    - name: Load job template definitions
+      ansible.builtin.set_fact:
+        job_templates_raw: "{{ lookup('file', 'exchange_job_templates.yml') | from_yaml }}"
+    
+    - name: Create Common collection job templates
+      ansible.controller.job_template:
+        name: "{{ item.job_template.name }}"
+        description: "{{ item.job_template.description }}"
+        job_type: "{{ item.job_template.job_type }}"
+        inventory: "{{ item.job_template.inventory }}"
+        project: "{{ item.job_template.project }}"
+        playbook: "{{ item.job_template.playbook }}"
+        credentials: "{{ item.job_template.credential }}"
+        organization: "{{ item.job_template.organization }}"
+        extra_vars: "{{ item.job_template.extra_vars | default({}) }}"
+        ask_variables_on_launch: "{{ item.job_template.ask_variables_on_launch | default(false) }}"
+        verbosity: "{{ item.job_template.verbosity | default(1) }}"
+        controller_host: "{{ _controller_host }}"
+        controller_username: "{{ _controller_username }}"
+        controller_password: "{{ _controller_password }}"
+        controller_oauthtoken: "{{ _controller_oauthtoken }}"
+        validate_certs: "{{ _validate_certs }}"
+        state: present
+      loop: "{{ job_templates_raw }}"
+      when: 
+        - item.job_template is defined
+        - item.job_template.name is match("^Common:.*")
+      loop_control:
+        label: "{{ item.job_template.name }}"
+    
+    - name: Create Windows collection job templates
+      ansible.controller.job_template:
+        name: "{{ item.job_template.name }}"
+        description: "{{ item.job_template.description }}"
+        job_type: "{{ item.job_template.job_type }}"
+        inventory: "{{ item.job_template.inventory }}"
+        project: "{{ item.job_template.project }}"
+        playbook: "{{ item.job_template.playbook }}"
+        credentials: "{{ item.job_template.credential }}"
+        organization: "{{ item.job_template.organization }}"
+        extra_vars: "{{ item.job_template.extra_vars | default({}) }}"
+        ask_variables_on_launch: "{{ item.job_template.ask_variables_on_launch | default(false) }}"
+        verbosity: "{{ item.job_template.verbosity | default(1) }}"
+        controller_host: "{{ _controller_host }}"
+        controller_username: "{{ _controller_username }}"
+        controller_password: "{{ _controller_password }}"
+        controller_oauthtoken: "{{ _controller_oauthtoken }}"
+        validate_certs: "{{ _validate_certs }}"
+        state: present
+      loop: "{{ job_templates_raw }}"
+      when: 
+        - item.job_template is defined
+        - item.job_template.name is match("^Windows:.*")
+      loop_control:
+        label: "{{ item.job_template.name }}"
+    
+    - name: Load main workflow definition
+      ansible.builtin.set_fact:
+        main_workflow: "{{ lookup('file', 'exchange_workflow_job_template.yml') | from_yaml }}"
+    
+    - name: Load workflow survey specification
+      ansible.builtin.set_fact:
+        workflow_survey: "{{ lookup('file', 'exchange_workflow_survey.yml') | from_yaml }}"
+    
+    - name: Create main Exchange maintenance workflow
+      ansible.controller.workflow_job_template:
+        name: "{{ main_workflow[0].workflow_job_template.name }}"
+        description: "{{ main_workflow[0].workflow_job_template.description }}"
+        inventory: "{{ main_workflow[0].workflow_job_template.inventory | default(omit) }}"
+        organization: "{{ main_workflow[0].workflow_job_template.organization }}"
+        extra_vars: "{{ main_workflow[0].workflow_job_template.extra_vars | default({}) }}"
+        ask_variables_on_launch: "{{ main_workflow[0].workflow_job_template.ask_variables_on_launch | default(false) }}"
+        survey_enabled: true
+        survey_spec: "{{ workflow_survey.survey_spec }}"
+        schema: "{{ main_workflow[0].workflow_job_template.schema | from_yaml }}"
+        controller_host: "{{ _controller_host }}"
+        controller_username: "{{ _controller_username }}"
+        controller_password: "{{ _controller_password }}"
+        controller_oauthtoken: "{{ _controller_oauthtoken }}"
+        validate_certs: "{{ _validate_certs }}"
+        state: present
+      register: main_workflow_result
+    
+    # Workflow nodes are created automatically from schema
+    # No need to create them individually
+    
+    - name: Load early finish workflow definition
+      ansible.builtin.set_fact:
+        early_finish_workflow: "{{ lookup('file', 'exchange_workflow_early_finish.yml') | from_yaml }}"
+    
+    - name: Create early finish workflow
+      ansible.controller.workflow_job_template:
+        name: "{{ early_finish_workflow[0].workflow_job_template.name }}"
+        description: "{{ early_finish_workflow[0].workflow_job_template.description }}"
+        inventory: "{{ early_finish_workflow[0].workflow_job_template.inventory | default(omit) }}"
+        organization: "{{ early_finish_workflow[0].workflow_job_template.organization }}"
+        extra_vars: "{{ early_finish_workflow[0].workflow_job_template.extra_vars | default({}) }}"
+        ask_variables_on_launch: "{{ early_finish_workflow[0].workflow_job_template.ask_variables_on_launch | default(false) }}"
+        ask_inventory_on_launch: "{{ early_finish_workflow[0].workflow_job_template.ask_inventory_on_launch | default(false) }}"
+        schema: "{{ early_finish_workflow[0].workflow_job_template.schema | from_yaml }}"
+        controller_host: "{{ _controller_host }}"
+        controller_username: "{{ _controller_username }}"
+        controller_password: "{{ _controller_password }}"
+        controller_oauthtoken: "{{ _controller_oauthtoken }}"
+        validate_certs: "{{ _validate_certs }}"
+        state: present
+      register: early_finish_workflow_result
+    
+    # Workflow nodes are created automatically from schema
+    
+    - name: Summary
+      ansible.builtin.debug:
+        msg:
+          - "✅ Import Complete!"
+          - ""
+          - "Created {{ job_templates_raw | selectattr('job_template', 'defined') | list | length }} job templates"
+          - "Created 2 workflows"
+          - ""
+          - "Next steps:"
+          - "1. Verify templates in AAP UI: Resources → Templates"
+          - "2. Verify workflows in AAP UI: Resources → Workflows"
+          - "3. Test individual job templates"
+          - "4. Test complete workflow"

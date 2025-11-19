@@ -1,0 +1,13 @@
+[windows_dc]
+# Replace 192.0.2.10 with your Windows Server 2019 VM's actual IP address
+dc01 ansible_host=192.0.2.10
+
+[windows_dc:vars]
+ansible_user=Administrator
+# Set password via command line: -e 'ansible_password=YourPassword'
+# Or uncomment and set here (not recommended for production):
+# ansible_password=YourPassword
+ansible_connection=winrm
+ansible_winrm_transport=basic
+ansible_winrm_server_cert_validation=ignore
+ansible_port=5985

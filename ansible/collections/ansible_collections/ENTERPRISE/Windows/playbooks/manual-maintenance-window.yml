@@ -1,0 +1,184 @@
+---
+# Manual Maintenance Window Playbook
+# This provides a structured pause for manual maintenance tasks
+
+- name: Exchange Manual Maintenance Window
+  hosts: localhost
+  gather_facts: false
+  vars:
+    maintenance_window_duration: "{{ maintenance_window_duration | default(120) }}"  # minutes
+    maintenance_instructions: "{{ maintenance_instructions | default('Perform your Exchange server maintenance tasks now.') }}"
+    target_database: "{{ target_database | default('EXAMPLE-MB01') }}"
+    environment_type: "{{ environment_type | default('production') }}"
+    change_request_number: "{{ change_request_number | default('') }}"
+
+  tasks:
+    - name: Calculate maintenance window end time
+      set_fact:
+        maintenance_start_time: "{{ ansible_date_time.iso8601 }}"
+        maintenance_end_time: "{{ (ansible_date_time.epoch | int + (maintenance_window_duration | int * 60)) | strftime('%Y-%m-%d %H:%M:%S %Z') }}"
+
+    - name: Display maintenance window information
+      debug:
+        msg: |
+          ===============================================
+          EXCHANGE MAINTENANCE WINDOW ACTIVE
+          ===============================================
+          Environment: {{ environment_type | upper }}
+          Target Database: {{ target_database }}
+          Change Request: {{ change_request_number | default('N/A') }}
+          
+          Start Time: {{ maintenance_start_time }}
+          Planned End Time: {{ maintenance_end_time }}
+          Duration: {{ maintenance_window_duration }} minutes
+          
+          Server Status: IN MAINTENANCE MODE
+          ===============================================
+
+    - name: Display maintenance instructions
+      debug:
+        msg: |
+          {{ maintenance_instructions }}
+          
+          IMPORTANT REMINDERS:
+          - The Exchange server is now in maintenance mode
+          - Databases have been moved (if applicable)
+          - Queues have been monitored and exported
+          - Services may be stopped - they will be checked after maintenance
+          
+          YOU CAN NOW SAFELY:
+          - Apply Windows updates
+          - Install Exchange updates/patches
+          - Perform configuration changes
+          - Restart the server if needed
+          
+          When maintenance is complete, this workflow will:
+          - Check and start Exchange services
+          - Exit maintenance mode
+          - Verify system health
+
+    - name: Wait for maintenance completion confirmation
+      pause:
+        prompt: |
+          
+          ===============================================
+          MAINTENANCE WINDOW IN PROGRESS
+          ===============================================
+          
+          Current Time: {{ ansible_date_time.iso8601 }}
+          Planned End: {{ maintenance_end_time }}
+          
+          Have you completed your maintenance tasks?
+          
+          Type 'completed' to continue with post-maintenance steps,
+          or 'extend' to extend the maintenance window,
+          or 'abort' to emergency exit maintenance mode:
+        timeout: "{{ maintenance_window_duration | int * 60 }}"  # Convert to seconds
+        echo: true
+      register: maintenance_response
+
+    - name: Handle maintenance completion response
+      block:
+        - name: Process completed maintenance
+          debug:
+            msg: "Maintenance marked as completed. Proceeding with post-maintenance steps."
+          when: maintenance_response.user_input | lower in ['completed', 'complete', 'done', 'finished']
+
+        - name: Process maintenance extension request
+          block:
+            - name: Request extension duration
+              pause:
+                prompt: "How many additional minutes do you need? (30-240): "
+                timeout: 300
+                echo: true
+              register: extension_response
+
+            - name: Validate extension time
+              fail:
+                msg: "Invalid extension time. Must be between 30 and 240 minutes."
+              when: 
+                - extension_response.user_input | int < 30 or extension_response.user_input | int > 240
+
+            - name: Calculate new end time
+              set_fact:
+                maintenance_end_time: "{{ (ansible_date_time.epoch | int + (extension_response.user_input | int * 60)) | strftime('%Y-%m-%d %H:%M:%S %Z') }}"
+
+            - name: Wait for extended maintenance completion
+              pause:
+                prompt: |
+                  
+                  Maintenance window extended until: {{ maintenance_end_time }}
+                  
+                  Type 'completed' when finished:
+                timeout: "{{ extension_response.user_input | int * 60 }}"
+                echo: true
+              register: extended_maintenance_response
+
+            - name: Validate extended maintenance completion
+              fail:
+                msg: "Maintenance not properly completed after extension"
+              when: extended_maintenance_response.user_input | lower not in ['completed', 'complete', 'done', 'finished']
+
+          when: maintenance_response.user_input | lower in ['extend', 'extension', 'more']
+
+        - name: Process maintenance abort request
+          block:
+            - name: Confirm abort request
+              pause:
+                prompt: |
+                  
+                  WARNING: You requested to abort maintenance!
+                  This will immediately exit maintenance mode without completing post-maintenance steps.
+                  
+                  Type 'ABORT' to confirm emergency abort, or 'continue' to resume normal completion:
+                timeout: 300
+                echo: true
+              register: abort_confirmation
+
+            - name: Emergency abort maintenance
+              fail:
+                msg: "EMERGENCY ABORT: Maintenance terminated by user request"
+              when: abort_confirmation.user_input | upper == 'ABORT'
+
+            - name: Resume normal completion
+              debug:
+                msg: "Resuming normal maintenance completion process"
+              when: abort_confirmation.user_input | lower == 'continue'
+
+          when: maintenance_response.user_input | lower in ['abort', 'emergency', 'stop']
+
+        - name: Handle timeout or invalid response
+          block:
+            - name: Log timeout
+              debug:
+                msg: |
+                  Maintenance window timeout reached or invalid response provided.
+                  Response: {{ maintenance_response.user_input | default('TIMEOUT') }}
+                  Proceeding with automatic post-maintenance steps.
+
+            - name: Set timeout completion flag
+              set_fact:
+                maintenance_completed_by_timeout: true
+
+          when: 
+            - maintenance_response.user_input is not defined or 
+              maintenance_response.user_input | lower not in ['completed', 'complete', 'done', 'finished', 'extend', 'extension', 'more', 'abort', 'emergency', 'stop']
+
+      when: maintenance_response is defined
+
+    - name: Log maintenance completion
+      debug:
+        msg: |
+          ===============================================
+          MAINTENANCE WINDOW COMPLETED
+          ===============================================
+          Start Time: {{ maintenance_start_time }}
+          End Time: {{ ansible_date_time.iso8601 }}
+          Planned End: {{ maintenance_end_time }}
+          Completion Method: {{ 'User Confirmed' if maintenance_response.user_input is defined else 'Automatic Timeout' }}
+          
+          Proceeding to post-maintenance steps:
+          - Service management and startup
+          - Exit maintenance mode
+          - Final status verification
+          ===============================================

@@ -1,0 +1,56 @@
+---
+# install-adds.yml
+# Installs AD DS, promotes the server to a new forest (services.sandbox.local), and enables WinRM
+# Assumes Windows Server is reachable via WinRM. Use the provided vars to set credentials and IP.
+#
+# Usage: ansible-playbook -i ansible/inventory/hosts install-adds.yml -e 'ansible_user=Administrator ansible_password={{YOUR_PASSWORD}}'
+
+- name: Install AD DS and promote to Domain Controller
+  hosts: windows_dc
+  gather_facts: no
+  vars:
+    domain_name: "services.sandbox.local"
+    safe_mode_password: "{{ lookup('env', 'AD_DS_DSRM_PASSWORD') | default('P@ssw0rd!', true) }}"
+    computer_name: "DC01"
+  
+  tasks:
+    - name: Ensure PSWindowsUpdate and ADDS modules present
+      win_feature:
+        name: AD-Domain-Services
+        state: present
+        include_management_tools: yes
+
+    - name: Set computer name
+      win_hostname:
+        name: "{{ computer_name }}"
+      register: rename_result
+
+    - name: Reboot if hostname changed
+      win_reboot:
+        msg: "Rebooting after hostname change"
+        pre_reboot_delay: 5
+      when: rename_result.reboot_required
+
+    - name: Promote to new forest services.sandbox.local
+      win_domain:
+        dns_domain_name: "{{ domain_name }}"
+        safe_mode_password: "{{ safe_mode_password }}"
+        domain_mode: WinThreshold
+        forest_mode: WinThreshold
+        reboot: yes
+      register: domain_result
+
+    - name: Wait for domain promotion reboot
+      wait_for_connection:
+        timeout: 1200
+
+    - name: Ensure WinRM basic settings for Ansible
+      win_shell: |
+        winrm quickconfig -q
+        winrm set winrm/config/service/auth '@{Basic="true"}'
+        winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+      when: false  # Usually already handled by Ansible connection setup
+
+    - name: Output domain promotion result
+      debug:
+        var: domain_result

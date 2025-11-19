@@ -1,0 +1,88 @@
+---
+- name: Exchange Maintenance Automation (AAP Compatible)
+  hosts: exchange_servers
+  collections:
+    - ansible.builtin
+    - ansible.windows
+    - community.windows
+    - microsoft.ad
+    - ENTERPRISE.Windows
+  gather_facts: yes
+  vars:
+    # AAP Survey Variables - these will be populated by AAP surveys
+    # No interactive prompts - all input comes from job template surveys
+    interactive_mode: false
+    
+    # Database selection from survey
+    database_name: "{{ survey_database | default('PREPROD-MB01') }}"
+    
+    # Database movement from survey  
+    move_database: "{{ survey_move_database | default('no') }}"
+    target_server_index: "{{ survey_target_server | default('1') }}"
+    
+    # Redirect server from survey
+    redirect_server_index: "{{ survey_redirect_server | default('1') }}"
+    
+    # Site selection from survey
+    maintenance_site: "{{ survey_site | default('localhost') }}"
+    
+    # Queue monitoring - no interactive checking in AAP
+    queue_check_decision: "continue"
+    
+    # Auto-move active database if it's on target servers
+    auto_move_active_db: "{{ survey_auto_move_database | default(false) }}"
+    
+  tasks:
+    - name: Validate survey inputs
+      assert:
+        that:
+          - database_name in ['PREPROD-MB01', 'EXAMPLE-MB01']
+          - move_database in ['yes', 'no']
+          - maintenance_site in ['localhost', 'AJ', 'CS']
+          - target_server_index | int > 0
+          - redirect_server_index | int > 0
+        fail_msg: "Invalid survey input detected. Please check job template survey configuration."
+
+    - name: Phase 1 - Exchange Environment Preparation
+      ansible.builtin.include_role:
+        name: ENTERPRISE.Windows.exchange-prep
+      tags:
+        - prep
+        - preparation
+
+    - name: Phase 2 - Database Management
+      ansible.builtin.include_role:
+        name: ENTERPRISE.Windows.exchange-database-management
+      tags:
+        - database
+        - db-management
+
+    - name: Phase 3 - Server Maintenance Mode
+      ansible.builtin.include_role:
+        name: ENTERPRISE.Windows.exchange-maintenance-mode
+      tags:
+        - maintenance
+        - maintenance-mode
+
+    - name: Phase 4 - Queue Monitoring (Non-Interactive)
+      ansible.builtin.include_role:
+        name: ENTERPRISE.Windows.exchange-queue-monitoring
+      tags:
+        - queue
+        - monitoring
+
+    - name: Phase 5 - Service Management
+      ansible.builtin.include_role:
+        name: ENTERPRISE.Windows.exchange-service-management
+      tags:
+        - services
+        - service-management
+
+    - name: Send notification on completion
+      ansible.builtin.debug:
+        msg: |
+          Exchange maintenance completed successfully.
+          Check server logs and output files for details.
+          Job Template: {{ tower_job_template_name | default('Unknown') }}
+          Job ID: {{ tower_job_id | default('Unknown') }}
+      when: tower_job_id is defined
