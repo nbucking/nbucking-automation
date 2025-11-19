@@ -1,0 +1,4 @@
+---
+# vars file for Deploy_sshd_config
+sshd_config: /etc/ssh/sshd_config
+

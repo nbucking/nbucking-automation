@@ -1,0 +1,257 @@
+---
+# tasks file
+- name: Export block
+  block:
+  - name: "Include variables for {{ source_vct | upper }}"
+    ansible.builtin.include_vars: "{{ source_vct | lower }}.yml"
+    delegate_to: localhost
+
+  - name: "Export the template from {{ my_datacenter }}"
+    community.vmware.vmware_export_ovf:
+      hostname: '{{ vcenter_hostname | default(omit) }}'
+      username: '{{ vcenter_username | default(omit) }}'
+      password: '{{ vcenter_password | default(omit) }}'
+      name: '{{ source_vm_name }}'
+      datacenter: '{{ my_datacenter }}'
+      export_with_images: "{{ export_images | default('true') }}"
+      export_dir: '{{ export_path }}'
+      validate_certs: false
+    delegate_to: localhost
+
+- name: Inside the AJ NON BLOCK
+  block:
+  - name: Include variables for AJ NON
+    ansible.builtin.include_vars: ajnon_vct.yml
+    delegate_to: localhost
+
+  - name: Deploy the template in AJ NON vCenter
+    community.vmware.vmware_deploy_ovf:
+      hostname: '{{ vcenter_hostname | default(omit) }}'
+      username: '{{ vcenter_username | default(omit) }}'
+      password: '{{ vcenter_password | default(omit) }}'
+      name: '{{ source_vm_name }}'
+      datacenter: '{{ my_datacenter }}'
+      cluster: '{{ my_cluster }}'
+      ovf: '{{ export_path }}/{{ source_vm_name }}/{{ source_vm_name }}.ovf'
+      folder: '{{ my_folder }}'
+      datastore: '{{ my_datastore }}'
+      power_on: '{{ dest_power_on | default(false) }}'
+      disk_provisioning: '{{ dest_disk_prov | default("eagerZeroedThick") }}'
+      validate_certs: false
+    delegate_to: localhost
+  
+  - name: Turn that machine into a template
+    ansible.builtin.include_role: 
+      name: ENTERPRISE.Common.Convert_to_template
+    vars:
+      my_vct_servername: "{{ source_vm_name }}"
+      # my_folder: "{{ my_folder }}"
+      # my_datacenter: "{{ my_datacenter }}"
+      new_template_name: "{{ source_vm_name }}"
+    when: turn_into_template is true
+
+  when: (("AJ_NON" in datacenters) and (source_vct != "AJNON_VCT"))
+
+- name: Inside the CS NON BLOCK
+  block:
+  - name: Include variables for CS NON
+    ansible.builtin.include_vars: csnon_vct.yml
+    delegate_to: localhost
+
+  - name: Deploy the template in CS NON vCenter
+    community.vmware.vmware_deploy_ovf:
+      hostname: '{{ vcenter_hostname | default(omit) }}'
+      username: '{{ vcenter_username | default(omit) }}'
+      password: '{{ vcenter_password | default(omit) }}'
+      name: '{{ source_vm_name }}'
+      datacenter: '{{ my_datacenter }}'
+      cluster: '{{ my_cluster }}'
+      ovf: '{{ export_path }}/{{ source_vm_name }}/{{ source_vm_name }}.ovf'
+      folder: '{{ my_folder }}'
+      datastore: '{{ my_datastore }}'
+      power_on: '{{ dest_power_on | default(false) }}'
+      disk_provisioning: '{{ dest_disk_prov | default("eagerZeroedThick") }}'
+      validate_certs: false
+    delegate_to: localhost
+  
+  - name: Turn that machine into a template
+    ansible.builtin.include_role: 
+      name: ENTERPRISE.Common.Convert_to_template
+    vars:
+      my_vct_servername: "{{ source_vm_name }}"
+      # my_folder: "{{ my_folder }}"
+      # my_datacenter: "{{ my_datacenter }}"
+      new_template_name: "{{ source_vm_name }}"
+    when: turn_into_template is true
+
+  when: (("CS_NON" in datacenters) and (source_vct != "CSNON_VCT"))
+
+- name: Inside the AJ PRD BLOCK
+  block:
+  - name: Include variables for AJ PRD
+    ansible.builtin.include_vars: ajprd_vct.yml
+    delegate_to: localhost
+
+  - name: Deploy the template in AJ PRD vCenter
+    community.vmware.vmware_deploy_ovf:
+      hostname: '{{ vcenter_hostname | default(omit) }}'
+      username: '{{ vcenter_username | default(omit) }}'
+      password: '{{ vcenter_password | default(omit) }}'
+      name: '{{ source_vm_name }}'
+      datacenter: '{{ my_datacenter }}'
+      cluster: '{{ my_cluster }}'
+      ovf: '{{ export_path }}/{{ source_vm_name }}/{{ source_vm_name }}.ovf'
+      folder: '{{ my_folder }}'
+      datastore: '{{ my_datastore }}'
+      power_on: '{{ dest_power_on | default(false) }}'
+      disk_provisioning: '{{ dest_disk_prov | default("eagerZeroedThick") }}'
+      validate_certs: false
+    delegate_to: localhost
+  
+  - name: Turn that machine into a template
+    ansible.builtin.include_role: 
+      name: ENTERPRISE.Common.Convert_to_template
+    vars:
+      my_vct_servername: "{{ source_vm_name }}"
+      # my_folder: "{{ dest_folder }}"
+      # my_datacenter: "{{ dest_datacenter }}"
+      new_template_name: "{{ source_vm_name }}"
+    when: turn_into_template is true
+
+  when: ("AJ_PRD" in datacenters) and (source_vct != "AJPRD_VCT")
+
+- name: Inside the AJ PRD RESTRICTED BLOCK
+  block:
+  - name: Include variables for AJ PRD Restricted
+    ansible.builtin.include_vars: ajprd_vct_res.yml
+    delegate_to: localhost
+
+  - name: Deploy the template in AJ PRD Restricted vCenter
+    community.vmware.vmware_deploy_ovf:
+      hostname: '{{ vcenter_hostname | default(omit) }}'
+      username: '{{ vcenter_username | default(omit) }}'
+      password: '{{ vcenter_password | default(omit) }}'
+      name: '{{ source_vm_name }}{{ source_vm_suffix | default(none) }}'
+      datacenter: '{{ my_datacenter }}'
+      cluster: '{{ my_cluster }}'
+      ovf: '{{ export_path }}/{{ source_vm_name }}/{{ source_vm_name }}.ovf'
+      folder: '{{ my_folder }}'
+      datastore: '{{ my_datastore }}'
+      power_on: '{{ dest_power_on | default(false) }}'
+      disk_provisioning: '{{ dest_disk_prov | default("eagerZeroedThick") }}'
+      validate_certs: false
+    delegate_to: localhost
+  
+  - name: Turn that machine into a template
+    ansible.builtin.include_role: 
+      name: ENTERPRISE.Common.Convert_to_template
+    vars:
+      my_vct_servername: "{{ source_vm_name }}{{ source_vm_suffix | default(none) }}"
+      # my_folder: "{{ dest_folder }}"
+      # my_datacenter: "{{ dest_datacenter }}"
+      new_template_name: "{{ source_vm_name }}{{ source_vm_suffix | default(none) }}"
+    when: turn_into_template is true
+
+  when: ("AJ_PRD_Restricted" in datacenters)
+
+- name: Inside the CS PRD BLOCK
+  block:
+  - name: Include variables for CS PRD
+    ansible.builtin.include_vars: csprd_vct.yml
+    delegate_to: localhost
+
+  - name: Deploy the template in CS PRD vCenter
+    community.vmware.vmware_deploy_ovf:
+      hostname: '{{ vcenter_hostname | default(omit) }}'
+      username: '{{ vcenter_username | default(omit) }}'
+      password: '{{ vcenter_password | default(omit) }}'
+      name: '{{ source_vm_name }}'
+      datacenter: '{{ my_datacenter }}'
+      cluster: '{{ my_cluster }}'
+      ovf: '{{ export_path }}/{{ source_vm_name }}/{{ source_vm_name }}.ovf'
+      folder: '{{ my_folder }}'
+      datastore: '{{ my_datastore }}'
+      power_on: '{{ dest_power_on | default(false) }}'
+      disk_provisioning: '{{ dest_disk_prov | default("eagerZeroedThick") }}'
+      validate_certs: false
+    delegate_to: localhost
+  
+  - name: Turn that machine into a template
+    ansible.builtin.include_role: 
+      name: ENTERPRISE.Common.Convert_to_template
+    vars:
+      my_vct_servername: "{{ source_vm_name }}"
+      # my_folder: "{{ dest_folder }}"
+      # my_datacenter: "{{ dest_datacenter }}"
+      new_template_name: "{{ source_vm_name }}"
+    when: turn_into_template is true
+
+  when: (("CS_PRD" in datacenters) and (source_vct != "CSPRD_VCT"))
+
+- name: Inside the CS PRD RESTRICTED BLOCK
+  block:
+  - name: Include variables for CS PRD Restricted
+    ansible.builtin.include_vars: csprd_vct_res.yml
+    delegate_to: localhost
+
+  - name: Deploy the template in CS PRD Restricted vCenter
+    community.vmware.vmware_deploy_ovf:
+      hostname: '{{ vcenter_hostname | default(omit) }}'
+      username: '{{ vcenter_username | default(omit) }}'
+      password: '{{ vcenter_password | default(omit) }}'
+      name: "{{ source_vm_name }}{{ source_vm_suffix | default(none) }}"
+      datacenter: '{{ my_datacenter }}'
+      cluster: '{{ my_cluster }}'
+      ovf: '{{ export_path }}/{{ source_vm_name }}/{{ source_vm_name }}.ovf'
+      folder: '{{ my_folder }}'
+      datastore: '{{ my_datastore }}'
+      power_on: '{{ dest_power_on | default(false) }}'
+      disk_provisioning: '{{ dest_disk_prov | default("eagerZeroedThick") }}'
+      validate_certs: false
+    delegate_to: localhost
+  
+  - name: Turn that machine into a template
+    ansible.builtin.include_role: 
+      name: ENTERPRISE.Common.Convert_to_template
+    vars:
+      my_vct_servername: "{{ source_vm_name }}{{ source_vm_suffix | default(none) }}"
+      # my_folder: "{{ dest_folder }}"
+      # my_datacenter: "{{ dest_datacenter }}"
+      new_template_name: "{{ source_vm_name }}{{ source_vm_suffix | default(none) }}"
+    when: turn_into_template is true
+
+  when: ("CS_PRD_Restricted" in datacenters)
+
+- name: Inside the CS NON RESTRICTED BLOCK
+  block:
+  - name: Include variables for CS NON RESTRICTED
+    ansible.builtin.include_vars: csnon_vct_res.yml
+    delegate_to: localhost
+
+  - name: Deploy the template in CS NON vCenter
+    community.vmware.vmware_deploy_ovf:
+      hostname: '{{ vcenter_hostname | default(omit) }}'
+      username: '{{ vcenter_username | default(omit) }}'
+      password: '{{ vcenter_password | default(omit) }}'
+      name: '{{ source_vm_name }}'
+      datacenter: '{{ my_datacenter }}'
+      cluster: '{{ my_cluster }}'
+      ovf: '{{ export_path }}/{{ source_vm_name }}/{{ source_vm_name }}.ovf'
+      folder: '{{ my_folder }}'
+      datastore: '{{ my_datastore }}'
+      power_on: '{{ dest_power_on | default(false) }}'
+      disk_provisioning: '{{ dest_disk_prov | default("eagerZeroedThick") }}'
+      validate_certs: false
+    delegate_to: localhost
+  
+  - name: Turn that machine into a template
+    ansible.builtin.include_role: 
+      name: ENTERPRISE.Common.Convert_to_template
+    vars:
+      my_vct_servername: "{{ source_vm_name }}"
+      # my_folder: "{{ my_folder }}"
+      # my_datacenter: "{{ my_datacenter }}"
+      new_template_name: "{{ source_vm_name }}{{ source_vm_suffix | default(none) }}"
+    when: turn_into_template is true
+
+  when: ("CS_NON_Restricted" in datacenters)

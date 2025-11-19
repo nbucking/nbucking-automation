@@ -1,0 +1,5 @@
+DC	Cap Server	URL	Capserver ID	IP
+AJPRD	ajstsrvlvcap151.services.stamp.tsa.dhs.gov	https://ajstsrvlvcap151.services.stamp.tsa.dhs.gov:9090	2	172.27.58.42
+AJNON	ajstsrvlvcap152.services.stamp.tsa.dhs.gov	https://ajstsrvlvcap152.services.stamp.tsa.dhs.gov:9090	7	172.27.58.43
+CSPRD	csstsrvlvcap151.services.stamp.tsa.dhs.gov	https://csstsrvlvcap151.services.stamp.tsa.dhs.gov:9090	3	172.26.58.42
+CSNON	csstsrvlvcap152.services.stamp.tsa.dhs.gov	https://csstsrvlvcap152.services.stamp.tsa.dhs.gov:9090	4	172.26.58.43

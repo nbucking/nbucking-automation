@@ -1,0 +1,40 @@
+---
+- name: Get Datacenter Information
+  ansible.builtin.include_role:
+    name: GetDatacenterInfo
+  when: my_datacenter is not defined
+  
+- block:
+  - name: Run only if the VMLOCATION matches my_datacenter
+    ansible.builtin.debug:
+      msg: "Skipping this vCenter Server"
+    when: VMLOCATION != my_datacenter
+
+  - name: LAST CHANCE TO CANCEL BEFORE DELETION
+    ansible.builtin.pause:
+      prompt: "LAST CHANCE TO CANCEL BEFORE DELETION"
+      seconds: 30
+
+  - name: Running main play
+    block:
+    - name: Only Run if the user wants to delete the Virtual Machine
+      ansible.builtin.debug:
+        msg: "Deleting this Virtual Machine today!"
+      when: areyousure_deletevm == 'yes'
+
+    - name: Get Host UUID Information
+      ansible.builtin.include_role:
+        name: GetHostInfo
+      when: my_vct_servername_uuid is not defined
+
+    - name: Deleting VM from VMWare
+      community.vmware.vmware_guest:
+        hostname: "{{ vcenter_hostname | default(omit) }}" 
+        username: "{{ vcenter_username | default(omit) }}"
+        password: "{{ vcenter_password | default(omit) }}"
+        uuid: "{{ my_vct_servername_uuid }}"
+        state: absent
+      delegate_to: localhost
+    
+    when: VMLOCATION == my_datacenter and areyousure_deletevm == 'yes'
+  when: VMLOCATION == my_datacenter and areyousure_deletevm == 'yes'

@@ -1,0 +1,40 @@
+---
+- name: Check for stat file created in the facts directory
+  stat:
+    path: /etc/ansible/facts.d/Update_GRUBPW.20220923
+  register: pwUpdated
+
+- name: Fail if GRUB Password has been completed
+  fail:
+    msg: " GRUB Password already been Updated! "
+  when: pwUpdated.stat.isreg is defined
+
+- name: Update GRUB password for SG
+  script: changeGrub2Pw_SG.sh
+  register: outputSG
+  when: ansible_local['vmInfo']['tenant'] == 'SG'
+- debug: msg={{ outputSG.stdout_lines }}
+  when: ansible_local['vmInfo']['tenant'] == 'SG'
+
+- name: Update GRUB password for TIM
+  script: changeGrub2Pw_TIM.sh
+  register: outputTIM
+  when: ansible_local['vmInfo']['tenant'] == 'TM'
+- debug: msg={{ outputTIM.stdout_lines }}
+  when: ansible_local['vmInfo']['tenant'] == 'TM'
+
+- name: Update GRUB password for ENTERPRISE 
+  script: changeGrub2Pw_STAMP.sh
+  register: outputST
+  when: ( ansible_local['vmInfo']['tenant'] == 'ST' or ansible_local['vmInfo']['tenant'] == 'SS' )
+- debug: msg={{ outputST.stdout_lines }}
+  when: ( ansible_local['vmInfo']['tenant'] == 'ST' or ansible_local['vmInfo']['tenant'] == 'SS' )
+
+- name: Update GRUB password for TVS
+  script: changeGrub2Pw_TVS.sh
+  register: outputTV
+  when: ansible_local['vmInfo']['tenant'] == 'TV'
+- debug: msg={{ outputTV.stdout_lines }}
+  when: ansible_local['vmInfo']['tenant'] == 'TV'
+
+# EOF

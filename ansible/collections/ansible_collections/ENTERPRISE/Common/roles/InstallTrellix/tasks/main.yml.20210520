@@ -1,0 +1,66 @@
+---
+# tasks file for Reinstall_McAfee
+- name: Stop McAfee if it is currently running
+  systemd:
+    name: mcafee.ma
+    state: stopped
+  ignore_errors: yes
+- name: Check if uninstall script exists
+  stat:
+    path: /opt/McAfee/agent/scripts/uninstall.sh
+  register: stat_uninstall
+- name: remove McAfee Agent by running uninstall
+  command: 
+    cmd: "sh /opt/McAfee/agent/scripts/uninstall.sh"
+  when: stat_uninstall is defined
+  register: uninstall
+  ignore_errors: yes
+- name: Remove the packages if running uninstall doesn't work 
+  yum:
+    name: ['MFEcma', 'MFErt', 'MFEdx'] ## Removing McAfee
+    update_cache: yes
+    state: absent
+  when: uninstall is failed
+- name: Upload new profile to /etc
+  copy:
+    src: profile_zero
+    dest: /etc/profile
+    backup: yes
+- name: Try installing McAfee A/V
+  script:
+    cmd: install_prd.sh -i
+  register: av_results
+- debug:
+    var: av_results.stdout_lines
+- name: Check to see if the tmout.sh file exists
+  stat:
+    path: /etc/profile.d/tmout.sh
+  register: tmout
+- name: Upload the TMout shell script for session timeouts
+  copy:
+    src: TMOUTro.sh
+    dest: /etc/profile.d
+  when: tmout is undefined
+- name: Upload new profile to /etc
+  copy:
+    src: profile
+    dest: /etc/profile
+    backup: yes
+- name: Check if firewalld is started
+  command: systemctl is-active firewalld
+  register: firewalld
+  ignore_errors: yes
+
+- name: Setup required firewall ports
+  firewalld:
+    port: "{{ item }}"
+    immediate: yes
+    permanent: yes
+    state: enabled
+  loop:
+    - 8081/tcp
+  when: firewalld == 'active'
+- name: Check to see if the script failed
+  fail:
+    msg: "The script failed with the error -> scriptlet failed, exit status 1"
+  when: "'scriptlet failed' in av_results.stdout"

@@ -1,0 +1,125 @@
+---
+  - name: Display a banner
+    ansible.builtin.include_role:
+      name: ENTERPRISE.Common.DisplayBanner
+    vars:
+      os_type: Linux
+      software_name: SplunkForwarder
+      software_version: "{{ splunk_version }}"
+    run_once: true
+
+  - name: Update Local Facts
+    ansible.builtin.include_role:
+      name: DeployCustomFacts
+    when: ansible_local['vmInfo']['capsule'] is undefined
+
+  - name: Check to see if a version of SplunkForwarder is installed
+    ansible.builtin.stat:
+      path: "{{ splunk_path }}"
+    register: stat_splunk
+
+  - name: Check what version of SplunkForwarder is running, if any
+    shell: 
+      cmd: /opt/splunkforwarder/bin/splunk -version | grep ^Splunk | awk '{print $4}'
+    register: splunkversion
+    when: stat_splunk is defined
+    ignore_errors: true
+
+  - name: "Message if Splunk {{ splunk_version }} is already installed" 
+    ansible.builtin.debug:
+      msg: "SplunkForwarder version {{ splunk_version }} is already installed"
+    when: splunkversion.stdout == splunk_version
+
+  - debug: var=splunkversion.stdout
+
+  - name: Main block
+    block:
+    - name: Grab the capsule server name from facts
+      ansible.builtin.set_fact:
+        capsule: "{{ ansible_local['vmInfo']['capsule'] }}"
+
+    - name: Stop SplunkForwarder from running
+      ansible.builtin.systemd:
+        name: SplunkForwarder
+        state: stopped
+      ignore_errors: true
+
+    - name: Remove /etc/init.d/splunk if it exists
+      ansible.builtin.file:
+        path: /etc/init.d/splunk
+        state: absent
+
+    - name: Remove the contents of /opt/splunkforwarder
+      community.general.archive:
+        path: "{{ splunk_path }}"
+        dest: "{{ stage_dir }}/splunkforwarder_{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}.tgz"
+        format: gz
+        remove: yes
+      ignore_errors: yes
+
+    - name: Download the SplunkForwarder package
+      ansible.builtin.get_url:
+        url: "https://{{ capsule }}/{{ repo_loc}}/{{ splunkforwarder_pkg }}"
+        dest: "{{ stage_dir }}"
+        mode: "0644"
+        validate_certs: "{{ _validate_certs | default('true')}}"
+
+    - name: Untar and unzip splunk tarball
+      ansible.builtin.unarchive:
+        src: "{{ stage_dir}}/{{ splunkforwarder_pkg }}"
+        dest: "{{ stage_dir }}"
+        remote_src: yes
+
+    - name: Run Install Command
+      ansible.builtin.command: "/usr/bin/bash {{ stage_dir}}/{{ splunk_install_bin }}"
+      register: splunk_out
+
+    - ansible.builtin.debug: msg={{ splunk_out.stdout_lines }}
+
+    - name: "Cleanup files from the {{ stage_dir }} directory"
+      ansible.builtin.file:
+        path: "{{stage_dir}}/{{ item }}"
+        state: absent
+      with_items: "{{ splunk_files }}"
+
+    - name: Chown the splunkforwarder directory
+      ansible.builtin.file:
+        path:  "{{ splunk_path }}"
+        owner: "{{ splunk_owner }}"
+        group: "{{ splunk_group }}"
+        recurse: yes
+        state: directory
+
+    - name: Change directories under splunk to 750
+      ansible.builtin.shell: 'find {{ splunk_path }} -type d -exec chmod 0750  {}  \;'
+
+    - name: Setup splkadm user with password limits
+      ansible.builtin.command: "chage -M 60 -m 1 {{ splunk_owner }}"
+
+    - name: Make sure SplunkForwarder is running
+      ansible.builtin.systemd:
+        name: SplunkForwarder
+        enabled: yes
+        state: started
+    
+    when: splunkversion.stdout != splunk_version or reinstall == "yes"
+
+    rescue:
+    - name: Stop splunk
+      ansible.builtin.shell: "/opt/splunkforwarder/bin/splunk stop"
+      register: splunk_stop
+      ignore_errors: yes
+
+    - ansible.builtin.debug: msg={{ splunk_stop.stdout_lines }}
+
+    - name: Run Install Command
+      ansible.builtin.shell: "/opt/splunkforwarder/bin/splunk enable boot-start -systemd-managed 1 -user splkadm"
+      register: splunk_boot_start
+
+    - ansible.builtin.debug: msg={{ splunk_boot_start.stdout_lines }}
+
+    - name: Restart SplunkFowarder
+      ansible.builtin.systemd:
+        name: SplunkForwarder
+        enabled: yes
+        state: restarted

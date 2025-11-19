@@ -1,0 +1,7 @@
+---
+# vars file for Add_Disk_to_VM
+disk_size_gb: 100
+physical_volume: /dev/sdb
+volume_group: vg_u01
+logical_volume: lv_u01
+mount_point: /u01

@@ -1,0 +1,130 @@
+---
+- name: Create firewall zone
+  firewalld:
+    zone: ssh_access
+    permanent: yes
+    state: present
+  notify: "reload firewalld"
+- name: Setup SSH firewall zone
+  firewalld:
+    zone: ssh_access
+    service: ssh
+    permanent: yes
+    state: enabled
+  notify: "reload firewalld"
+- name: Reload firewalld
+  command: 'firewall-cmd --reload'
+- name: Allow CAPAM access to SSH
+  firewalld:
+    zone: ssh_access
+    permanent: yes
+    source: "{{ item }}"
+    state: enabled
+  loop:
+    - 192.168.75.253 # CAPAM
+    - 192.168.75.254 # CAPAM
+    - 192.168.74.253 # CAPAM
+    - 192.168.74.254 # CAPAM
+    - 172.26.0.199   # EPO
+    - 172.26.24.96   # solariwinds server
+    - 172.27.24.96   # solariwinds server
+    - 172.26.24.106  # solariwinds server
+    - 172.27.24.99   # solariwinds server
+  notify: "reload firewalld"
+- name: Disable ssh access in public zone
+  firewalld:
+    zone: public
+    service: ssh
+    permanent: yes
+    state: disabled
+  notify: "reload firewalld"
+- name: Disable 22/tcp access in public zone
+  firewalld:
+    zone: public
+    port: 22/tcp
+    permanent: yes
+    state: disabled
+  notify: "reload firewalld"
+- name: Enable SSH access from capsule server - AJNON
+  firewalld:
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.0.155
+    state: enabled
+  when: ansible_local['vmInfo']['datacenter'] == "AJNON"
+  notify: "reload firewalld"
+- name: Enable SSH access from capsule server - AJPRD
+  firewalld:
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.24.235
+    state: enabled
+  when: ansible_local['vmInfo']['datacenter'] == "AJPRD"
+  notify: "reload firewalld"
+- name: Enable SSH access from capsule server - CSNON
+  firewalld:
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.0.247
+    state: enabled
+  when: ansible_local['vmInfo']['datacenter'] == "CSNON"
+  notify: "reload firewalld"
+- name: Enable SSH access from capsule server - CSPRD
+  firewalld:
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.24.226
+    state: enabled
+  when: ansible_local['vmInfo']['datacenter'] == "CSPRD"
+  notify: "reload firewalld"
+##### 
+- name: Add Nessus Scanner - "{{ item.adapterName }}"
+  firewalld:
+    zone: "{{ item.zone }}"
+    permanent: "{{ item.permanent }}"
+    source: "{{ item.source }}"
+    immediate: "{{ item.immediate }}"
+    state: "{{ item.state }}"
+  when: ansible_default_ipv4['network'] == "{{ item.network }}"
+  with_items: "{{ NessusRules }}"
+  notify: "reload firewalld"
+- name: Allow CHEF access to TIM
+  firewalld:
+    zone: ssh_access
+    permanent: yes
+    source: "{{ item }}"
+    state: enabled
+  loop:
+    - 10.2.25.48 # CDS51
+    - 10.2.25.49 # CDS52
+    - 10.2.25.32 # CIS51
+    - 10.2.25.33 # CIS52
+    - 10.0.29.72 # RPT51
+    - 10.0.29.73 # RPT52
+  notify: "reload firewalld"
+  when: ansible_local['vmInfo']['tenant'] == "TM"
+
+- name: Check Application Services AJ/CSOC PROD TIM
+  firewalld:
+    zone: ssh_access
+    permanent: yes
+    source: "{{ item }}"
+    state: enabled
+  loop:
+    - 10.0.25.44 # CSTMPRDSTA51
+    - 10.0.25.43 # CSTMPRDSTA52
+  notify: "reload firewalld"
+  when: ansible_local['vmInfo']['tenant'] == "TM" and ansible_local['vmInfo']['environment'] == "PRD" 
+
+- name: Check Application Services AJ/CSOC STG TIM
+  firewalld:
+    zone: ssh_access
+    permanent: yes
+    source: "{{ item }}"
+    state: enabled
+  loop:
+    - 10.0.24.143 # CSTMSTGSTA51
+    - 10.0.24.144 # CSTMSTGSTA52
+  notify: "reload firewalld"
+  when: ansible_local['vmInfo']['tenant'] == "TM" and  ansible_local['vmInfo']['environment'] == "STG" 
+

@@ -1,0 +1,40 @@
+---
+# tasks file for WinInstallTanium
+- name: Install and run the custom facts
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Windows.WinFacts
+
+- name: Set Fact for Datacenter name  
+  ansible.builtin.set_fact: DataCenter="{{ ansible_local['vmInfo']['datacenter'] }}"
+
+#  ansible_local['vmInfo']['DataCenter']
+- name: "Grab the variables for DataCenter"
+  ansible.builtin.include_vars: Configure_{{ DataCenter }}.yml
+
+- name: Download Software to install
+  ansible.windows.win_get_url:
+    dest: C:\temp
+    url: "{{ tools_url }}/{{ tanium_agent }}.zip"
+    url_timeout: 60
+    validate_certs: no
+
+- name: Unzip Software
+  community.windows.win_unzip:
+    src: 'C:\temp\{{ tanium_agent }}.zip'
+    dest: C:\temp
+    delete_archive: true
+
+- name: Run command that only runs if folder exists and runs from a specific folder
+  ansible.windows.win_shell: 'C:\temp\{{ tanium_agent }}\Install.bat'
+  args:
+    executable: powershell.exe
+
+- name: Pause for completion of install task
+  ansible.builtin.pause:
+    seconds: 30
+
+- name: Delete setup files
+  ansible.windows.win_file:
+    path: C:\temp\{{ tanium_agent }}
+    state: absent
+  ignore_errors: true

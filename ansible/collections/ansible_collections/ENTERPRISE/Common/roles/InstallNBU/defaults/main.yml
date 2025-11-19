@@ -1,0 +1,7 @@
+---
+# defaults file for TemplateRole
+netbackup_tar: nbu.tar
+repo_loc: pulp/content/STA/Library/custom/STAMPLinuxBinaries/Software/
+stage_dir: /var/tmp/staging
+root_user: root
+root_group: root

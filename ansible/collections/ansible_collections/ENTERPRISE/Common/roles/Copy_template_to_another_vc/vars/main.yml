@@ -1,0 +1,4 @@
+---
+# vars file for TemplateRole
+destination_vcenter_port: 443
+destination_vcenter_validate_certs: false

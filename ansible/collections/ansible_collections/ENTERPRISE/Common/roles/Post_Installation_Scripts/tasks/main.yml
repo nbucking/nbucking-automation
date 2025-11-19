@@ -1,0 +1,5 @@
+---
+# tasks file for Post_Installation_Scripts
+
+- name: Run Post Installation Scripts
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yml"

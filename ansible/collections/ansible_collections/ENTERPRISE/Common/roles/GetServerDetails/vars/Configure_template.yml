@@ -1,0 +1,13 @@
+---
+_hosts: '{{ my_vct_servername }}'
+my_cluster:
+my_folder:
+my_datacenter:
+my_hostname: "{{ my_vct_servername | lower }}.{{ my_dns_domain }}"
+my_network_name:
+my_netmask:
+my_gateway_address:
+my_dnsserver1:
+my_dnsserver2:
+my_dns_domain:
+my_datastore: 

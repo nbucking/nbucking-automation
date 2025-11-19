@@ -1,0 +1,15 @@
+---
+# tasks file
+- community.vmware.vmware_deploy_ovf:
+    hostname: '{{ vcenter_hostname | default(omit) }}'
+    username: '{{ vcenter_username | default(omit) }}'
+    password: '{{ vcenter_password | default(omit) }}'
+    name: '{{ vm_name }}'
+    datacenter: '{{ dest_datacenter }}'
+    cluster: '{{ dest_cluster }}'
+    ovf: '{{ export_path_ovf }}'
+    folder: '{{ dest_folder }}'
+    datastore: '{{ dest_datastore }}'
+    power_on: '{{ dest_power_on | default(false) }}'
+    disk_provisioning: '{{ dest_disk_prov | default("eagerZeroedThick") }}'
+  delegate_to: localhost

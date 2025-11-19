@@ -1,0 +1,35 @@
+---
+- name: Gather info block
+  block:
+  - name: "Gather all snapshots in {{ my_datacenter }}"
+    community.vmware.vmware_all_snapshots_info:
+      hostname: "{{ vcenter_hostname | default(omit) }}"
+      username: "{{ vcenter_username | default(omit) }}"
+      password: "{{ vcenter_password | default(omit) }}"
+      datacenter: "{{ my_datacenter }}"
+      validate_certs: no
+    delegate_to: localhost
+    register: snapshot_info
+  
+  - name: Check if there are any snapshots
+    assert:
+      that:
+        - snapshot_info.vmware_all_snapshots_info is defined
+        - snapshot_info.vmware_all_snapshots_info | length > 0
+      fail_msg: "No snapshots found for the Data Center {{ my_datacenter }}"
+  
+  - name: Check if any snapshots are older than 10 days
+    set_fact:
+      old_snapshots: "{{ snapshot_info.vmware_all_snapshots_info | selectattr('creation_time', 'search', '^.{0,10}$') | selectattr('creation_time', 'lt', (ansible_date_time.iso8601 | regex_replace('T.*', '')) | to_datetime('%Y-%m-%d') - days_threshold | to_datetime('%Y-%m-%d')) | list }}"
+
+  - name: Print old snapshots information
+    debug:
+      msg: "Snapshot {{ item.name }} is older than {{ days_threshold }} days. Created on: {{ item.creation_time }}"
+    loop: "{{ old_snapshots }}"
+    when: old_snapshots | length > 0
+
+  - name: Fail if there are old snapshots
+    fail:
+      msg: "There are snapshots older than {{ days_threshold }} days."
+    when: old_snapshots | length > 0
+

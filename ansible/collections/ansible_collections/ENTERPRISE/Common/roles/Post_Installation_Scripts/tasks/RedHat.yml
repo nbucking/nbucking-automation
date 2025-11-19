@@ -1,0 +1,45 @@
+---
+# tasks file for Linux
+- name: Run the Post Installation Scripts for Linux
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.Register_to_Satellite
+
+- name: Run the Post Installation Scripts for Linux
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.ConfigureSSHD
+
+- name: Run the Post Installation Scripts for Linux
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.EnableSNMPD
+
+- name: Run the Post Installation Scripts for Linux
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.InstallFlexera
+
+- name: Run the Post Installation Scripts for Linux
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.InstallSplunk
+
+- name: Run the Post Installation Scripts for Linux
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.InstallTanium
+
+- name: Run the Post Installation Scripts for Linux
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.InstallTrellix
+
+- name: Run the Post Installation Scripts for Linux
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.Update_GRUBPW
+
+- name: Run the Post Installation Scripts for Linux
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.UpdateChrony
+
+- name: Run the Post Installation Scripts for Linux
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.UpdateEnvPasswd
+    
+- name: Run the Post Installation Scripts for Linux
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.AddToDomainSSSD

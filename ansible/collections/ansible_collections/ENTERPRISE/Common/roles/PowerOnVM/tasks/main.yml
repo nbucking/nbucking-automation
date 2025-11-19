@@ -1,0 +1,32 @@
+---
+# tasks file for ShutdownVM
+- name: Get Datacenter Information
+  ansible.builtin.include_role:
+    name: GetDatacenterInfo
+  when: my_datacenter is not defined
+
+- name: Run only if the VMLOCATION matches my_datacenter
+  debug:
+    msg: "Skipping this vcenter server"
+  when: VMLOCATION != my_datacenter
+
+- name: Running main play
+  block:
+  - name: Get Host UUID Information
+    ansible.builtin.include_role:
+      name: GetHostInfo
+    when: my_vct_servername_uuid is not defined
+
+  - name: Power On Host in VMware
+    community.vmware.vmware_guest:
+      hostname: "{{ vcenter_hostname | default(omit) }}" 
+      username: "{{ vcenter_username | default(omit) }}"
+      password: "{{ vcenter_password | default(omit) }}"
+      validate_certs: false
+      uuid: "{{ my_vct_servername_uuid }}"
+      state: poweredon
+    delegate_to: localhost
+    register: poweron 
+  when: VMLOCATION == my_datacenter
+
+

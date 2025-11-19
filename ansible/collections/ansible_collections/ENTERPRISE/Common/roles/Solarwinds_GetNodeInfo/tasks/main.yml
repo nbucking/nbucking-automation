@@ -1,0 +1,29 @@
+---
+# tasks file
+- name: Get info about a node by name on AJ Solarwinds server
+  jeisenbath.solarwinds.orion_node_info:
+    hostname: "{{ solarwinds_server_aj }}"
+    username: "{{ solarwinds_user }}"
+    password: "{{ solarwinds_pass }}"
+    name: "{{ node_name | default(omit) }}"
+    ip_address: "{{ my_ip_address | default(omit) }}"
+  delegate_to: localhost
+  register: aj_node_info
+  ignore_errors: true
+
+- name: Get info about a node by name on CS Solarwinds server
+  jeisenbath.solarwinds.orion_node_info:
+    hostname: "{{ solarwinds_server_cs }}"
+    username: "{{ solarwinds_user }}"
+    password: "{{ solarwinds_pass }}"
+    name: "{{ node_name | default(omit)}}"
+    ip_address: "{{ my_ip_address | default(omit) }}"
+  delegate_to: localhost
+  register: cs_node_info
+  ignore_errors: true
+
+- name: show the status of the node in AJ/CS
+  ansible.builtin.debug:
+    msg: 
+      - 'AJ --> {{ aj_node_info.orion_node.statusdescription | default("Host does not exist") }}'
+      - 'CS --> {{ cs_node_info.orion_node.statusdescription | default("Host does not exist") }}'

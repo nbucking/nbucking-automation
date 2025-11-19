@@ -1,0 +1,61 @@
+---
+# tasks file for Create_vm- name: Create a virtual machine on given ESXi hostname
+# - name: Fail if Datacenter does not equal VMLOCATION
+#   ansible.builtin.fail:
+#     msg: "This VM cannot be built on this vcenter server."
+#   when: VMLOCATION != my_datacenter
+- name: Run only if the VMLOCATION matches my_datacenter
+  debug:
+    msg: "Skipping this vcenter server"
+  when: VMLOCATION != my_datacenter
+
+- name: Create shell vm
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    # This is hostname of particular ESXi server on which user wants VM to be deployed
+    #esxi_hostname: "{{ esxi_hostname | default(omit) }}"
+    cluster: "{{ my_cluster }}"
+    validate_certs: false
+    name: "{{ my_vct_servername }}"
+    datacenter: "{{ my_datacenter }}"
+    folder: "{{ my_folder }}"
+    guest_id: "{{ my_guest_id | default(omit) }}"
+    annotation: "{{ annotation_text }}"
+    disk:
+    - size_gb: 250
+      type: eagerzeroedthick
+      datastore: "{{ my_datastore | default('Trusted Datastore Cluster (CS)') }}"
+    hardware:
+      boot_firmware: "efi"
+      hotadd_cpu: true
+      hotadd_memory: true
+      memory_mb: "{{ my_memory_mb_large }}"
+      num_cpus:  "{{ my_num_cpus_large }}"
+      scsi: paravirtual
+    networks:
+    - name: "{{ my_network_name }}"
+      connected: true
+      start_connected: true
+      ip: "{{ my_ip_address }}"
+      netmask: "{{ my_netmask }}"
+      gateway: "{{ my_gateway_address }}"
+      device_type: vmxnet3
+      type: static
+    customization:
+      hostname: "{{ my_hostname  | default(omit) }}"
+      dns_servers:
+      - "{{ my_dnsserver1 }}"
+      - "{{ my_dnsserver2 }}"
+      dns_suffix:
+      - "{{ my_dns_domain }}"
+      domain: "{{ my_dns_domain }}"
+    template: "{{ my_template }}"
+    state: "{{ my_state | default('poweredon') }}"
+    wait_for_ip_address: true
+    wait_for_ip_address_timeout: 300
+  delegate_to: localhost
+  register: deploy_vm
+  when: VMLOCATION == my_datacenter
+

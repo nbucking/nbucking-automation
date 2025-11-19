@@ -1,0 +1,52 @@
+---
+# tasks file for Convert_to_template
+- name: "Getting VM Facts for Template {{ old_template_name }}"
+  community.vmware.vmware_guest_info:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    datacenter: "CS NON-PROD"
+    folder: "Linux/Testing"
+    name: "{{ old_template_name }}"
+  register: old_template_facts
+  delegate_to: localhost
+
+- name: "Removing Template {{ old_template_name }}"
+  community.vmware.vmware_guest: 
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    uuid: "{{ old_template_facts.instance.hw_product_uuid }}"
+    state: absent
+  delegate_to: localhost
+
+- name: "Getting VM Facts for {{ inventory_hostname }}"
+  community.vmware.vmware_guest_info:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    datacenter: "CS NON-PROD"
+    folder: "Linux/Testing"
+    name: "{{ inventory_hostname }}"
+  register: new_template_facts
+  delegate_to: localhost
+
+- name: "Ensuring {{ inventory_hostname }} is powered off"
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    uuid: "{{ new_template_facts.instance.hw_product_uuid }}"
+    state: poweredoff
+  delegate_to: localhost
+
+- name: "Renaming {{ inventory_hostname }} to {{ old_template_name }} and converting to template"
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    uuid: "{{ new_template_facts.instance.hw_product_uuid }}"
+    name: "{{ old_template_name }}"
+    folder: "Linux/Testing"
+    is_template: true
+  delegate_to: localhost

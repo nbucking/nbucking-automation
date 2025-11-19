@@ -1,0 +1,21 @@
+---
+# tasks file for TemplateRole
+- name: Get a cert from an https port
+  community.crypto.get_certificate:
+    host: sg-csg-admin-devint.tvc.tsa.dhs.gov
+    port: 443
+    proxy_port: 443
+    ciphers: RSA+SHA512:DSA+SHA512:ECDSA+SHA512:RSA+SHA384:DSA+SHA384:ECDSA+SHA384:RSA+SHA256:DSA+SHA256:ECDSA+SHA256:RSA+SHA224:DSA+SHA224:ECDSA+SHA224:RSA+SHA1:DSA+SHA1:ECDSA+SHA1
+  delegate_to: localhost
+  run_once: true
+  register: cert
+
+- name: How many days until cert expires
+  debug:
+    msg: "cert expires in: {{ expire_days }} days."
+  vars:
+    expire_days: "{{ (( cert.not_after | to_datetime('%Y%m%d%H%M%SZ')) - (ansible_date_time.iso8601 | to_datetime('%Y-%m-%dT%H:%M:%SZ')) ).days }}"
+
+- name: Looking at the output of cert command
+  debug: 
+    var: cert

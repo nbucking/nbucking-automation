@@ -1,0 +1,86 @@
+---
+# tasks file for RemoveFromDomainSSSD
+#- name: Ensure that NSCD is running/enabled
+# 
+- name: Ensure OS is RHEL 8
+  fail:
+    msg: This role is for RHEL 8 servers only
+  when: ansible_distribution_major_version != "8"
+
+- name: Set variables for thisDomain and thisREALM
+  set_fact:
+    thisHost:   "{{ ansible_hostname }}"
+    thisDomain: "{{ ansible_domain }}"
+    thisREALM:  "{{ ansible_domain | upper }}"
+
+- name: Get Domain controller for this host
+  shell:
+    cmd: sssctl domain-status -a "{{ thisDomain | quote }}" | awk -F":" '$1 == "AD Domain Controller"{print gensub(/ /,"",1,$2}'
+  register: thisADC
+
+- name: Lookup login and password
+  set_fact:
+    login:  "{{ lookup('csvfile', '{{ thisDomain }}   file=lookup_table.csv col=1') }}"
+    passwd: "{{ lookup('csvfile', '{{ thisDomain }}   file=lookup_table.csv col=2') }}"
+
+- name: "Run adcli delete computer from {{ thisDomain }}"
+  shell:
+    cmd: "echo '{{ passwd | quote }}' | /usr/sbin/adcli delete-computer -U '{{ login }}' --domain '{{ thisDomain }}' --domain-controller='{{ thisADC }}' '{{ this_Host }}' --stdin-password"
+  no_log: True
+  ignore_errors: yes
+
+- name: Make sure SSSD is not running
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+    masked: no
+    enabled: no
+  with_items:
+    - sssd
+    - oddjobd 
+
+- name: Ensure NSCD is enabled and running
+  systemd:
+    name: nscd.service
+    state: started
+    enabled: yes
+    masked: no
+
+- name: Uninstall SSSD packages
+  dnf:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - sssd
+    - sssd-dbus
+    - realmd
+    - krb5-workstation
+    - sssd-tools
+    - oddjob-mkhomedir
+    - adcli
+    - nss-pam-ldapd
+    - samba-common-tools
+    - PackageKit
+
+- name: Uninstall msktutil
+  dnf:
+    name: msktutil
+    state: absent
+  ignore_errors: yes
+
+- name: Delete SSSD configuration files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/samba/smb.conf
+    - /etc/sssd/sssd.conf
+    - /etc/krb5.conf
+    - /etc/krb5.keytab
+    - /var/lib/sss/db/*
+    - /var/lib/sss/mc/*
+    - /var/lib/sss/secret/*
+#    - /root/.secret
+#    - /root/Check_Your_Work.txt
+#    - /root/join_ + {{ thisDomain }} + _domain
+# EOF

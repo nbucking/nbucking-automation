@@ -4,19 +4,17 @@
 # Organization: Credentialing
 # Project: Automation Repo
 
-# Common Collection Templates (Optional Integrations)
-# Note: These templates require additional collections or integrations not included in this repository.
-# They are provided as examples of how to integrate with VMware vCenter and SolarWinds.
-# You would need to implement these playbooks/roles based on your environment.
+# Common Collection Templates
+# These templates use the ENTERPRISE.Common collection for infrastructure integration
 
-# 1. Create VM Snapshot (Optional - Requires VMware integration)
+# 1. Create VM Snapshot
 - job_template:
     name: "Common: Create a VM Snapshot - Exchange Maintenance"
-    description: "Create VMware snapshot for Exchange maintenance (requires VMware vCenter collection/module)"
+    description: "Create VMware snapshot using ENTERPRISE.Common.TakeASnapshot role for Exchange maintenance"
     job_type: "run"
     inventory: "Exchange Servers"
     project: "Automation Repo"
-    playbook: "playbooks/vmware-snapshot.yml"  # Example - implement based on your VMware setup
+    playbook: "playbooks/common-snapshot.yml"
     credential: "VMware vCenter"
     organization: "Credentialing"
     extra_vars:
@@ -30,14 +28,14 @@
     ask_variables_on_launch: true
     verbosity: 1
 
-# 2. SolarWinds Node Maintenance Mode (Optional - Requires SolarWinds integration)
+# 2. SolarWinds Node Maintenance Mode
 - job_template:
     name: "Common: SolarWinds Node MX Mode - Exchange Maintenance"
-    description: "Manage SolarWinds node maintenance mode (requires SolarWinds API integration)"
+    description: "Manage SolarWinds node maintenance mode using ENTERPRISE.Common.SolarWinds_MXMode role for Exchange maintenance"
     job_type: "run"
     inventory: "Exchange Servers"
     project: "Automation Repo"
-    playbook: "playbooks/solarwinds-maintenance.yml"  # Example - implement based on your monitoring setup
+    playbook: "playbooks/common-solarwinds-mx.yml"
     credential: "SolarWinds API"
     organization: "Credentialing"
     extra_vars:

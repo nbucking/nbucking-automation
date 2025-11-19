@@ -1,0 +1,25 @@
+---
+# tasks file for Windows
+- name: Install and run the custom facts on Windows System
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Windows.WinPostInstallSecurity
+
+- name: Run the Post Installation Scripts for Windows
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.InstallFlexera
+
+- name: Run the Post Installation Scripts for Windows
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.InstallSplunk
+
+- name: Run the Post Installation Scripts for Windows
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.InstallTanium
+
+- name: Run the Post Installation Scripts for Windows
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.InstallTrellix
+
+- name: Run the Post Installation Scripts for Windows
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Windows.AddToWinDomain

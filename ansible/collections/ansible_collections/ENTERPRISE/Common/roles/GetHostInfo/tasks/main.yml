@@ -1,0 +1,46 @@
+---
+# tasks file for GetHostInfo
+- name: Get Datacenter Information
+  ansible.builtin.include_role:
+    name: GetDatacenterInfo
+  when: my_datacenter is not defined
+
+- name: Get Folder Information
+  ansible.builtin.include_role:
+    name: GetFolderInfo
+  when: my_folder is not defined
+
+- name: "Getting VM Facts for {{ my_vct_servername }}"
+  community.vmware.vmware_guest_info:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    datacenter: "{{ my_datacenter }}"
+    folder: "{{ my_folder }}"
+    name: "{{ my_vct_servername }}"
+  register: my_vct_servername_facts
+  delegate_to: localhost
+
+- name: Gather info from standalone ESXi server
+  community.vmware.vmware_datastore_info:
+    hostname: '{{ esxi_hostname | default(omit) }}'
+    username: '{{ esxi_username | default(omit) }}'
+    password: '{{ esxi_password | default(omit) }}'
+    datacenter_name: "{{ my_datacenter }}"
+    name: "{{ my_vct_servername_facts.instance.hw_datastores[0] }}"
+  delegate_to: localhost
+  register: datastore_info
+
+- name: Set Facts for HW Information
+  ansible.builtin.set_fact:
+    my_vct_servername_uuid: "{{ my_vct_servername_facts.instance.hw_product_uuid }}"
+    #my_datastore: Trusted Datastore Cluster (CS)
+    my_datastore: "{{ datastore_info.datastores[0].datastore_cluster }}"
+  delegate_to: localhost
+
+# - debug: var=my_vct_servername_facts.instance.hw_datastores[0]
+# - debug: var=my_vct_servername_uuid
+# - debug: var=my_vct_servername_facts.instance.hw_product_uuid
+# - debug: var=my_datastore
+# - debug: var=datastore_info.datastores[0].datastore_cluster
+# - debug: var=datastore_info

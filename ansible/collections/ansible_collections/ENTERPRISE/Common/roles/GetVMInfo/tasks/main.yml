@@ -1,0 +1,46 @@
+---
+# tasks file for GetVMInfo
+- name: Get Datacenter Information
+  ansible.builtin.include_role:
+    name: GetDatacenterInfo
+  when: my_datacenter is not defined
+
+- name: Get Folder Information
+  ansible.builtin.include_role:
+    name: GetFolderInfo
+  when: my_folder is not defined
+
+- name: "Getting VM Info for {{ my_vct_servername }}"
+  community.vmware.vmware_guest_info:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    datacenter: "{{ my_datacenter }}"
+    folder: "{{ my_folder }}"
+    name: "{{ my_vct_servername }}"
+    schema: "vsphere"
+    properties:
+      - _moId
+      - config.cpuHotAddEnabled
+      - config.memoryHotAddEnabled
+      - config.memoryReservationLockedToMax
+      - config.cpuAllocation
+  register: vct_info
+  delegate_to: localhost
+
+- debug: var=vct_info
+
+- name: create a csv file
+  ansible.builtin.lineinfile:
+    path: /tmp/guest_vm.info
+    line: >
+      '{{ my_vct_servername }},{{ vct_info.instance.moid }},{{ vct_info.instance.config.cpuHotAddEnabled }},
+      {{ vct_info.instance.config.flags.virtualMmuUsage}},{{ vct_info.instance.config.cpuAllocation.limit }},
+      {{ vct_info.instance.config.cpuAllocation.reservation}},{{vct_info.instance.config.cpuAllocation.shares.level}},
+      {{ vct_info.instance.config.memoryHotAddEnabled }},{{ vct_info.instance.memoryAllocation.shares.level}},
+      {{ vct_info.instance.config.memoryAllocation.reservation}},{{ vct_info.instance.config.memoryAllocation.limit}}
+    create: yes
+  delegate_to: localhost
+
+- name: show the csv file
+  ansible.builtin.command: cat /tmp/guest_vm.info

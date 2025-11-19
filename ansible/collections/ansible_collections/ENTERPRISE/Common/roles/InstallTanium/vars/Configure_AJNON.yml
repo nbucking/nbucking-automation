@@ -1,0 +1,5 @@
+---
+# vars file for WinInstallSplunk
+capsule: ajstsrvlvcap152.services.stamp.tsa.dhs.gov
+tools_url: "https://{{ capsule }}/pulp/content/STA/Library/custom/WindowsTeam/Software/"
+tanium_agent: Tanium_7.4.9.1046

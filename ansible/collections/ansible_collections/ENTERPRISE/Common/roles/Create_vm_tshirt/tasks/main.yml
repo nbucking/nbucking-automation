@@ -1,0 +1,31 @@
+---
+
+# - name: Run only if the VMLOCATION matches my_datacenter
+#   debug:
+#     msg: "Skipping this vcenter server"
+#   when: VMLOCATION != my_datacenter
+
+- name: "Grab the variables to build a server: {{ my_vct_servername }}"
+  ansible.builtin.include_vars: Configure_{{ my_server_details }}.yml
+
+- name: "Set the variable for my_vct_servername"
+  ansible.builtin.set_stats:
+    data:
+      _hosts: "{{ my_vct_servername }}"
+      my_template_version: "{{ my_template_version }}"
+      my_template: "{{ my_template }}"
+      my_hostname: "{{ my_vct_servername | lower }}"
+      forward_dns: "{{ my_ip_address }}"
+
+- name: Set Annotation to be added to each host upon build
+  ansible.builtin.set_fact:
+    annotation_text: |
+      Built using Ansible Automation Platform
+      Creator: {{ tower_user_name }}
+      Time: {{ lookup('pipe','date') }}
+      Type: {{ my_server_type }}
+      Source Template : {{ my_template }}
+      Remedy CRQ# : {{ crq_number | default(omit) }}
+
+- name: "Build the server in that environment"
+  ansible.builtin.include_tasks: Create_{{ my_server_size }}.yml

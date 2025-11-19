@@ -1,0 +1,98 @@
+---
+# tasks file for Swap_IPs
+- block: 
+  - name: "Changing {{ old_server_hostname }} to {{ new_server_hostname }}"
+    replace:
+      path: "{{ item.path }}"
+      regexp: "{{ item.regexp1 }}"
+      replace: "{{ item.replace }}"
+    with_items:
+      - { path: '/etc/ssh/sshd_config', regexp1: "{{ new_server_ip_address }}", replace: "{{ old_server_ip_address }}" }
+      - { path: '/etc/sysconfig/network-scripts/ifcfg-ens192', regexp1: "{{ new_server_ip_address }}", replace: "{{ old_server_ip_address }}" }
+      - { path: '/etc/hosts', regexp1: "{{ new_server_ip_address }}", replace: "{{ old_server_ip_address }}" }
+      - { path: '/etc/hosts', regexp1: "{{ new_server_hostname }}",  replace: "{{ old_server_hostname }}" }
+      - { path: '/etc/hostname', regexp1: "{{ new_server_hostname }}",  replace: "{{ old_server_hostname }}" }
+      - { path: '/etc/sysconfig/network-scripts/ifcfg-ens32', regexp1: "{{ new_server_ip_address }}", replace: "{{ old_server_ip_address }}" }
+      - { path: '/etc/sysconfig/network-scripts/ifcfg-en160', regexp1: "{{ new_server_ip_address }}", replace: "{{ old_server_ip_address }}" }
+    register: task_result
+    ignore_errors: yes
+
+  - name: "Change the hostname for {{ new_server_hostname}} to {{ old_server_hostname }}"
+    ansible.builtin.hostname:
+      name: "{{ old_server_fqdn }}"
+      use: systemd
+
+  when:  ansible_host  == new_server_ip_address 
+
+- block: 
+  - name: "Changing {{ old_server_hostname }} to {{ new_server_hostname }}"
+    replace:
+      path: "{{ item.path }}"
+      regexp: "{{ item.regexp1 }}"
+      replace: "{{ item.replace }}"
+    with_items:
+      - { path: '/etc/ssh/sshd_config', regexp1: "{{ old_server_ip_address }}", replace: "{{ new_server_ip_address }}" }
+      - { path: '/etc/sysconfig/network-scripts/ifcfg-ens192', regexp1: "{{ old_server_ip_address }}", replace: "{{ new_server_ip_address }}" }
+      - { path: '/etc/hosts', regexp1: "{{ old_server_ip_address }}", replace: "{{ new_server_ip_address }}" }
+      - { path: '/etc/hosts', regexp1: "{{ old_server_hostname }}",  replace: "{{ new_server_hostname }}" }
+      - { path: '/etc/hostname', regexp1: "{{ old_server_hostname }}",  replace: "{{ new_server_hostname }}" }
+      - { path: '/etc/sysconfig/network-scripts/ifcfg-ens32', regexp1: "{{ new_server_ip_address }}", replace: "{{ old_server_ip_address }}" }
+      - { path: '/etc/sysconfig/network-scripts/ifcfg-en160', regexp1: "{{ new_server_ip_address }}", replace: "{{ old_server_ip_address }}" }
+    register: task_result
+    ignore_errors: true
+
+  - name: "Change the hostname for {{ old_server_hostname }} (to {{ new_server_hostname }})"
+    ansible.builtin.hostname:
+      name: "{{ new_server_fqdn }}"
+      use: systemd
+
+  when:  ansible_host == old_server_ip_address 
+
+- name: Reboot immediately the server to take latest changes
+  ansible.builtin.shell: "sleep 5 && reboot" 
+  async: 1
+  poll: 0
+
+- block: 
+  - name: "Change ansible's IP address for {{ new_server_hostname }}"
+    set_fact:
+      ansible_host: "{{ new_server_ip_address }}"
+
+  - name: Wait for the hosts network interface to come back up
+    local_action:
+      module: wait_for
+      host: "{{ ansible_host }}"
+      port: 22
+      delay: 10
+      state: started
+    register: wait_result
+
+  # - name: Run a command
+  #   command: uname -a
+  #   register: uname
+
+  # - debug: var=uname
+
+  when:  ansible_host == new_server_ip_address 
+      
+- block: 
+  - name: Change ansible's IP address for each host
+    set_fact:
+      ansible_host: "{{ old_server_ip_address }}"
+
+  - name: Wait for the hosts network interface to come back up
+    local_action:
+      module: wait_for
+      host: "{{ ansible_host }}"
+      port: 22
+      delay: 10
+      state: started
+    register: wait_result
+
+  # - name: Run a command
+  #   command: uname -a
+  #   register: uname
+
+  # - debug: var=uname
+
+  when:  ansible_host  == old_server_ip_address 

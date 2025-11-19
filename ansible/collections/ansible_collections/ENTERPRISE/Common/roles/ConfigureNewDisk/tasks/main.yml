@@ -1,0 +1,34 @@
+---
+# tasks file for ConfigureNewDisk
+# lvol, lvg
+- name: Create volume block
+  block:
+  - name: "Create the volume group {{ volume_group }}"
+    community.general.lvg:
+      vg: "{{ volume_group }}"
+      pvs: "{{ physical_volume }}"
+      state: present
+
+  - name: "Create the logical volume {{ logical_volume }}"
+    community.general.lvol:
+      lv: "{{ logical_volume }}"
+      vg: "{{ volume_group }}"
+      size: "{{ logical_volume_size | default('100%FREE') }}"
+      state: present
+
+  - name: Create the file system
+    community.general.filesystem:
+      fstype: xfs
+      dev: "/dev/mapper/{{ volume_group}}-{{ logical_volume }}"
+      
+  - name: "Mount the file system {{ mount_point }}"
+    ansible.posix.mount:
+      path: "{{ mount_point }}"
+      src: "/dev/mapper/{{ volume_group}}-{{ logical_volume }}"
+      fstype: xfs
+      opts: defaults,nosuid
+      state: mounted
+
+  when: volume_group is defined and
+        physical_volume is defined and
+        logical_volume is defined

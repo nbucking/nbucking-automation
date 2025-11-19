@@ -1,0 +1,24 @@
+---
+- name: Gather initial facts
+  ansible.builtin.setup:
+  when: ansible_os_family is undefined
+
+- name: Create Windows DIR
+  ansible.windows.win_file:
+    path: C:\Ansible\facts
+    state: directory
+  when: ansible_os_family == "Windows"
+
+- name: Copy powershell script to windows servers
+  ansible.windows.win_copy:
+    src: WinFacts.ps1
+    dest: 'C:\Ansible\facts\local.ps1'
+  when: ansible_os_family == "Windows"
+
+- name: Add facts to a variable
+  ansible.builtin.setup:
+    fact_path: C:/Ansible/facts
+  register: setupvar
+
+- ansible.builtin.debug: var=setupvar
+  when: winfacts_verbose == true

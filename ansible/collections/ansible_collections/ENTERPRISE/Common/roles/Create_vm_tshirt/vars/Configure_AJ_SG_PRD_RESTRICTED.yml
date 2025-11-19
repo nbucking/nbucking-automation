@@ -1,0 +1,14 @@
+---
+_hosts: '{{ my_vct_servername }}'
+my_cluster: ajssprdlpesx80.cvp.cs
+my_folder: Linux/SG/PRD
+my_datacenter: AJ PROD
+my_hostname: "{{ my_vct_servername | lower }}.{{ my_dns_domain }}"
+my_network_name: VM - SG Restricted (PRD) (LACP)
+my_netmask: 255.255.255.0
+my_gateway_address: 10.10.5.1
+my_dnsserver1: 10.10.0.20
+my_dnsserver2: 10.10.0.32
+my_dns_domain: tvc.tsa.dhs.gov
+my_datastore: Restricted Datastore Cluster (AJ)
+my_template: RHEL88_CRED_Template_Restricted

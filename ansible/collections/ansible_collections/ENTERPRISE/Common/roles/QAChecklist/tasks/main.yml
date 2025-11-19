@@ -1,0 +1,140 @@
+---
+# tasks file for QAChecklist
+- name: Ensure OS is RHEL 8
+  fail:
+    msg: This role is for RHEL 8 servers only
+  when: ansible_distribution_major_version != "8"
+
+- name: Check to see if /home is mounted noexec
+  shell: /usr/bin/mount |grep '/home' | grep noexec #|| /bin/true
+  register: result
+  changed_when: "result.rc == 1"
+  ignore_errors: true
+
+- name: Remount /home with exec so we can run ansible scripts (will reset after reboot)
+  shell: /usr/bin/mount -o remount,exec /home
+  when: '"noexec" | string  in result.stdout'
+
+- name: Ensure the Operating System is patch and booted to the latest level
+  shell: dnf updateinfo -q
+  register: patchlatest
+  ignore_errors: yes
+
+- name: Check to see if it needs to be rebooted
+  shell: needs-restarting -r || /bin/true
+  register: needsreboot
+  ignore_errors: yes
+
+- name: Check if Splunk is installed and running
+  systemd:
+    name: SplunkForwarder
+  register: splunk
+  ignore_errors: yes
+
+- name: Check if Flexera is installed and running
+  systemd:
+    name: mgsusageag
+  register: flexera
+  ignore_errors: yes
+
+- name: Check if Tanium is installed and running
+  systemd:
+    name: taniumclient
+  register: tanium
+  ignore_errors: yes
+
+- name: See if NTP is synchronized
+  shell: timedatectl  |grep "synchronized" | awk -F":" '{print $2}' | sed -e 's/ //'
+  register: sync
+  ignore_errors: yes
+
+- name: Check if postfix is running without errors
+  systemd:
+    name: postfix
+  register: postfix
+  ignore_errors: yes
+
+- name: Check if SSSD is running without errors
+  systemd:
+    name: sssd
+  register: sssd
+  ignore_errors: yes
+
+- name: Grab timezone to show admin
+  shell: timedatectl |grep -i "time zone" | awk -F":" '{print $2}' | sed -e 's/^ //'
+  register: showTimezone
+
+- name: Check if puppet is configured
+  puppet:
+  register: puppet
+  ignore_errors: yes
+
+- name: Grab nameserver 1 entry
+  shell: grep -m 1 ^nameserver /etc/resolv.conf | tail -1 | awk '{print $2}'
+  register: nameserver1
+
+- name: Grab nameserver 2 entry
+  shell: grep -m 2 ^nameserver /etc/resolv.conf | tail -1 | awk '{print $2}'
+  register: nameserver2
+
+- name: Grab nameserver 3 entry
+  shell: grep -m 3 ^nameserver /etc/resolv.conf | tail -1 | awk '{print $2}'
+  register: nameserver3
+
+- name: Check if DNS is configured
+  shell: "/usr/bin/nslookup {{ ansible_default_ipv4.address }} | cut -d= -f2 | sed -e 's/^ //'"
+  register: lookup
+
+- name: Setfact for puppet
+  set_fact:
+    needsPuppet: "**NO**"
+  when: puppet is failed
+
+- name: Setfact for needing a reboot
+  set_fact:
+    needsAreboot: "Reboot is required"
+  when: '"Reboot is required" in needsreboot.stdout'
+
+- name: Setfact for needing patches installed
+  set_fact:
+    needsPatches: "**NO**"
+  when: patchlatest.stdout != ""
+
+- name: Setfact to check is SplunkForwarder is running
+  set_fact:
+    needsSplunk: "**NO**"
+  when: splunk.status.ActiveState != "active"
+
+- name: Setfact to check is Tanium is running
+  set_fact:
+    needsTanium: "**NO**"
+  when: tanium.status.ActiveState != "active"
+
+- name: Setfact to check is Flexera is running
+  set_fact:
+    needsflexera: "**NO**"
+  when: flexera.status.ActiveState != "active"
+
+- name: Setfact to check if server is syncing for Time
+  set_fact:
+    needsChrony: "**NO**"
+  when: sync.stdout != "yes"
+
+- name: Setfact to check if postfix is active
+  set_fact:
+    needsPostfix: "**NO**"
+  when: postfix.status.ActiveState != "active"
+
+- name: Setfact to check if SSSD is active
+  set_fact:
+    needsSSSD: "**NO**"
+  when: sssd.status.ActiveState != "active"
+
+- name: Create the template that will be mailed out
+  template:
+    src: QAChecklist.j2
+    dest: "/var/tmp/{{ ansible_hostname }}.qa"
+    owner: root
+    group: root
+    mode: '0644'
+  delegate_to: localhost

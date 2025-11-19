@@ -1,0 +1,17 @@
+---
+# vars file for Create_vm
+my_num_cpus_xtra_small: 4
+my_memory_mb_xtra_small: '8192'
+my_num_cpus_small: 4
+my_memory_mb_small: '16384'
+my_num_cpus_shmedium: 8
+my_memory_mb_shmedium: '16384'
+my_num_cpus_medium: 8
+my_memory_mb_medium: '24576'
+my_num_cpus_grande: 8
+my_memory_mb_grande: '32768'
+my_num_cpus_large: 16
+my_memory_mb_large: '32768'
+my_template: RHEL8_CRED_Template
+my_server_type: RHEL8
+my_template_version: Template Built 20240813

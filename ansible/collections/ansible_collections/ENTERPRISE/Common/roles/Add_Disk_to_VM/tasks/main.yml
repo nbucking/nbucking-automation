@@ -1,0 +1,65 @@
+---
+# tasks file for Add_Disk_to_VM
+- name: Get Datacenter Information
+  ansible.builtin.include_role:
+    name: GetDatacenterInfo
+  when: my_datacenter is not defined
+
+- name: Run only if the VMLOCATION matches my_datacenter
+  ansible.builtin.debug:
+    msg: "Skipping this vcenter server"
+  when: VMLOCATION != my_datacenter
+
+- name: Skip if VMLOCATION != Datacenter
+  block:
+  - name: Get Datacenter Information
+    ansible.builtin.include_role:
+      name: GetDatacenterInfo
+    when: my_datacenter is not defined
+
+  - name: Get Folder Information
+    ansible.builtin.include_role:
+      name: GetFolderInfo
+    when: my_folder is not defined
+
+  - name: Get Host Information
+    ansible.builtin.include_role:
+      name: GetHostInfo
+    when: my_datastore is not defined and my_vct_servername_uuid is not defined
+
+  - name: Get Disk Information
+    ansible.builtin.include_role:
+      name: GetDiskInfo
+    when: my_disk_info is not defined and my_unit_number is not defined
+
+  - name: "Getting VM Facts for {{ my_vct_servername }}"
+    community.vmware.vmware_guest_info:
+      hostname: "{{ vcenter_hostname | default(omit) }}" 
+      username: "{{ vcenter_username | default(omit) }}"
+      password: "{{ vcenter_password | default(omit) }}"
+      datacenter: "{{ my_datacenter }}"
+      folder: "{{ my_folder }}"
+      name: "{{ my_vct_servername }}"
+    register: my_vct_servername_facts
+    delegate_to: localhost
+
+  #- ansible.builtin.debug: var=my_vct_servername_facts
+
+
+  - name: "Add disks to virtual machine using UUID"
+    community.vmware.vmware_guest_disk:
+      hostname: "{{ vcenter_hostname | default(omit) }}" 
+      username: "{{ vcenter_username | default(omit) }}"
+      password: "{{ vcenter_password | default(omit) }}"
+      datacenter: "{{ my_datacenter }}"
+      uuid: "{{ my_vct_servername_facts.instance.hw_product_uuid }}"
+      disk: 
+        - size_gb: "{{ disk_size_gb }}"
+          type: thick
+          datastore: "{{ my_datastore }}"
+          scsi_controller: "{{ my_controller_number }}"
+          unit_number: "{{ my_unit_number }}"
+          scsi_type: "{{ my_scsi_type }}"
+          state: present
+    delegate_to: localhost
+  when: VMLOCATION == my_datacenter

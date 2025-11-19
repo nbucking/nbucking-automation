@@ -1,0 +1,13 @@
+---
+_hosts: '{{ my_vct_servername }}'
+my_cluster: ajssprdlpesx50.cvp.cs
+my_folder: Linux/TIM/STG
+my_datacenter: AJ PROD
+my_hostname: "{{ my_vct_servername | lower }}.{{ my_dns_domain }}"
+my_network_name: VM - TIM Trusted (LACP)
+my_netmask: 255.255.252.0
+my_gateway_address: 10.0.28.1
+my_dnsserver1: 10.0.4.129
+my_dnsserver2: 10.0.4.132
+my_dns_domain: cvp.cs
+my_datastore: Trusted Datastore Cluster (AJ)

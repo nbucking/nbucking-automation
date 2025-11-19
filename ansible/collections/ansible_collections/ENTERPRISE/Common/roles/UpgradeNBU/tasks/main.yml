@@ -1,0 +1,80 @@
+---
+# tasks file for UpgradeNBU
+- name: Grab version of NBU
+  ansible.builtin.shell: cat /usr/openv/netbackup/bin/version |awk '{print $2}'
+  register: nbu_version
+
+- name: Show current version of NBU
+  ansible.builtin.debug: var=nbu_version.stdout
+
+- name: Check to see if /usr/openv/netbackup/bp.conf exists
+  ansible.builtin.stat:
+    path: /usr/openv/netbackup/bp.conf
+  register: bp
+
+- name: Fail if bp.conf does not exist
+  ansible.builtin.fail:
+    msg: "No bp.conf file. Manual intervention needed"
+  when: bp.stat.isreg is not defined
+
+- name: Remount directories with exec so we can run ansible scripts (will reset after reboot)
+  ansible.builtin.shell: /usr/bin/mount -o remount,exec "{{ item }}"
+  loop:
+    - /var/tmp
+    - /home
+    - /tmp
+  ignore_errors: true
+
+- name: Grab the capsule server name
+  ansible.builtin.set_fact:
+    capsule: "{{ ansible_local['vmInfo']['capsule'] }}"
+
+- name: Create the staging directory
+  ansible.builtin.file:
+    path: "{{ stage_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Download the NetBackup installation
+  ansible.builtin.get_url:
+    url: "https://{{ capsule }}/{{ repo_loc }}/{{ netbackup_tar }}"
+    dest: "{{ stage_dir }}"
+    owner: "{{ root_user }}"
+    group: "{{ root_group }}"
+    mode: '0750'
+  register: get_netbackup
+
+- name: Untar and unzip NetBackup tarball
+  ansible.builtin.unarchive:
+    src: "{{ stage_dir }}/{{ netbackup_tar }}"
+    dest: "{{ stage_dir }}"
+    remote_src: yes
+
+- name: Get client name
+  ansible.builtin.shell: grep ^CLIENT_NAME /usr/openv/netbackup/bp.conf | awk '{print $3}'
+  register: client_name
+
+- name: Get server name
+  ansible.builtin.shell: grep ^SERVER /usr/openv/netbackup/bp.conf | awk '{print $3}'
+  register: server_name
+
+- name: Copy the answers file to /tmp
+  ansible.builtin.template:
+    src: NBInstallAnswer.conf.j2
+    dest: /tmp/NBInstallAnswer.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Run Install Command
+  ansible.builtin.shell: "/bin/bash {{ stage_dir}}/RedHat3.10.0/client_config"
+  args:
+    chdir: "{{ stage_dir }}/RedHat3.10.0/"
+  register: nbu_out
+
+- ansible.builtin.debug: msg={{ nbu_out.stdout_lines }}
+
+- name: Remove the netbackup install directory
+  ansible.builtin.file:
+    path: "{{ stage_dir }}"
+    state: absent

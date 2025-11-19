@@ -1,0 +1,61 @@
+---
+# tasks file for RemoveASnapshot
+- name: Are you sure block
+  block:
+  - name: Get Datacenter Information
+    ansible.builtin.include_role:
+      name: GetDatacenterInfo
+    when: my_datacenter is not defined
+
+  - name: Get Folder Information
+    ansible.builtin.include_role:
+      name: GetFolderInfo
+    when: my_folder is not defined
+
+  - name: Main Block
+    block:
+    - name: Snapshot removal can take a while message
+      ansible.builtin.debug:
+        msg: "SNAPSHOT REMOVAL CAN TAKE SEVERAL MINUTES. PLEASE BE PATIENT"
+        
+    - name: Remove all snapshots for "{{ my_vct_servername }}"
+      community.vmware.vmware_guest_snapshot:
+        hostname: "{{ vcenter_hostname | default(omit) }}" 
+        username: "{{ vcenter_username | default(omit) }}"
+        password: "{{ vcenter_password | default(omit) }}"
+        datacenter: "{{ my_datacenter }}"
+        folder: "{{ my_folder }}"
+        name: "{{ my_vct_servername }}"
+        state: remove_all
+        validate_certs: false
+      register: snapshots_removed
+      delegate_to: localhost
+
+    - name: Set Description to be added to each snapshot
+      ansible.builtin.set_fact:
+        description_text: |
+          Snapshot removed using Ansible Automation Platform
+          Job ID: {{ tower_job_id is defined | ansible.builtin.ternary(tower_job_id,tower_workflow_job_id,tower_schedule_id) }}
+          Creator: {{ tower_user_name is defined | ansible.builtin.ternary(tower_user_name,tower_workflow_job_name,scheduled_user_name) }}
+          Time: {{ lookup('pipe','env TZ=America/Denver date') }}
+      when: snapshots_removed is changed
+
+    - name: Sending email to the VMWare team for awareness
+      community.general.mail:
+        host: 172.28.26.64
+        port: 25
+        to: glenn.zenker@associates.tsa.dhs.gov,ashley.jones2@associates.tsa.dhs.gov
+        cc: "{{ tower_user_email | default(omit)}}"
+        from: AnsibleAutomation@tsa.dhs.gov
+        subject: "All VMWare Snapshots removed from {{ my_vct_servername }}"
+        body: "{{ description_text }}"
+      delegate_to: localhost
+      when: snapshots_removed is changed
+
+
+    when: VMLOCATION == my_datacenter and are_you_sure == 'YES'
+  when: are_you_sure == 'YES'
+
+- ansible.builtin.debug: 
+    msg: "User was not sure about removing all snapshots- ABORTED"
+  when: are_you_sure != 'YES'

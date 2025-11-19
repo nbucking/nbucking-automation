@@ -1,0 +1,6 @@
+---
+# vars file for WinInstallSplunk
+capsule: csstsrvlvcap151.services.stamp.tsa.dhs.gov
+tools_url: "https://{{ capsule }}/pulp/content/STA/Library/custom/WindowsTeam/Software/McAfee_Agents_PRD.zip"
+mcafee_agent: McAfee_Agents_PRD
+env: PRD

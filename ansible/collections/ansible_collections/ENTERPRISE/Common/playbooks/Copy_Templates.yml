@@ -1,0 +1,115 @@
+---
+- name: Export and import VMware guest template between vCenter servers
+  hosts: localhost
+  gather_facts: no
+  vars_files: copy_template_vars.yml
+  tasks:
+  - name: Export the template from CS NON
+    community.vmware.vmware_export_ovf:
+      hostname: '{{ source_vcenter_hostname | default(omit) }}'
+      username: '{{ source_vcenter_username | default(omit) }}'
+      password: '{{ source_vcenter_password | default(omit) }}'
+      name: '{{ source_vm_name }}'
+      datacenter: '{{ source_datacenter }}'
+      export_with_images: "{{ export_images | default('true') }}"
+      export_dir: '{{ export_path }}'
+      validate_certs: false
+    delegate_to: localhost
+
+  - block:
+    - name: Include variables for AJ NON
+      ansible.builtin.include_vars: ajnon_vct.yml
+      delegate_to: localhost
+
+    - name: Deploy the template in AJ NON vCenter
+      community.vmware.vmware_deploy_ovf:
+        hostname: '{{ vcenter_hostname | default(omit) }}'
+        username: '{{ vcenter_username | default(omit) }}'
+        password: '{{ vcenter_password | default(omit) }}'
+        name: '{{ source_vm_name }}'
+        datacenter: '{{ dest_datacenter }}'
+        cluster: '{{ dest_cluster }}'
+        ovf: '{{ export_path }}/{{ source_vm_name }}/{{ source_vm_name }}.ovf'
+        folder: '{{ dest_folder }}'
+        datastore: '{{ dest_datastore }}'
+        power_on: '{{ dest_power_on | default(false) }}'
+        disk_provisioning: '{{ dest_disk_prov | default("eagerZeroedThick") }}'
+        validate_certs: false
+      delegate_to: localhost
+    
+    - name: Turn that machine into a template
+      ansible.builtin.include_role: 
+        name: /runner/project/collections/ansible_collections/ENTERPRISE/Common/roles/Convert_to_template
+      vars:
+        my_vct_servername: "{{ source_vm_name }}"
+
+    when: '"AJ NON" in datacenters'
+
+
+  - name: Deploy the template in AJ PRD Trusted vCenter
+    community.vmware.vmware_deploy_ovf:
+      hostname: '{{ ajprd_vcenter_hostname | default(omit) }}'
+      username: '{{ prd_vcenter_username | default(omit) }}'
+      password: '{{ prd_vcenter_password | default(omit) }}'
+      name: '{{ source_vm_name }}'
+      datacenter: '{{ ajprd_datacenter }}'
+      cluster: '{{ ajprd_trusted_cluster }}'
+      ovf: '{{ export_path }}/{{ source_vm_name }}/{{ source_vm_name }}.ovf'
+      folder: '{{ ajprd_dest_folder }}'
+      datastore: '{{ aj_trusted_datastore }}'
+      power_on: '{{ dest_power_on | default(false) }}'
+      disk_provisioning: '{{ dest_disk_prov | default("eagerZeroedThick") }}'
+      validate_certs: false
+    delegate_to: localhost
+    when: '"AJ PRD" in datacenters'
+  
+  - name: Deploy the template in AJ PRD Restricted vCenter
+    community.vmware.vmware_deploy_ovf:
+      hostname: '{{ ajprd_vcenter_hostname | default(omit) }}'
+      username: '{{ prd_vcenter_username | default(omit) }}'
+      password: '{{ prd_vcenter_password | default(omit) }}'
+      name: '{{ source_vm_name }}-Restricted'
+      datacenter: '{{ ajprd_datacenter }}'
+      cluster: '{{ ajprd_restricted_cluster }}'
+      ovf: '{{ export_path }}/{{ source_vm_name }}/{{ source_vm_name }}.ovf'
+      folder: '{{ ajprd_dest_folder }}'
+      datastore: '{{ aj_restricted_datastore }}'
+      power_on: '{{ dest_power_on | default(false) }}'
+      disk_provisioning: '{{ dest_disk_prov | default("eagerZeroedThick") }}'
+      validate_certs: false
+    delegate_to: localhost
+    when: '"AJ PRD Restricted" in datacenters'
+
+  - name: Deploy the template in CS PRD Trusted vCenter
+    community.vmware.vmware_deploy_ovf:
+      hostname: '{{ csprd_vcenter_hostname | default(omit) }}'
+      username: '{{ prd_vcenter_username | default(omit) }}'
+      password: '{{ prd_vcenter_password | default(omit) }}'
+      name: '{{ source_vm_name }}'
+      datacenter: '{{ csprd_datacenter }}'
+      cluster: '{{ csprd_trusted_cluster }}'
+      ovf: '{{ export_path }}/{{ source_vm_name }}/{{ source_vm_name }}.ovf'
+      folder: '{{ csprd_dest_folder }}'
+      datastore: '{{ cs_trusted_datastore }}'
+      power_on: '{{ dest_power_on | default(false) }}'
+      disk_provisioning: '{{ dest_disk_prov | default("eagerZeroedThick") }}'
+      validate_certs: false
+    delegate_to: localhost
+    when: '"CS PRD" in datacenters'
+  
+  - name: Deploy the template in CS PRD Restricted vCenter
+    community.vmware.vmware_deploy_ovf:
+      hostname: '{{ csprd_vcenter_hostname | default(omit) }}'
+      username: '{{ prd_vcenter_username | default(omit) }}'
+      password: '{{ prd_vcenter_password | default(omit) }}'
+      name: '{{ source_vm_name }}-Restricted'
+      datacenter: '{{ csprd_datacenter }}'
+      cluster: '{{ csprd_restricted_cluster }}'
+      ovf: '{{ export_path }}/{{ source_vm_name }}/{{ source_vm_name }}.ovf'
+      folder: '{{ csprd_dest_folder }}'
+      datastore: '{{ cs_restricted_datastore }}'
+      power_on: '{{ dest_power_on | default(false) }}'
+      disk_provisioning: '{{ dest_disk_prov | default("eagerZeroedThick") }}'
+      validate_certs: false
+    delegate_to: localhost
+    when: '"CS PRD Restricted" in datacenters'

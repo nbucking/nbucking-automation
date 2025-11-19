@@ -1,0 +1,79 @@
+---
+# tasks file for InstallMDE
+- name: Display a banner
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.DisplayBanner
+  vars:
+    os_type: Linux
+    software_name: Microsoft Defender
+    software_version:  101.25072.0003-1
+  run_once: true
+
+- name: Check to see if Microsoft Defender is already installed
+  ansible.builtin.command: rpm -q mdatp
+  register: mdatp_ver
+  ignore_errors: yes
+
+- name: Grab the capsule server name
+  ansible.builtin.set_fact:
+    capsule: "{{ ansible_local['vmInfo']['capsule'] }}"
+
+- name: Get the Microsoft Defender package from Satellite
+  ansible.builtin.get_url:
+    url: "https://{{ capsule }}/{{ repo_loc}}/{{ mde_pkg }}"
+    dest: "{{ stage_dir }}"
+    owner: "{{ root_user }}"
+    group: "{{ root_group }}"
+    mode: '0644'
+    validate_certs: "{{ _validate_certs | default('false')}}"
+  register: get_flexera
+
+- name: Copy the package over to the system
+  ansible.builtin.copy:
+    src: "{{ packages.name }}"
+    dest: "{{ packages.destination }}"
+    owner: "{{ root_user }}"
+    mode: "{{ packages.pkg_mode }}"
+  loop:
+    - { name: 'MicrosoftDefenderATPOnboardingLinuxServer.py', destination: '/root', pkg_mode: '0700' }  
+    - { name: 'mde_installer.sh', destination: '/root', pkg_mode: '0700' }
+  loop_control:
+    loop_var: packages
+
+- name: Install the Microsoft Defender software
+  ansible.builtin.dnf: 
+    name: "{{ stage_dir }}/{{ mde_pkg }}"
+    disable_gpg_check: yes
+    state: present
+
+- name: Configure the Microsoft Defender use_proxy
+  ansible.builtin.shell: "/bin/mdatp config proxy set --value {{ proxy_location }}"
+  register: proxy_loc
+
+- name: Run installation commands
+  ansible.builtin.shell: /root/mde_installer.sh --install --channel prod --onboard /root/MicrosoftDefenderSTPOnboardingLinuxServer.py --min_req -y
+  register: mde_installer_out
+
+- name: Run Connectivity Test
+  ansible.builtin.shell: /opt/microsoft/mdatp/conf/client_analyzer/binary/MDESupportTool connectivitytest -o MicrosoftDefenderATPOnboardingLinuxServer.py
+  register: mdesupporttool_out ## this command might ned to be adjusted
+
+- name: Run OnBoarding python script
+  ansible.builtin.shell: /bin/python3 /root/MicrosoftDefenderSTPOnboardingLinuxServer.py
+  register: onboarding_out
+
+- name: Verify Microsoft Defender Health on the server - connectivity test
+  ansible.builtin.command: "/bin/mdatp connectivity test"
+  register: health_connectivity_test
+
+- name: Verify Microsoft Defender Health on the server - real_time_protection_enabled
+  ansible.builtin.command: "/bin/mdatp health --field real_time_protection_enabled"
+  register: health_rtprotection
+
+- name: Verify Microsoft Defender Health on the server - app_version
+  ansible.builtin.command: "/bin/mdatp health --field app_version"
+  register: health_connectivity_app_version
+
+- name: Verify Microsoft Defender Health on the server - behavior_monitoring
+  ansible.builtin.command: "/bin/mdatp health --field behavior_monitoring"
+  register: health_connectivity_behavior_monitoring

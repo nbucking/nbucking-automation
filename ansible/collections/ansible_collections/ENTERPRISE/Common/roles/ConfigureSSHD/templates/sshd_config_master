@@ -1,0 +1,48 @@
+Port 22
+ListenAddress {{ ansible_default_ipv4.address }}
+
+AcceptEnv LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+AcceptEnv LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
+AcceptEnv XMODIFIERS
+AddressFamily inet
+AllowAgentForwarding no
+AllowTcpForwarding no
+AuthorizedKeysFile .ssh/authorized_keys
+Banner /etc/issue
+ChallengeResponseAuthentication no
+Ciphers aes256-ctr,aes192-ctr,aes128-ctr
+ClientAliveCountMax 0
+ClientAliveInterval 600
+# RHEL-07-040470 - Version 2, Release: 8 Benchmark Date: 24 Jul 2020
+Compression no
+# RHEL-07-040470 - Version 2, Release: 6 Benchmark Date: 24 Jan 2020
+# Compression delayed
+GSSAPIAuthentication no
+GSSAPICleanupCredentials yes
+HostbasedAuthentication no
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+IgnoreRhosts yes
+IgnoreUserKnownHosts yes
+KerberosAuthentication no
+MACs hmac-sha2-512,hmac-sha2-256
+MaxStartups 20:30:100
+PasswordAuthentication yes
+PermitEmptyPasswords no
+# STIG ID: RHEL-07-040370
+PermitRootLogin no 
+PermitUserEnvironment no
+PrintLastLog yes
+Protocol 2
+PubkeyAuthentication yes
+StrictModes yes
+Subsystem sftp /usr/libexec/openssh/sftp-server
+SyslogFacility AUTHPRIV
+TCPKeepAlive yes
+UseDNS yes
+UsePAM yes
+X11Forwarding no
+X11UseLocalhost yes
+RekeyLimit 1G 1h
+
+# EOF

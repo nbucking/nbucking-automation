@@ -1,0 +1,113 @@
+## Sudoers allows particular users to run various commands as
+## the root user, without needing the root password.
+##
+## Examples are provided at the bottom of the file for collections
+## of related commands, which can then be delegated out to particular
+## users or groups.
+##
+## This file must be edited with the 'visudo' command.
+Defaults    listpw  =  never
+Defaults    !visiblepw
+Defaults    always_set_home
+Defaults    match_group_by_gid
+Defaults    always_query_group_plugin
+
+Defaults    env_reset
+Defaults    env_keep =  "COLORS DISPLAY HOSTNAME HISTSIZE KDEDIR LS_COLORS"
+Defaults    env_keep += "MAIL PS1 PS2 QTDIR USERNAME LANG LC_ADDRESS LC_CTYPE"
+Defaults    env_keep += "LC_COLLATE LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES"
+Defaults    env_keep += "LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE"
+Defaults    env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"
+Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin
+## Command Aliases
+## These are groups of related commands...
+root                    ALL=(ALL) NOPASSWD: ALL
+paladin                 ALL=(ALL) NOPASSWD: ALL
+greenway                ALL=(ALL) NOPASSWD: ALL
+nessus                  ALL=(ALL) NOPASSWD: ALL
+solarwin                ALL=(ALL) NOPASSWD: ALL
+%wheel                  ALL=(ALL) NOPASSWD: ALL
+appadm                  ALL=(ALL) NOPASSWD: ALL
+build                   ALL=(ALL) NOPASSWD: ALL
+chefexec                ALL=(ALL) NOPASSWD: ALL
+chefserver              ALL=(ALL) NOPASSWD: ALL
+st-iad-nessus           ALL=(ALL) NOPASSWD: ALL
+{% if inventory_hostname in groups['AJTIMPRD'] or inventory_hostname in groups['AJTIMSTG'] or inventory_hostname in groups['CSTIMPRD'] or inventory_hostname in groups['CSTIMSTG'] %}
+tvs-aj_prd-lnxadm       ALL=(ALL) NOPASSWD: ALL
+tvs-cs_prd-lnxadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_prd-appadm       ALL=(ALL) NOPASSWD: ALL
+tim-aj_prd-appadm       ALL=(ALL) NOPASSWD: ALL
+tim-aj_prd-sysadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_prd-sysadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_prd-devops       ALL=(ALL) NOPASSWD: ALL
+tim-aj_prd-devops       ALL=(ALL) NOPASSWD: ALL
+tim-cs_prd-developer    ALL=(ALL) NOPASSWD: ALL
+tim-aj_prd-developer    ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+{% if inventory_hostname in groups['AJTIMPRDORC'] or inventory_hostname in groups['AJTIMSTGORC'] or inventory_hostname in groups['CSTIMPRDORC'] or inventory_hostname in groups['CSTIMSTGORC'] %}
+tvs-aj_prd-lnxadm       ALL=(ALL) NOPASSWD: ALL
+tvs-cs_prd-lnxadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_prd-appadm       ALL=(ALL) NOPASSWD: ALL
+tim-aj_prd-appadm       ALL=(ALL) NOPASSWD: ALL
+tim-aj_prd-sysadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_prd-sysadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_prd-devops       ALL=(ALL) NOPASSWD: ALL
+tim-aj_prd-devops       ALL=(ALL) NOPASSWD: ALL
+tim-cs_prd-developer    ALL=(ALL) NOPASSWD: ALL
+tim-aj_prd-developer    ALL=(ALL) NOPASSWD: ALL
+tim-aj_prd-dba          ALL=(ALL) NOPASSWD: ALL
+tim-cs_prd-dba          ALL=(ALL) NOPASSWD: ALL
+st-prd-netbkadm         ALL=(ALL) NOPASSWD: ALL
+oracle                  ALL=(ALL) NOPASSWD: ALL
+grid                    ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+{% if inventory_hostname in groups['AJTIMPRDPDZ'] or inventory_hostname in groups['AJTIMSTGPDZ'] or inventory_hostname in groups['CSTIMPRDPDZ'] or inventory_hostname in groups['CSTIMSTGPDZ'] %}
+tvs-aj_pdz-lnxadm       ALL=(ALL) NOPASSWD: ALL
+tvs-cs_pdz-lnxadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_pdz-appadm       ALL=(ALL) NOPASSWD: ALL
+tim-aj_pdz-appadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_pdz-sysadm       ALL=(ALL) NOPASSWD: ALL
+tim-aj_pdz-sysadm       ALL=(ALL) NOPASSWD: ALL
+tim-aj_pdz-tester       ALL=(ALL) NOPASSWD: ALL
+tim-cs_pdz-devops       ALL=(ALL) NOPASSWD: ALL
+tim-aj_pdz-devops       ALL=(ALL) NOPASSWD: ALL
+tim-aj_pdz-developer    ALL=(ALL) NOPASSWD: ALL
+tim-cs_pdz-developer    ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+
+{% if inventory_hostname in groups['TIMNON']  %}
+tvs-aj_dev-lnxadm       ALL=(ALL) NOPASSWD: ALL
+tvs-cs_dev-lnxadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_dev-appadm       ALL=(ALL) NOPASSWD: ALL
+tim-aj_dev-appadm       ALL=(ALL) NOPASSWD: ALL
+tim-aj_dev-sysadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_dev-sysadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_dev-devops       ALL=(ALL) NOPASSWD: ALL
+tim-aj_dev-devops       ALL=(ALL) NOPASSWD: ALL
+tim-cs_dev-developer    ALL=(ALL) NOPASSWD: ALL
+tim-aj_dev-developer    ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+{% if inventory_hostname in groups['TIMNONORC']  %}
+tvs-aj_dev-lnxadm       ALL=(ALL) NOPASSWD: ALL
+tvs-cs_dev-lnxadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_dev-appadm       ALL=(ALL) NOPASSWD: ALL
+tim-aj_dev-appadm       ALL=(ALL) NOPASSWD: ALL
+tim-aj_dev-sysadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_dev-sysadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_dev-devops       ALL=(ALL) NOPASSWD: ALL
+tim-aj_dev-devops       ALL=(ALL) NOPASSWD: ALL
+tim-cs_dev-developer    ALL=(ALL) NOPASSWD: ALL
+tim-aj_dev-developer    ALL=(ALL) NOPASSWD: ALL
+tim-aj_dev-dba          ALL=(ALL) NOPASSWD: ALL
+tim-cs_dev-dba          ALL=(ALL) NOPASSWD: ALL
+oracle                  ALL=(ALL) NOPASSWD: ALL
+grid                    ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+{% if inventory_hostname in groups['TIMNONPDZ']  %}
+tvs-aj_dvz-lnxadm       ALL=(ALL) NOPASSWD: ALL
+tvs-cs_dvz-lnxadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_dvz-appadm       ALL=(ALL) NOPASSWD: ALL
+tim-aj_dvz-appadm       ALL=(ALL) NOPASSWD: ALL
+tim-cs_dvz-sysadm       ALL=(ALL) NOPASSWD: ALL
+tim-aj_dvz-sysadm       ALL=(ALL) NOPASSWD: ALL
+{% endif %}

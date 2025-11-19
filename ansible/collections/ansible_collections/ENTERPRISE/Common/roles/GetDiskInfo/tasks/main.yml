@@ -1,0 +1,60 @@
+---
+# tasks file for TemplateRole
+- name: Get Datacenter Information
+  ansible.builtin.include_role:
+    name: GetDatacenterInfo
+  when: my_datacenter is not defined
+
+- name: Get Folder Information
+  ansible.builtin.include_role:
+    name: GetFolderInfo
+  when: my_folder is not defined
+
+- name: Get Host Information
+  ansible.builtin.include_role:
+    name: GetHostInfo
+  when: my_datastore is not defined and my_vct_servername_uuid is not defined
+
+- name: Gather disk info from virtual machine using UUID
+  community.vmware.vmware_guest_disk_info:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    datacenter: "{{ my_datacenter }}"
+    uuid: "{{ my_vct_servername_uuid }}"
+  delegate_to: localhost
+  register: disk_info
+
+- name: Display disk info
+  ansible.builtin.debug: 
+    var: disk_info
+    verbosity: 1
+
+- name: Create a dict with controller and the total number of disks
+  ansible.builtin.set_fact:
+    my_disk_info: "{{ disk_info | default({}) | combine({ item.value.controller_bus_number : item.value.unit_number} )}}"
+  with_dict: "{{ disk_info.guest_disk_info }}"
+
+- name: Set the variable for my_unit_number
+  ansible.builtin.set_fact:
+    my_unit_number: "{{ (my_disk_info[0] + 1) | int }}"
+
+- name: Skip disk 7 and make it  disk 8 per SCSI rules
+  ansible.builtin.set_fact:
+    my_unit_number: 8
+  when: my_unit_number|int == 7|int
+
+- name: Get the controller type for this system
+  ansible.builtin.set_fact:
+    my_scsi_type: "{{ item.value.controller_type }}"
+  with_dict: "{{ disk_info.guest_disk_info }}"
+
+- ansible.builtin.debug: 
+    msg: "{{ my_scsi_type }}"
+    verbosity: 1
+- ansible.builtin.debug: 
+    msg: "{{ my_disk_info[0] }}"
+    verbosity: 1
+- ansible.builtin.debug: 
+    msg: "My unit number is {{ my_unit_number }}" 
+    verbosity: 1

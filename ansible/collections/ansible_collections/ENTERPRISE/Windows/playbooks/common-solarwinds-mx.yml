@@ -1,0 +1,32 @@
+---
+# SolarWinds Maintenance Mode Playbook
+# This playbook manages SolarWinds node maintenance mode using ENTERPRISE.Common.SolarWinds_MXMode role
+
+- name: Manage SolarWinds Node Maintenance Mode
+  hosts: all
+  gather_facts: yes
+  
+  vars:
+    # These variables should be passed from the job template or workflow
+    # nodestatus: "mute"  # or "unmute"
+    # maintenance_window_duration: 120  # minutes
+    # hours: "{{ (maintenance_window_duration | default(120) / 60) | round(0, 'ceil') | int }}"
+  
+  tasks:
+    - name: Display maintenance mode configuration
+      ansible.builtin.debug:
+        msg:
+          - "Node Status: {{ nodestatus }}"
+          - "Maintenance Window: {{ maintenance_window_duration | default(120) }} minutes ({{ hours | default(2) }} hours)"
+          - "Target Server: {{ ansible_hostname }}"
+    
+    - name: Manage SolarWinds maintenance mode using ENTERPRISE.Common.SolarWinds_MXMode role
+      ansible.builtin.include_role:
+        name: ENTERPRISE.Common.SolarWinds_MXMode
+      vars:
+        node_status: "{{ nodestatus }}"
+        duration_hours: "{{ hours | default(2) }}"
+    
+    - name: Report maintenance mode status
+      ansible.builtin.debug:
+        msg: "SolarWinds maintenance mode {{ 'enabled' if nodestatus == 'mute' else 'disabled' }} for {{ ansible_hostname }}"

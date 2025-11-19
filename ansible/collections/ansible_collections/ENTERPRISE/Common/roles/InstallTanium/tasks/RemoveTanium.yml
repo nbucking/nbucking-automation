@@ -1,0 +1,15 @@
+---
+- name: Stop Tanium if it is running
+  ansible.builtin.systemd:
+    name: taniumclient
+    state: stopped
+
+- name: Remove the Tanium binaries
+  ansible.builtin.yum:
+    name: TaniumClient
+    state: absent
+
+- name: Remove the Tanium directory and all content
+  ansible.builtin.file:
+    path: /opt/Tanium
+    state: absent

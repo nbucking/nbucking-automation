@@ -1,0 +1,13 @@
+---
+_hosts: '{{ my_vct_servername }}'
+my_cluster: csssnonlpesx50.dev.example.com
+my_folder: Linux/ENTERPRISE
+my_datacenter: CS NON-PROD
+my_hostname: "{{ my_vct_servername | lower }}.{{ my_dns_domain }}"
+my_network_name: VM - GSS Trusted (DEV) (LACP)
+my_netmask: 255.255.255.0
+my_gateway_address: 172.26.0.1
+my_dnsserver1: 10.2.4.129
+my_dnsserver2: 10.2.4.40
+my_dns_domain: dev.example.com
+my_datastore: Trusted Datastore Cluster (CS)

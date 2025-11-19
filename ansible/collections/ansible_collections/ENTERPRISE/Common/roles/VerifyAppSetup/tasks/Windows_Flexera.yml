@@ -1,0 +1,11 @@
+- name: Run the WinRegistryInfo role
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Windows.WinRegistryInfo
+  vars:
+    registry_key_path: 'HKLM:\SOFTWARE\WOW6432Node\ManageSoft Corp\ManageSoft\Common\DownloadSettings\{088744b6-bc64-4b12-8bc8-eddfdb77dd57}'
+    registry_key_name: Host
+
+- name: Run the installer for Flexera
+  ansible.builtin.include_role: 
+    name: ENTERPRISE.Common.InstallFlexera
+  when: current_version.exists != true

@@ -1,0 +1,224 @@
+#!/bin/bash
+#
+# 'vmInfo.fact' by Glenn Zenker (TSA/Mantech); last modified by Glenn ZEnker:  20231202.
+# This file is written to:   '/etc/ansible/facts.d/vmInfo.fact'.
+
+# This set of collected facts are applicable to STAMP 1.0 and STAMP 2.0.
+# Changed to CASE statements to make it easier to read
+# csstpptlvvlt51  - stamp1.0
+# csstsrvlvvlt251 - stamp2.0
+
+HOSTNAME="$(hostname | cut -d'.' -f1 | tr [:lower:] [:upper:])"
+CAPSULE="$(sudo subscription-manager config | sed -e 's/^   //' |grep ^hostname | sed -e 's/^hostname = //')"
+CAPSULE="${CAPSULE:="csstsrvlvsat151.services.stamp.tsa.dhs.gov"}"
+
+# Check to see if host is STAMP 1.0 or 2.0
+HOSTSIZE="$(hostname | cut -d'.' -f1 | wc -c)"
+
+if [ ${HOSTSIZE} = "16" ]; then
+     STAMPVER="2"
+elif [ ${HOSTSIZE} = "15" ]; then
+     STAMPVER="1"
+else
+     STAMPVER="Unknown"
+fi
+
+DATACENTER='JUNK'
+if [[ ${STAMPVER} = '2' ]]
+then
+        LOCATION="$(hostname | cut -c1-2   | tr [:lower:] [:upper:])"
+          TENANT="$(hostname | cut -c3-4   | tr [:lower:] [:upper:])"
+          DOMAIN="$(hostname | cut -c5-7   | tr [:lower:] [:upper:])"
+            ROLE="$(hostname | cut -c10-12 | tr [:lower:] [:upper:])"
+     ENVIRONMENT="$(hostname | cut -c13    | tr [:lower:] [:upper:])"
+      IDENTIFIER="$(hostname | cut -c14-15 | tr [:lower:] [:upper:])"
+
+      if [[ ${TENANT}  == 'SS' ]]
+      then
+	  TENANT="ST"
+      fi
+
+# In STAMP 2.0 Domain
+     if [[ ${ENVIRONMENT} = '1' ]]
+     then
+          case "${LOCATION}" in
+               AJ) case "${TENANT}" in
+                        SG) case "${DOMAIN}" in
+                                         PRD) DATACENTER="AJPRD" ;;
+                                           *) DATACENTER='AJunk' ;;
+                            esac ;; # End SG CASE
+                        TM) case "${DOMAIN}" in
+                                     STG|PRD) DATACENTER="AJPRD" ;;
+                                           *) DATACENTER='AJunk' ;;
+                            esac ;; # End TIM CASE
+                    IV|PI|TV) case "${DOMAIN}" in
+                                     STG|PRD) DATACENTER="AJPRD" ;;
+                                           *) DATACENTER='AJunk' ;;
+                            esac ;; # End TVS CASE
+                     ST|SS) case "${DOMAIN}" in
+                                   SRV|MGT|PRD) DATACENTER="AJPRD" ;;
+                                             *) DATACENTER='AJunk' ;;
+                            esac ;; # End STAMP CASE
+                         *) DATACENTER='AJTENANTunk' ;;
+                   esac ;;  # End AJ CASE
+               CS) case "${TENANT}" in
+                        SG) case "${DOMAIN}" in 
+                                         PRD) DATACENTER="CSPRD" ;;
+                                           *) DATACENTER="CSunk" ;;
+                            esac ;; # End SG CASE
+                        TM) case "${DOMAIN}" in
+                                     STG|PRD) DATACENTER="CSPRD" ;;  
+                                           *) DATACENTER="CSunk" ;;
+                            esac ;; # End TIM CASE
+                    IV|PI|TV) case "${DOMAIN}" in
+                                     STG|PRD) DATACENTER="CSPRD" ;;
+                                           *) DATACENTER="CSunk" ;;
+                            esac ;; # End TVS CASE
+                     ST|SS) case "${DOMAIN}" in
+                                SRV|MGT|PRD) DATACENTER="CSPRD" ;;
+                                          *) DATACENTER="CSunk" ;;
+                            esac ;; # End STAMP CASE
+                         *) DATACENTER='CSTENANTunk' ;;
+                   esac ;; # End CS CASE
+                *) DATACENTER='LOCATIONunk'
+                   ;; # End LOCATION CASE
+          esac
+     
+     elif [[ ${ENVIRONMENT} = '2' ]]
+     then
+          case "${LOCATION}" in
+               AJ) case "${TENANT}" in
+                        SG) case "${DOMAIN}" in
+                                 DEV|TST|STG) DATACENTER="AJNON" ;;
+                                           *) DATACENTER='AJunk' ;;
+                            esac ;; # End SG CASE
+                        TM) case "${DOMAIN}" in
+                                 DEV|DIT|SIT) DATACENTER="AJNON" ;;
+                                           *) DATACENTER='AJunk' ;;
+                            esac ;; # End TIM CASE
+               IV|PI|TV|VC) case "${DOMAIN}" in
+                     TST|DEV|DTS|UTS|STS|TSG) DATACENTER="CSNON" ;;
+                                           *) DATACENTER='AJunk' ;;
+                            esac ;; # End TVS CASE
+                     ST|SS) case "${DOMAIN}" in
+                 AMP|XTR|SRV|MGT|NON|LAB|PPD) DATACENTER="AJNON" ;;
+                                           *) DATACENTER='AJunk' ;;
+                            esac ;; # End STAMP CASE
+                         *) DATACENTER='AJTENANTunk' ;;
+                   esac ;;  # End AJ CASE
+               CS) case "${TENANT}" in
+                        SG) case "${DOMAIN}" in 
+                                 DEV|TST|STG) DATACENTER="CSNON" ;;
+                                           *) DATACENTER="CSunk" ;;
+                            esac ;; # End SG CASE
+                        TM) case "${DOMAIN}" in
+                                DEV|DIT|SIT) DATACENTER="CSNON" ;;
+                                          *) DATACENTER="CSunk" ;;
+                            esac ;; # End TIM CASE
+               IV|PI|TV|VC) case "${DOMAIN}" in
+                    TST|DEV|DTS|UTS|STS|TSG) DATACENTER="CSNON" ;;
+                                          *) DATACENTER="CSunk" ;;
+                            esac ;; # End TVS CASE
+                     ST|SS) case "${DOMAIN}" in
+                         AMP|XTR|SRV|MGT|NON|LAB|PPD) DATACENTER="CSNON" ;;
+                                                   *) DATACENTER="CSunk" ;;
+                            esac ;; # End STAMP CASE
+                         *) DATACENTER='CSTENANTunk' ;;
+                   esac ;; # End CS CASE
+                *) DATACENTER='LOCATIONunk'
+                   ;; # End LOCATION CASE
+          esac
+     
+     fi
+
+     echo '{    "location": "'${LOCATION}'", '
+     echo '       "tenant": "'${TENANT}'", '
+     echo '   "datacenter": "'${DATACENTER}'", '
+     echo '"stamp_version": "'${STAMPVER}'", '
+     echo '  "server_type": "'${ROLE}'", '
+     echo '      "capsule": "'${CAPSULE}'", '
+     echo '  "environment": "'${DOMAIN}'" }'
+
+else
+
+  HOSTNAME="$(hostname | cut -d'.' -f1 | tr [:lower:] [:upper:])"
+  LOCATION="$(hostname | cut -c1-2     | tr [:lower:] [:upper:])"
+    TENANT="$(hostname | cut -c3-4     | tr [:lower:] [:upper:])"
+      ROLE="$(hostname | cut -c10-12   | tr [:lower:] [:upper:])"
+       ENV="$(hostname | cut -c5-7     | tr [:lower:] [:upper:])"
+DATACENTER=''
+
+      if [[ ${TENANT}  == 'SS' ]]
+      then
+	  TENANT="ST"
+      fi
+
+case "${LOCATION}" in
+     AJ) case "${TENANT}" in
+              SG) case "${ENV}" in
+                       DEV|TST|STG) DATACENTER="AJNON" ;;
+                               PRD) DATACENTER="AJPRD" ;;
+                                 *) DATACENTER='AJunk' ;;
+                  esac ;; # End SG CASE
+              TM) case "${ENV}" in
+                       DEV|DIT|SIT) DATACENTER="AJNON" ;;
+                           STG|PRD) DATACENTER="AJPRD" ;;
+                                 *) DATACENTER='AJunk' ;;
+                  esac ;; # End TIM CASE
+          IV|PI|TV|VC) case "${ENV}" in
+                   TST|DEV|DTS|UTS|STS|TSG) DATACENTER="AJNON" ;;
+                               MIT|STG|PRD) DATACENTER="AJPRD" ;;
+                                         *) DATACENTER='AJunk' ;;
+                  esac ;; # End TVS CASE
+           ST|SS) case "${ENV}" in
+                         NON|LAB|PPD) DATACENTER="AJNON" ;;
+                         SRV|MGT|PRD) DATACENTER="AJPRD" ;;
+                                   *) DATACENTER='AJunk' ;;
+                  esac ;; # End STAMP CASE
+               *) DATACENTER='AJTENANTunk' ;;
+         esac ;;  # End AJ CASE
+     CS) case "${TENANT}" in
+              SG) case "${ENV}" in 
+                       DEV|TST|STG) DATACENTER="CSNON" ;;
+                               PRD) DATACENTER="CSPRD" ;;
+                                 *) DATACENTER="CSunk" ;;
+                  esac ;; # End SG CASE
+              TM) case "${ENV}" in
+                                DEV|DIT|SIT) DATACENTER="CSNON" ;;
+                                    STG|PRD) DATACENTER="CSPRD" ;;  
+                                          *) DATACENTER="CSunk" ;;
+                  esac ;; # End TIM CASE
+     IV|PI|TV|VC) case "${ENV}" in
+                            TST|DEV|DTS|UTS|STS|TSG) DATACENTER="CSNON" ;;
+                                        MIT|STG|PRD) DATACENTER="CSPRD" ;;
+                                                  *) DATACENTER="CSunk" ;;
+                  esac ;; # End TVS CASE
+           ST|SS) case "${ENV}" in
+                               NON|LAB|PPD) DATACENTER="CSNON" ;;
+                               SRV|MGT|PRD) DATACENTER="CSPRD" ;;
+                                         *) DATACENTER="CSunk" ;;
+                  esac ;; # End STAMP CASE
+               *) DATACENTER='CSTENANTunk' ;;
+         esac ;; # End CS CASE
+     D1) case "${TENANT}" in
+           ST|SS) case "${ENV}" in 
+                               PRD) DATACENTER="AJPRD" ;;
+                               NON) DATACENTER="CSNON" ;;
+                                 *) DATACENTER="D1unk" ;;
+                 esac ;; # End SS CASE
+      *) DATACENTER='LOCATIONunk'
+         esac ;; # End LOCATION CASE
+esac
+
+     echo '{    "location": "'${LOCATION}'", '
+     echo '       "tenant": "'${TENANT}'", '
+     echo '   "datacenter": "'${DATACENTER}'", '
+     echo '"stamp_version": "'${STAMPVER}'", '
+     echo '  "server_type": "'${ROLE}'", '
+     echo '      "capsule": "'${CAPSULE}'", '
+     echo '  "environment": "'${ENV}'" }'
+
+
+fi  
+     
+unset HOSTNAME HOSTSIZE LOCATION TENANT DATACENTER ENV STAMPVER

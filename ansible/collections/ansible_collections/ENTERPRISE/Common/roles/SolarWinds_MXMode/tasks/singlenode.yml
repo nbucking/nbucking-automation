@@ -1,0 +1,44 @@
+---
+# tasks file
+#This task will run against solarwinds polling engines. It will run based on the variable nodestatus which should be defined in the task. Nodestatus will tell the role to
+#mute or unmute a node from monitoring
+  - name: Copy powershell scripts to windows servers
+    win_copy:
+      src: files/
+      dest: 'D:\Scripts\Ansible\'
+
+  - name: Get Device Monitoring Status
+    ansible.windows.win_command:
+    # When using argv, each entry is quoted in the module
+      chdir: D:\Scripts\Ansible\
+      cmd: powershell.exe d:\Scripts\Ansible\MuteNode.ps1 -Device {{ my_ip_address }} -Status
+    
+
+  - name: Mute Device
+    ansible.windows.win_command:
+    # When using argv, each entry is quoted in the module
+      chdir: D:\Scripts\Ansible\
+      cmd: powershell.exe d:\Scripts\Ansible\MuteNode.ps1 -Device {{ my_ip_address }} -Mute
+    when: nodestatus == "mute"
+
+  - name: Unmute Device
+    ansible.windows.win_command:
+    # When using argv, each entry is quoted in the module
+      chdir: D:\Scripts\Ansible\
+      cmd: powershell.exe d:\Scripts\Ansible\MuteNode.ps1 -Device {{ my_ip_address }} -Unmute
+    when: nodestatus == "unmute"    
+
+  - name: Unmanage Device
+    ansible.windows.win_command:
+    # When using argv, each entry is quoted in the module
+      chdir: D:\Scripts\Ansible\
+      cmd: powershell.exe d:\Scripts\Ansible\MuteNode.ps1 -Device {{ my_ip_address }} -Unmanage
+    when: nodestatus == "unmanage"    
+  
+  - name: Manage Device
+    ansible.windows.win_command:
+    # When using argv, each entry is quoted in the module
+      chdir: D:\Scripts\Ansible\
+      cmd: powershell.exe d:\Scripts\Ansible\MuteNode.ps1 -Device {{ my_ip_address }} -Manage
+    when: nodestatus == "manage"  
+  

@@ -1,0 +1,4 @@
+---
+# tasks file
+- name: "Update the inventory in {{ my_datacenter }}"
+  ansible.builtin.include_tasks: Inv_Upd_{{ my_datacenter | replace(' ', '_') }}.yml

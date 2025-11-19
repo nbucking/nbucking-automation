@@ -1,0 +1,11 @@
+---
+# tasks file
+
+- name: Fetch information about Repositories
+  redhat.satellite.repository_info:
+    username: "{{ sat_username }}"
+    password: "{{ sat_password }}"
+    server_url: "{{ sat_url }}"
+    search: "name = {{ sat_repository }}"
+    product: "{{ sat_product }}"
+    organization: "{{ sat_organization | default('STA')}}"

@@ -1,0 +1,12 @@
+---
+# tasks file
+- name: Display a Banner to the user during a playbook run
+  ansible.builtin.debug:
+    msg:
+      -  "*************************************"
+      -  "**      You are installing           "
+      -  "**      {{ software_name }} {{ software_version }}       "
+      -  "**          for {{ os_type }}                "
+      -  "**                                   "
+      -  "*************************************"
+  when: software_name is defined and software_version is defined and os_type is defined

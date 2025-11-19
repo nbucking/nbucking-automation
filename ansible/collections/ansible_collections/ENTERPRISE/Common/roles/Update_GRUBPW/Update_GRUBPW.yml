@@ -1,0 +1,10 @@
+---
+- name: Update GRUB password
+  hosts: AJSGSTGALL
+  become: yes
+  gather_facts: no
+  tasks:
+    - name:
+      script: /etc/ansible/roles/Update_GRUBPW/files/changeGrub2Pw.sh
+      register: output
+    - debug: msg={{ output.stdout_lines }}

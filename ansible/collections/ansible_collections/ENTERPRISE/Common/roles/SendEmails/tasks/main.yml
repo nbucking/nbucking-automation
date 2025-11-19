@@ -1,0 +1,11 @@
+---
+# tasks file
+- name: Sending an e-mail
+  community.general.mail:
+    host: 172.28.26.64
+    port: 25
+    to: "{{ to_users }}"
+    from: "{{ from_users | default('StampAutomation@tsa.dhs.gov') }}"
+    subject: "{{ subject_line }}"
+    body: "{{ body_of_email }}"
+  delegate_to: localhost

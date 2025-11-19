@@ -1,0 +1,45 @@
+---
+# tasks file for Convert_to_template for Windows
+- name: Get Datacenter Information
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.GetDatacenterInfo
+  when: my_datacenter is not defined
+
+- name: Get Folder Information
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.GetFolderInfo
+  when: my_folder is not defined
+
+- name: "Getting VM Facts for Template {{ my_vct_servername }}"
+  community.vmware.vmware_guest_info:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    datacenter: "{{ my_datacenter }}"
+    folder: "{{ my_folder }}"
+    name: "{{ my_vct_servername }}"
+    validate_certs: false
+  register: new_template_facts
+  delegate_to: localhost
+
+- name: "Ensuring {{ my_vct_servername }} is powered off"
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    uuid: "{{ new_template_facts.instance.hw_product_uuid }}"
+    state: poweredoff
+    validate_certs: false
+  delegate_to: localhost
+
+- name: "Renaming {{ my_vct_servername }} to {{ new_template_name }} and converting to template"
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    uuid: "{{ new_template_facts.instance.hw_product_uuid }}"
+    name: "{{ new_template_name }}"
+    folder: "Automation/Templates"
+    is_template: true
+    validate_certs: false
+  delegate_to: localhost

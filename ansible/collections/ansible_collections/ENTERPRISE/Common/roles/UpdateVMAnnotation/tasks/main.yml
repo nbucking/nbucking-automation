@@ -1,0 +1,38 @@
+---
+# tasks file for UpdateVMAnnotation
+
+- name: Get Datacenter Information
+  ansible.builtin.include_role:
+    name: GetDatacenterInfo
+  when: my_datacenter is not defined
+
+- name: Get Folder Information
+  ansible.builtin.include_role:
+    name: GetFolderInfo
+  when: my_folder is not defined
+
+- name: Set Annotation to be added to each host upon build
+  ansible.builtin.set_fact:
+    annotation_text: |
+      Built using Ansible Automation Platform
+      Creator: {{ tower_user }}
+      Time: {{ date_time }}
+      Type: {{ my_server_type }}
+      Source Template : {{ my_template }}
+      Remedy CRQ# : {{ crq_number | default(omit) }}
+  when: annotation_text is undefined
+
+- name: Update annotation
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    validate_certs: false
+    annotation: "{{ annotation_text }}"
+    name: "{{ my_vct_servername }}"
+    datacenter: "{{ my_datacenter }}"
+    folder: "{{ my_folder }}"
+    state: "{{ my_state | default('present') }}"
+  delegate_to: localhost
+  register: update_annotation
+  when: VMLOCATION == my_datacenter

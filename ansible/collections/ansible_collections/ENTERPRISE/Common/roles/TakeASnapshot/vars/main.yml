@@ -1,0 +1,3 @@
+---
+# vars file for TemplateRole
+template_name: "Common: Remove VMware Snapshots of guest vms"

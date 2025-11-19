@@ -1,0 +1,814 @@
+TMFirewallRules:                                                                                      
+  - adapterName: cstmprdlvsta51                                                                        
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.44
+    destination: 192.168.78.60
+  
+  - adapterName: cstmprdlvsta51                                                                        
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.44
+    destination: 192.168.78.55
+  
+  
+  - adapterName: cstmprdlvsta51                                                                        
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.44
+    destination: 192.168.78.155
+  
+  - adapterName: cstmprdlvsta51                                                                        
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.44
+    destination: 192.168.78.160
+  
+  ######
+  - adapterName: cstmprdlvsta52                                                                        
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.43
+    destination: 192.168.78.60
+  
+  - adapterName: cstmprdlvsta52                                                                        
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.43
+    destination: 192.168.78.55
+  
+  
+  - adapterName: cstmprdlvsta52                                                                        
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.43
+    destination: 192.168.78.155
+  
+  - adapterName: cstmprdlvsta52                                                                        
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.43
+    destination: 192.168.78.160
+
+
+  - adapterName: cstmditlviam51                                                                       
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.2.28.41
+    destination: 10.2.28.42
+
+  - adapterName: ajtmstglviam51                                                              
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.28.142
+    destination: 10.0.28.141
+
+  - adapterName: cstmstglaiam51                                                                        
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.24.141
+    destination: 10.0.29.42
+
+  - adapterName: ajtmprdlviam51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.29.41
+    destination: 10.0.29.42
+
+  - adapterName: cstmprdlviam51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.41
+    destination: 10.0.25.42
+   # 19 cstmprdwvtls51  All Stage and Prod Oracle DB VMs
+
+  - adapterName: cstmprdwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.36
+    destination: 10.0.122.43
+
+  - adapterName: cstmprdwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.36
+    destination: 10.0.122.44
+
+  - adapterName: cstmprdwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.36
+    destination: 10.0.122.53
+
+  - adapterName: cstmprdwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.36
+    destination: 10.0.122.54
+
+  - adapterName: cstmprdwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.36
+    destination: 10.0.123.49
+
+  - adapterName: cstmprdwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.36
+    destination: 10.0.123.50
+
+   # 19 cstmprdwvtls52  All Stage and Prod Oracle DB VMs
+
+  - adapterName: cstmprdwvtls52                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.170
+    destination: 10.0.122.43
+
+  - adapterName: cstmprdwvtls52                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.170
+    destination: 10.0.122.44
+
+  - adapterName: cstmprdwvtls52                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.170
+    destination: 10.0.122.53
+
+  - adapterName: cstmprdwvtls52                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.170
+    destination: 10.0.122.54
+
+  - adapterName: cstmprdwvtls52                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.170
+    destination: 10.0.123.49
+
+  - adapterName: cstmprdwvtls52                                                                    
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.25.170
+    destination: 10.0.123.50
+   # ajtmprdwvtls51  All Stage and Prod Oracle DB VMs
+
+  - adapterName: ajtmprdwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.28.180
+    destination: 10.0.122.43
+
+  - adapterName: ajtmprdwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.28.180
+    destination: 10.0.122.44
+
+  - adapterName: ajtmprdwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.28.180
+    destination: 10.0.122.53
+
+  - adapterName: ajtmprdwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.28.180
+    destination: 10.0.122.54
+
+  - adapterName: ajtmprdwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.28.180
+    destination: 10.0.123.49
+
+  - adapterName: ajtmprdwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.28.180
+    destination: 10.0.123.50
+
+   # ajtmstgwvtls51  All Stage and Prod Oracle DB VMs
+
+  - adapterName: ajtmstgwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                   
+    source: 10.0.29.180
+    destination: 10.0.122.43
+
+  - adapterName: ajtmstgwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.29.180
+    destination: 10.0.122.44
+
+  - adapterName: ajtmstgwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.29.180
+    destination: 10.0.122.53
+
+  - adapterName: ajtmstgwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.29.180
+    destination: 10.0.122.54
+
+  - adapterName: ajtmstgwvtls51                                                                         
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.29.180
+    destination: 10.0.123.49
+
+  - adapterName: ajtmstgwvtls51                                                                    
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.29.180
+    destination: 10.0.123.50
+    ### cstmdevwvtls51 Xming access
+
+  - adapterName: cstmdevwvtls51                                                                   
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.2.25.36
+    destination: 10.2.122.43
+  
+  
+  - adapterName: cstmdevwvtls51                                                                   
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.2.25.36
+    destination: 10.2.122.44
+  
+  
+  - adapterName: cstmdevwvtls51                                                                   
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.2.25.36
+    destination: 10.2.126.42
+  
+  
+  - adapterName: cstmdevwvtls51                                                                   
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.2.25.36
+    destination: 10.2.126.17
+  
+  
+  - adapterName: cstmdevwvtls51                                                                   
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.2.25.36
+    destination: 10.2.127.41
+  
+  - adapterName: cstmdevwvtls51                                                                   
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.2.25.36
+    destination: 10.2.127.42
+
+    ### 
+    ## ajtmstglvsoa51 STG OHS
+     
+  - adapterName: ajtmstglvsoa51 
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.28.145
+    destination: 192.168.78.44
+
+  - adapterName: ajtmstglvsoa51 
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.28.145
+    destination: 192.168.78.43
+
+    ##ajtmstglvsoa52  STG OHS 
+
+  - adapterName: ajtmstglvsoa52 
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.28.146
+    destination: 192.168.78.44
+
+  - adapterName: ajtmstglvsoa52 
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.28.146
+    destination: 192.168.78.43
+ ##ajtmprdlvsoa52  PRD OHS 
+ 
+  - adapterName: ajtmprdlvsoa51 
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.29.48
+    destination: 192.168.78.76
+
+  - adapterName: ajtmprdlvsoa51 
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.29.48
+    destination: 192.168.78.75
+
+    ##ajtmstglvsoa52  PRD OHS 
+ 
+  - adapterName: ajtmprdlvsoa52 
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.29.47
+    destination: 192.168.78.76
+
+  - adapterName: ajtmprdlvsoa51 
+    zone: ssh_access                                                                                  
+    permanent: yes                                                                                    
+    state: enabled                                                                                    
+    source: 10.0.29.47
+    destination: 192.168.78.75
+
+#=====================Stage and Prod Oracle DB VMs========================
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.43
+    destination: 10.0.122.44
+ 
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.43
+    destination: 10.0.122.53
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.43
+    destination: 10.0.122.54
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.43
+    destination: 10.0.123.49
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.43
+    destination: 10.0.123.50
+
+#============================cstmstglvorc44===============================
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.44
+    destination: 10.0.122.43
+ 
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.44
+    destination: 10.0.122.53
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.44
+    destination: 10.0.122.54
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.44
+    destination: 10.0.123.49
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.44
+    destination: 10.0.123.50
+#============================================cstmstglvorc53===================
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.53
+    destination: 10.0.122.44
+ 
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.53
+    destination: 10.0.122.43
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.53
+    destination: 10.0.122.54
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.53
+    destination: 10.0.123.49
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.53
+    destination: 10.0.123.50
+#=====================================================cstmstglvotc-54==================
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.54
+    destination: 10.0.122.44
+ 
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.54
+    destination: 10.0.122.53
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.54
+    destination: 10.0.122.43
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.54
+    destination: 10.0.123.49
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.122.54
+    destination: 10.0.123.50
+#===================================================================cstmprdlvorc123.49=====
+
+  - adapterName: cstmprdlvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.123.49
+    destination: 10.0.122.44
+ 
+  - adapterName: cstmprdlvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.123.49
+    destination: 10.0.122.53
+
+  - adapterName: cstmprdlvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.123.49
+    destination: 10.0.122.43
+
+  - adapterName: cstmprdlvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.123.49
+    destination: 10.0.122.54
+
+  - adapterName: cstmprdlvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.123.49
+    destination: 10.0.123.50
+#==========================================123.50==============
+
+  - adapterName: cstmstglvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.123.50
+    destination: 10.0.122.44
+ 
+  - adapterName: cstmprdlvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.123.50
+    destination: 10.0.122.53
+
+  - adapterName: cstmprdlvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.123.50
+    destination: 10.0.122.43
+
+  - adapterName: cstmprdlvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.123.50
+    destination: 10.0.122.54
+
+  - adapterName: cstmprdlvorc
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.123.50
+    destination: 10.0.123.49
+
+#===================================== DEV DIT SIT=================
+
+ - adapterName: DEV
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.122.43
+    destination: 10.2.122.44
+
+ - adapterName: DEV
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.122.43
+    destination: 10.2.126.42
+
+ - adapterName: DEV
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.122.43
+    destination: 10.2.126.17
+
+ - adapterName: DEV
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.122.43
+    destination: 10.2.127.41
+
+ - adapterName: DEV
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.122.43
+    destination: 10.2.127.42
+#========================================
+
+ - adapterName: DEV
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.122.44
+    destination: 10.2.122.43
+
+ - adapterName: DEV
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.122.44
+    destination: 10.2.126.42
+
+ - adapterName: DEV
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.122.44
+    destination: 10.2.126.17
+
+ - adapterName: DEV
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.122.44
+    destination: 10.2.127.41
+
+ - adapterName: DEV
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.122.44
+    destination: 10.2.127.42
+#========================================
+
+ - adapterName: DIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.126.42
+    destination: 10.2.122.43
+
+ - adapterName: DIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.126.42
+    destination: 10.2.122.44
+
+ - adapterName: DIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.126.42
+    destination: 10.2.126.17
+
+ - adapterName: DIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.126.42
+    destination: 10.2.127.41
+
+ - adapterName: DIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.126.42
+    destination: 10.2.127.42
+#========================================
+
+ - adapterName: DIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.126.17
+    destination: 10.2.122.43
+
+ - adapterName: DEV
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.126.17
+    destination: 10.2.122.44
+
+ - adapterName: DIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.126.17
+    destination: 10.2.126.42
+
+ - adapterName: DIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.126.17
+    destination: 10.2.127.41
+
+ - adapterName: DIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.126.17
+    destination: 10.2.127.42
+#========================================
+
+ - adapterName: SIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.127.41
+    destination: 10.2.122.43
+
+ - adapterName: SIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.127.41
+    destination: 10.2.122.44
+
+ - adapterName: SIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.127.41
+    destination: 10.2.126.42
+
+ - adapterName: SIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.127.41
+    destination: 10.2.126.17
+
+ - adapterName: SIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.127.41
+    destination: 10.2.127.42
+#========================================
+ - adapterName: SIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.127.42
+    destination: 10.2.122.43
+
+ - adapterName: SIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.127.42
+    destination: 10.2.122.44
+
+ - adapterName: SIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.127.42
+    destination: 10.2.126.42
+
+ - adapterName: SIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.127.42
+    destination: 10.2.126.17
+
+ - adapterName: SIT
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.2.127.42
+    destination: 10.2.127.41
+#========================================

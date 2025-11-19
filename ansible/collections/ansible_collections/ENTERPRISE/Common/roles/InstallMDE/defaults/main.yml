@@ -1,0 +1,10 @@
+---
+# defaults file for InstallMDE
+sat_url: https://csstsrvlvsat151.services.stamp.tsa.dhs.gov/pulp/content/STA/Library/custom/STAMPLinuxBinaries/Software/
+repo_loc: pulp/content/STA/Library/custom/STAMPLinuxBinaries/Software
+mde_pkg: mdatp-101.25072.0003-1.x86_64.rpm
+stage_dir: /var/tmp/
+root_user: root
+root_group: root
+reinstall: yes
+cleanup: 'yes'

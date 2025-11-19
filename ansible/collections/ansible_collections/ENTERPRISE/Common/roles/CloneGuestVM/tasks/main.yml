@@ -1,0 +1,77 @@
+---
+# tasks file for CloneGuestVM
+- name: Get Datacenter Information
+  ansible.builtin.include_role:
+    name: GetDatacenterInfo
+  when: my_datacenter is not defined
+
+- name: Get Folder Information
+  ansible.builtin.include_role:
+    name: GetFolderInfo
+  when: my_folder is not defined
+
+- name: Main Block
+  block:
+  - name: "Getting VM Facts for Template {{ my_vct_servername }}"
+    community.vmware.vmware_guest_info:
+      hostname: "{{ vcenter_hostname | default(omit) }}" 
+      username: "{{ vcenter_username | default(omit) }}"
+      password: "{{ vcenter_password | default(omit) }}"
+      datacenter: "{{ my_datacenter }}"
+      folder: "{{ my_folder }}"
+      name: "{{ my_vct_servername }}"
+    register: new_template_facts
+    delegate_to: localhost
+
+  - name: "Ensuring {{ my_vct_servername }} is powered off"
+    community.vmware.vmware_guest:
+      hostname: "{{ vcenter_hostname | default(omit) }}" 
+      username: "{{ vcenter_username | default(omit) }}"
+      password: "{{ vcenter_password | default(omit) }}"
+      uuid: "{{ new_template_facts.instance.hw_product_uuid }}"
+      state: poweredoff
+    delegate_to: localhost
+
+  - name: Change virtual machine's boot settings
+    community.vmware.vmware_guest_boot_manager:
+      hostname: "{{ vcenter_hostname | default(omit) }}" 
+      username: "{{ vcenter_username | default(omit) }}"
+      password: "{{ vcenter_password | default(omit) }}"
+      name: "{{ my_vct_servername }}"
+      boot_firmware: efi
+      secure_boot_enabled: true
+    delegate_to: localhost
+    register: vm_boot_settings
+
+  - name: "Powering on {{ my_vct_servername }} with VBS enabled"
+    community.vmware.vmware_guest:
+      hostname: "{{ vcenter_hostname | default(omit) }}" 
+      username: "{{ vcenter_username | default(omit) }}"
+      password: "{{ vcenter_password | default(omit) }}"
+      name: "{{ my_vct_servername }}"
+      datacenter: "{{ my_datacenter }}"
+      folder: "{{ my_folder }}"
+      hardware:
+        version: latest
+        virt_based_security: true
+        nested_virt: true
+        iommu: true
+        secure_boot: true
+        boot_firmware: efi
+      state: present
+    delegate_to: localhost
+
+  - name: "Ensuring {{ my_vct_servername }} is powered on"
+    community.vmware.vmware_guest:
+      hostname: "{{ vcenter_hostname | default(omit) }}" 
+      username: "{{ vcenter_username | default(omit) }}"
+      password: "{{ vcenter_password | default(omit) }}"
+      uuid: "{{ new_template_facts.instance.hw_product_uuid }}"
+      state: poweredon
+    delegate_to: localhost
+  
+  - name: "Wait for the host to power on"
+    ansible.builtin.pause:
+     minutes: 1
+     
+  when: VMLOCATION == my_datacenter

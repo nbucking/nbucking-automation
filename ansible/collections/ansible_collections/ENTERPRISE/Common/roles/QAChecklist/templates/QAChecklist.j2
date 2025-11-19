@@ -1,0 +1,27 @@
+
+
+This report was run on {{ ansible_date_time.date }}-{{ ansible_date_time.time }}
+
+CHECK:
+
+[1]  Is server is patched and is booted at the latest kernel?		{{ needsPatches }}
+[2]  Is Splunk installed and process is running?			{{ needsSplunk  }}
+[3]  Is McAfee installed and process is running?  			{{ needsMcafee  }}
+[4]  Is Flexera installed and process is running?			{{ needsFlexera }}
+[5]  Is Tanium  installed and process is running?			{{ needsTanium  }}
+[6]  Is Postfix installed and process is running?			{{ needsPostfix }}  
+[7]  Is Puppet configured?	 					{{ needsPuppet  }}
+[8]  Are Root/Paladin passwords are correctly set?			{{ needsPassSet }}
+[9]  Are Build accounts removed from the system?			{{ needsTstuser }}
+[10] Is Chrony syncing to network time?				 	{{ needsChrony  }}
+[11] Is SSSD installed and process is running?				{{ needsSSSD    }}
+[12] Is SNMPD installed and process is running?				{{ needsSNMP    }}
+
+Additional Checks
+
+[1]  Is this timezone setup correctly?					{{ showTimezone.stdout }}
+[2]  Is this nameserver1 correct?					{{ nameserver1.stdout }}
+[3]  Is this nameserver2 correct?					{{ nameserver2.stdout }}
+[4]  Is this nameserver3 correct?					{{ nameserver3.stdout }}
+[5]  Is this the corrct IP address?					{{ ansible_default_ipv4.address }}
+[6]  Is this nslookup correct?						{{ lookup.stdout }}

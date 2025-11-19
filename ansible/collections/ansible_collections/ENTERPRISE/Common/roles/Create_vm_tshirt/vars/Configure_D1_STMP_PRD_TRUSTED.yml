@@ -1,0 +1,13 @@
+---
+_hosts: '{{ my_vct_servername }}'
+my_cluster: d1ssprdlpesx50.cvp.cs
+my_folder: Linux/ENTERPRISE
+my_datacenter: D1 PROD
+my_hostname: "{{ my_vct_servername | lower }}.{{ my_dns_domain }}"
+my_network_name: VM - GSS Trusted (PRD) (LACP)
+my_netmask: 255.255.254.0
+my_gateway_address: 172.28.24.1
+my_dnsserver1: 10.0.8.129
+my_dnsserver2: 10.0.8.132
+my_dns_domain: cvp.cs
+my_datastore: Trusted Datastores

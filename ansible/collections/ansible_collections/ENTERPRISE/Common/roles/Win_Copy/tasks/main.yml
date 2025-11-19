@@ -1,0 +1,8 @@
+---
+# tasks file for Win_Copy
+- name: Copy the Chrome binary to C:\Temp
+  win_copy:
+    src: '\\csstmgtwvsus151.management.stamp.tsa.dhs.gov\temp\Chrome\110.0.5481.178\Chrome_Enterprise - 110.0.5481.178.msi'
+      #src: 'C:\Temp\Chrome_Enterprise - 110.0.5481.178.msi'
+    dest: 'C:\Temp\chrome'
+    remote_src: yes

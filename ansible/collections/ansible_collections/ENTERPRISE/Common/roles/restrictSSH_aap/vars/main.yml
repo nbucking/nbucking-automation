@@ -1,0 +1,914 @@
+---
+# vars file for restrictSSH
+NessusRules:
+  - adapterName: TVS-DEV-SEMI-CS
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.35.126
+    immediate: yes
+    state: enabled
+    network: 192.168.35.0
+  - adapterName: GSS-NON-TRUSTED-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.0.251
+    immediate: yes
+    state: enabled
+    network: 172.27.0.0
+  - adapterName: GSS-DEV-SEMI-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.2.130
+    immediate: yes
+    state: enabled
+    network: 172.26.2.0
+  - adapterName: GSS-NON-SEMI-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.2.10
+    immediate: yes
+    state: enabled
+    network: 172.27.2.0
+  - adapterName: SG-NON-SEMI-120-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.20.2.126
+    immediate: yes
+    state: enabled
+    network: 10.20.2.0
+  - adapterName: SG-NON-TRUST-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.20.1.226
+    immediate: yes
+    state: enabled
+    network: 10.20.1.0
+  - adapterName: SG-TST-DMZ-130-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.20.5.226
+    immediate: yes
+    state: enabled
+    network: 10.20.5.0
+  - adapterName: GSS-NON-TRUSTED-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.0.200
+    immediate: yes
+    state: enabled
+    network: 172.27.0.0
+  - adapterName: EA-NON-WKS-VIR-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.20.14.5
+    immediate: yes
+    state: enabled
+    network: 172.20.14.0
+  - adapterName: GSS-NON-PAAS-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.200.16
+    immediate: yes
+    state: enabled
+    network: 172.27.200.0
+  - adapterName: GSS-NON-WKS-VIR-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.20.11.126
+    immediate: yes
+    state: enabled
+    network: 172.20.11.0
+  - adapterName: SG-NON-WKS-VIR-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.20.13.126
+    immediate: yes
+    state: enabled
+    network: 172.20.13.0
+  - adapterName: TIM-NON-WKS-VIR-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.20.12.126
+    immediate: yes
+    state: enabled
+    network: 172.20.12.0
+  - adapterName: TVS-NON-WKS-VIR-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.20.10.126
+    immediate: yes
+    state: enabled
+    network: 172.20.10.0
+  - adapterName: GSS-NON-REST-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.3.181
+    immediate: yes
+    state: enabled
+    network: 172.27.3.0
+  - adapterName: SG-DEV-DB-105-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.20.6.162
+    immediate: yes
+    state: enabled
+    network: 10.20.6.0
+  - adapterName: SG-TST-DB-110-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.20.7.126
+    immediate: yes
+    state: enabled
+    network: 10.20.7.0
+  - adapterName: GSS-PRD-TRUST-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.24.151
+    immediate: yes
+    state: enabled
+    network: 172.27.24.0
+  - adapterName: EA-PRD-TRUST-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.32.4
+    immediate: yes
+    state: enabled
+    network: 172.27.32.0
+  - adapterName: GSS-PRD-PAAS-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.202.16
+    immediate: yes
+    state: enabled
+    network: 172.27.202.0
+  - adapterName: GSS-PRD-SEC-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.28.126
+    immediate: yes
+    state: enabled
+    network: 172.27.28.0 
+  - adapterName: GSS-PRD-SEMI-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.26.126
+    immediate: yes
+    state: enabled
+    network: 172.27.26.0 
+  - adapterName: SG-PRD-TRUST-AJ-50
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.9.99
+    immediate: yes
+    state: enabled
+    network: 192.168.9.0
+  - adapterName: TIM-PRD-SEMI-D1
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.78.126
+    immediate: yes
+    state: enabled
+    network: 192.168.78.0
+  - adapterName: TVS-PRD-SEMI-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.74.126
+    immediate: yes
+    state: enabled
+    network: 192.168.74.0
+  - adapterName: GSS-PRD-SEMI-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.26.126
+    immediate: yes
+    state: enabled
+    network: 172.27.26.0
+  - adapterName: TVS-PRD-TRUST-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.0.8.126
+    immediate: yes
+    state: enabled
+    network: 10.0.8.0
+  - adapterName: SG-PRD-SEMI-AJ-110
+    zone: ssh_access
+    permanent: yes
+    source: 10.10.2.99
+    immediate: yes
+    state: enabled
+    network: 10.10.2.0
+  - adapterName: SG-PRD-SEMI-AJ-115
+    zone: ssh_access
+    permanent: yes
+    source: 10.10.4.99
+    immediate: yes
+    state: enabled
+    network: 10.10.4.0
+  - adapterName: SG-PRD-SEMI-AJ-120
+    zone: ssh_access
+    permanent: yes
+    source: 10.10.3.99
+    immediate: yes
+    state: enabled
+    network: 10.10.3.0
+  - adapterName: SG-PRD-TRUST-AJ-10
+    zone: ssh_access
+    permanent: yes
+    source: 10.10.1.95
+    immediate: yes
+    state: enabled
+    network: 10.10.1.0
+  - adapterName: SG-PRD-TRUST-AJ-11
+    zone: ssh_access
+    permanent: yes
+    source: 10.10.0.99
+    immediate: yes
+    state: enabled
+    network: 10.10.0.0
+  - adapterName: OSC-PRD-WKS-WP-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.0.34.16
+    immediate: yes
+    state: enabled
+    network: 10.0.34.0
+  - adapterName: TIM-PRD-TRUST-D1
+    zone: ssh_access
+    permanent: yes
+    source: 10.0.28.226
+    immediate: yes
+    state: enabled
+    network: 10.0.28.0
+  - adapterName: GSS-PRD-REST-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.27.81
+    immediate: yes
+    state: enabled
+    network: 172.27.27.0
+  - adapterName: EA-PRD-Restricted-AJ-401
+    zone: ssh_access
+    permanent: yes
+    source: 172.27.33.4
+    immediate: yes
+    state: enabled
+    network: 172.27.27.0
+  - adapterName: SG-PRD-REST-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.10.5.99
+    immediate: yes
+    state: enabled
+    network: 10.10.5.0
+  - adapterName: TIM-PRD-REST-D1
+    zone: ssh_access
+    permanent: yes
+    source: 10.0.126.126
+    immediate: yes
+    state: enabled
+    network: 10.0.126.0
+  - adapterName: TVS-PRD-REST-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.0.126.126
+    immediate: yes
+    state: enabled
+    network: 10.0.126.0
+  - adapterName: GSS-DEV-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.0.191
+    immediate: yes
+    state: enabled
+    network: 172.26.0.0
+  - adapterName:  SG-DEV-RESTRICT-CS
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.86.126
+    immediate: yes
+    state: enabled
+    network: 192.168.86.0
+  - adapterName: SG-DEV-SEMI-CS
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.85.126
+    immediate: yes
+    state: enabled
+    network: 192.168.85.0
+  - adapterName: SG-DEV-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.84.126
+    immediate: yes
+    state: enabled
+    network: 192.168.84.0
+  - adapterName: TIM-DEV-SEMI-CS
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.37.126
+    immediate: yes
+    state: enabled
+    network: 192.168.37.0
+  - adapterName: TIM-NON-SEMI-D1
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.38.126
+    immediate: yes
+    state: enabled
+    network: 192.168.38.0
+  - adapterName: TVS-DEV-SEMI-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.34.126
+    immediate: yes
+    state: enabled
+    network: 192.168.34.0
+  - adapterName: TVS-DEV-SEMI-CS
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.35.126
+    immediate: yes
+    state: enabled
+    network: 192.168.34.0
+  - adapterName: TVS-DEV-SIM-CS
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.80.126
+    immediate: yes
+    state: enabled
+    network: 192.168.80.0
+  - adapterName: TS-DTS-SEMI-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.44.126
+    immediate: yes
+    state: enabled
+    network: 192.168.44.0
+  - adapterName:  TVS-DTS-SEMI-CS
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.45.126
+    immediate: yes
+    state: enabled
+    network: 192.168.45.0
+  - adapterName: TVS-DTS-SIM-CS
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.70.126
+    immediate: yes
+    state: enabled
+    network: 192.168.70.0
+  - adapterName: TVS-NON-WKS-VIR
+    zone: ssh_access
+    permanent: yes
+    source: 172.20.0.126
+    immediate: yes
+    state: enabled
+    network: 172.20.0.0
+  - adapterName: TVS-STS-SEMI-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.54.126
+    immediate: yes
+    state: enabled
+    network: 192.168.54.0
+  - adapterName: TVS-STS-SEMI-CS
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.55.126
+    immediate: yes
+    state: enabled
+    network: 192.168.55.0
+  - adapterName: TVS-DTS-SIM-CS
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.70.126
+    immediate: yes
+    state: enabled
+    network: 192.168.70.0
+  - adapterName: TVS-NON-WKS-VIR
+    zone: ssh_access
+    permanent: yes
+    source: 172.20.0.126
+    immediate: yes
+    state: enabled
+    network: 172.20.0.0
+  - adapterName: TVS-STS-SEMI-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.54.126
+    immediate: yes
+    state: enabled
+    network: 192.168.54.0
+  - adapterName: TVS-STS-SEMI-CS
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.55.126
+    immediate: yes
+    state: enabled
+    network: 192.168.55.0
+  - adapterName: GSS-DEV-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.0.130
+    immediate: yes
+    state: enabled
+    network: 172.26.0.0
+  - adapterName: GSS-DEV-SEMI-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.2.226
+    immediate: yes
+    state: enabled
+    network: 172.26.2.128
+  - adapterName: GSS-DEV-SEMI-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.2.126
+    immediate: yes
+    state: enabled
+    network: 172.26.2.0
+  - adapterName: GSS-DEV-TRUST-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.1.126
+    immediate: yes
+    state: enabled
+    network: 172.26.1.0
+  - adapterName: GSS-DTS-SEMI-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.10.126
+    immediate: yes
+    state: enabled
+    network: 172.26.10.0
+  - adapterName: GSS-STS-SEMI-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.18.226 
+    immediate: yes
+    state: enabled
+    network: 172.26.18.128
+  - adapterName: GSS-STS-SEMI-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.18.126
+    immediate: yes
+    state: enabled
+    network: 172.26.18.0
+  - adapterName: GSS-STS-TRUST-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.17.126
+    immediate: yes
+    state: enabled
+    network: 172.26.17.0
+  - adapterName: GSS-STS-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.16.126
+    immediate: yes
+    state: enabled
+    network: 172.26.16.0
+  - adapterName: GSS-DEV-TRUST-CS 
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.200.16
+    immediate: yes
+    state: enabled
+    network: 172.26.200.0
+  - adapterName: GSS-NON-PAAS-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.200.16
+    immediate: yes
+    state: enabled
+    network: 172.26.200.0
+  - adapterName: TIM-DEV-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.2.24.126
+    immediate: yes
+    state: enabled
+    network: 10.2.24.0
+  - adapterName: SG-NON-WKS-VIR
+    zone: ssh_access
+    permanent: yes
+    source: 172.20.3.126
+    immediate: yes
+    state: enabled
+    network: 172.20.3.0
+  - adapterName: TIM-NON-TRUST-D1
+    zone: ssh_access
+    permanent: yes
+    source: 10.2.28.129
+    immediate: yes
+    state: enabled
+    network: 10.2.28.0
+  - adapterName: TIM-NON-WKS-VIR
+    zone: ssh_access
+    permanent: yes
+    source: 172.20.2.226
+    immediate: yes
+    state: enabled
+    network: 172.20.2.0
+  - adapterName: TVS-DTS-WKS-TRUST
+    zone: ssh_access
+    permanent: yes
+    source: 172.20.20.4
+    immediate: yes
+    state: enabled
+    network: 172.20.20.0
+  - adapterName: GSS-DEV-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.0.110
+    immediate: yes
+    state: enabled
+    network: 172.26.0.0
+  - adapterName: TVS-DEV-TRUST-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.2.8.126
+    immediate: yes
+    state: enabled
+    network: 10.2.8.0
+  - adapterName: TVS-DEV-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.2.4.226
+    immediate: yes
+    state: enabled
+    network: 10.2.4.0
+  - adapterName: TVS-DTS-TRUST-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.21.8.126
+    immediate: yes
+    state: enabled
+    network: 10.21.8.0
+  - adapterName: TVS-DTS-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.21.4.126
+    immediate: yes
+    state: enabled
+    network: 10.21.4.0
+  - adapterName: TVS-STS-SIM-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.43.49.126
+    immediate: yes
+    state: enabled
+    network: 10.43.49.0
+  - adapterName: TVS-STS-TRUST-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.1.8.126
+    immediate: yes
+    state: enabled
+    network: 10.1.8.0
+  - adapterName: TVS-STS-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.1.4.126
+    immediate: yes
+    state: enabled
+    network: 10.1.4.0
+  - adapterName: PI-TST-NON-SEMI-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.112.0.99
+    immediate: yes
+    state: enabled
+    network: 10.112.0.0
+  - adapterName: GSS-DEV-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.0.111
+    immediate: yes
+    state: enabled
+    network: 172.26.0.0
+  - adapterName: GSS-DTS-SEMI-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.10.226
+    immediate: yes
+    state: enabled
+    network: 172.26.10.0 
+  - adapterName: GSS-DTS-TRUST-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.9.126
+    immediate: yes
+    state: enabled
+    network: 172.26.9.0
+  - adapterName: GSS-DTS-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.8.126
+    immediate: yes
+    state: enabled
+    network: 172.26.8.0
+  - adapterName: GSS-NON-WKS-VIR
+    zone: ssh_access
+    permanent: yes
+    source: 172.20.1.126
+    immediate: yes
+    state: enabled
+    network: 172.20.1.0
+  - adapterName: PI-NON-WKS-VIR-CS 
+    zone: ssh_access
+    permanent: yes
+    source: 10.112.25.99
+    immediate: yes
+    state: enabled
+    network: 10.112.25.0
+  - adapterName: PI-TST-TRUST-CS 
+    zone: ssh_access
+    permanent: yes
+    source: 10.112.50.99
+    immediate: yes
+    state: enabled
+    network: 10.112.50.0
+  - adapterName: MITRE Subnet
+    zone: ssh_access
+    permanent: yes
+    source: 10.12.51.126
+    immediate: yes
+    state: enabled
+    network: 10.12.51.0
+  - adapterName: GSS-DEV-RESTICT-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.3.181
+    immediate: yes
+    state: enabled
+    network: 172.26.3.0
+  - adapterName: GSS-DEV-RESTICT-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.3.91
+    immediate: yes
+    state: enabled
+    network: 172.26.3.0
+  - adapterName: GSS-DTS-RESTICT-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.11.226
+    immediate: yes
+    state: enabled
+    network: 172.26.11.128
+  - adapterName: GSS-DTS-RESTICT-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.11.126
+    immediate: yes
+    state: enabled
+    network: 172.26.11.0
+  - adapterName: GSS-STS-RESTICT-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.19.226
+    immediate: yes
+    state: enabled
+    network: 172.26.19.0
+  - adapterName: GSS-STS-RESTICT-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.19.126
+    immediate: yes
+    state: enabled
+    network: 172.26.19.0
+  - adapterName: TIM-DEV-RESTRICT-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.2.122.126
+    immediate: yes
+    state: enabled
+    network: 10.2.122.0
+  - adapterName: TIM-NON-RESTRICT-D1
+    zone: ssh_access
+    permanent: yes
+    source: 10.2.126.126
+    immediate: yes
+    state: enabled
+    network: 10.2.126.0
+  - adapterName: TVS-DEV-RESTICT-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.2.118.126
+    immediate: yes
+    state: enabled
+    network: 10.2.118.0 
+  - adapterName: TVS-DEV-RESTICT-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.2.114.126
+    immediate: yes
+    state: enabled
+    network: 10.2.114.0 
+  - adapterName: TVS-DTS-RESTICT-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.21.118.126
+    immediate: yes
+    state: enabled
+    network: 10.21.118.0
+  - adapterName: TVS-DTS-RESTICT-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.21.114.126
+    immediate: yes
+    state: enabled
+    network: 10.21.114.0 
+  - adapterName: TVS-STS-RESTICT-AJ
+    zone: ssh_access
+    permanent: yes
+    source: 10.21.118.126
+    immediate: yes
+    state: enabled
+    network: 10.21.118.0
+  - adapterName: TVS-STS-RESTICT-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.1.114.126
+    immediate: yes
+    state: enabled
+    network: 10.1.114.0
+  - adapterName: PI-TST-RESTRICTED-CS 
+    zone: ssh_access
+    permanent: yes
+    source: 10.112.80.99
+    immediate: yes
+    state: enabled
+    network: 10.112.80.0
+  - adapterName: GSS-PRD-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.24.151
+    immediate: yes
+    state: enabled
+    network: 172.26.24.0
+  - adapterName: TIM-PRD-TRUST-CS 
+    zone: ssh_access
+    permanent: yes
+    source: 10.0.24.126
+    immediate: yes
+    state: enabled
+    network: 10.0.24.0
+  - adapterName: osc-prd-wks-wp-cs
+    zone: ssh_access
+    permanent: yes
+    source: 10.0.38.16
+    immediate: yes
+    state: enabled
+    network: 10.0.38.0
+  - adapterName: PI-PRD-SEMI-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.111.0.99
+    immediate: yes
+    state: enabled
+    network: 10.111.0.0
+  - adapterName: PI-PRD-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.111.50.99
+    immediate: yes
+    state: enabled
+    network: 10.111.50.0
+  - adapterName: Trusted_SG-1-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.10.100.21
+    immediate: yes
+    state: enabled
+    network: 10.10.100.0 
+  - adapterName: GSS-PRD-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.24.230
+    immediate: yes
+    state: enabled
+    network: 172.26.24.0 
+  - adapterName: TVS-PRD-TRUST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.0.4.126
+    immediate: yes
+    state: enabled
+    network: 10.0.4.0 
+  - adapterName: GSS-PRD-PAAS-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.202.16
+    immediate: yes
+    state: enabled
+    network: 172.26.202.0 
+  - adapterName: GSS-PRD-SEC-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.28.226
+    immediate: yes
+    state: enabled
+    network: 172.26.28.0 
+  - adapterName: GSS-PRD-SEMI-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.26.126 
+    immediate: yes
+    state: enabled
+    network: 172.26.26.0 
+  - adapterName: TIM-PRD-SEMI-CS
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.77.126
+    immediate: yes
+    state: enabled
+    network: 192.168.77.0 
+  - adapterName: TVS-PRD-SEMI-CS
+    zone: ssh_access
+    permanent: yes
+    source: 192.168.75.126
+    immediate: yes
+    state: enabled
+    network: 192.168.75.0
+  - adapterName: GSS-PRD-REST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 172.26.27.81
+    immediate: yes
+    state: enabled
+    network: 172.26.27.0
+  - adapterName: TIM-PRD-REST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.0.122.126
+    immediate: yes
+    state: enabled
+    network: 10.0.122.0 
+  - adapterName: TVS-PRD-REST-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.0.114.126
+    immediate: yes
+    state: enabled
+    network: 10.0.114.0 
+  - adapterName: PI-PRD-RESTRICTED-CS
+    zone: ssh_access
+    permanent: yes
+    source: 10.111.80.99
+    immediate: yes
+    state: enabled
+    network: 10.111.80.0 
+TVSFirewallRules:
+  - adapterName: cstvprdlvftp01
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.4.113
+    destination: 192.168.75.80
+  - adapterName: cstvprdlvftp01
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.4.163
+    destination: 192.168.75.80
+  - adapterName: cstvprdlvftp01
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 192.168.75.21
+    destination: 192.168.75.80
+  - adapterName: cstvprdlvftp01
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 192.168.75.126
+    destination: 192.168.75.80
+  
+  - adapterName: cstvprdlvftp02
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.4.113
+    destination: 192.168.75.81
+  - adapterName: cstvprdlvftp02
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 10.0.4.163
+    destination: 192.168.75.81
+  - adapterName: cstvprdlvftp02
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 192.168.75.21
+    destination: 192.168.75.81
+  - adapterName: cstvprdlvftp02
+    zone: ssh_access
+    permanent: yes
+    state: enabled
+    source: 192.168.75.126
+    destination: 192.168.75.81

@@ -1,0 +1,62 @@
+---
+# tasks file for VaultUpgrade
+- name: Check to see if /home is mounted noexec
+  shell: /usr/bin/mount |grep '/home' | grep noexec #|| /bin/true
+  register: result
+  ignore_errors: true
+  
+- name: Remount /home with exec so we can run ansible scripts (will reset after reboot)
+  shell: /usr/bin/mount -o remount,exec /home
+  when: '"noexec" | string  in result.stdout'
+  
+- name: Stop the vault process
+  systemd:
+    name: vault.service
+    state: stopped
+  
+- name: UnInstall Vault Enterprise
+  yum:
+    name: vault-enterprise.x86_64
+    state: absent
+
+- name: Install Vault enterprise with HSM
+  yum:
+    name: vault-enterprise-hsm.x86_64
+    state: present 
+  
+- name: Copy systemd to remote servers
+  copy:
+    src: vault.service.systemd
+    dest: /usr/lib/systemd/system/vault.service
+    mode: '0644'
+    owner: root
+    group: root
+  
+- name: Force systemd to reread configuration
+  systemd:
+    daemon_reload: true
+  
+- name: Start the Vault process
+  systemd:
+    name: vault.service
+    enable: yes
+    state: started
+  
+- name: Unseal the vault
+  script: unseal.sh 
+  register: checkvault
+  no_log: true
+  
+- name: Delete the template
+  file:
+    path: /root/unseal.sh
+    state: absent
+  
+- name: Check vault status
+  script: 
+    cmd:  vaultstatus.sh
+  register: vaultstatus
+  
+- debug:
+    msg: "Vault status is offline. Needs manual review"
+  when: vaultstatus.stdout == "Offline"

@@ -1,0 +1,33 @@
+---
+# tasks file
+- name: Download Software
+  ansible.builtin.get_url:
+    url: "{{ software_url }}"
+    dest: "{{ software_dest | default('/var/tmp')}}"
+    mode: '0440'
+    validate_certs: false
+  environment:
+    http_proxy:  http://10.239.90.45:80
+    https_proxy: https://10.239.90.45:80
+  register: download_output
+
+- debug: var=download_output.dest
+
+- name: Upload Software to Satellite Repo
+  redhat.satellite.content_upload:
+    username: "{{ sat_username }}"
+    password: "{{ sat_password }}"
+    server_url: "{{ sat_url }}"
+    src: "{{ download_output.dest }}"
+    repository: "{{ sat_repository }}"
+    product: "{{ sat_product }}"
+    organization: "{{ sat_organization | default('STA')}}"
+
+- name: Fetch information about Repositories
+  redhat.satellite.repository_info:
+    username: "{{ sat_username }}"
+    password: "{{ sat_password }}"
+    server_url: "{{ sat_url }}"
+    name: "{{ sat_repository }}"
+    product: "{{ sat_product }}"
+    organization: "{{ sat_organization | default('STA')}}"

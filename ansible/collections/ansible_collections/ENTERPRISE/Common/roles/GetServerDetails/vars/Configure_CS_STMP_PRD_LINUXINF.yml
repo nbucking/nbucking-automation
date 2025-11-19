@@ -1,0 +1,13 @@
+---
+_hosts: '{{ my_vct_servername }}'
+my_cluster: csstsrvlpesx150
+my_folder: Linux/ENTERPRISE
+my_datacenter: CS PRD
+my_hostname: "{{ my_vct_servername | lower }}.{{ my_dns_domain }}"
+my_network_name: cs-stmp-prd-linuxinf
+my_netmask: 255.255.255.0
+my_gateway_address: 172.26.58.1
+my_dnsserver1: 172.26.57.51
+my_dnsserver2: 172.27.57.51
+my_dns_domain: services.stamp.tsa.dhs.gov
+my_datastore: ESX150 Trusted Datastore Cluster (CS)

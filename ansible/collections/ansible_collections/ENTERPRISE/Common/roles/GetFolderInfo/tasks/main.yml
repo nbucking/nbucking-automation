@@ -1,0 +1,23 @@
+---
+# tasks file for GetFolderInfo
+- name: Find Guest's Folder using server name
+  community.vmware.vmware_guest_find:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    name: "{{ my_vct_servername }}"
+  delegate_to: localhost
+  register: vm_folder
+  ignore_errors: yes
+
+- name: Main block
+  block:
+  - debug:
+      var: vm_folder.folders[0]
+      verbosity: 1
+
+  - name: Setting the variable for my_folder
+    ansible.builtin.set_fact:
+      my_folder: "{{ vm_folder.folders[0] }}"
+  
+  when: vm_folder is not failed

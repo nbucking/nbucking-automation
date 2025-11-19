@@ -1,0 +1,72 @@
+---
+# tasks file for Reinstall_McAfee
+- name: Check if uninstall script exists
+  stat:
+    path: /opt/McAfee/agent/scripts/uninstall.sh
+  register: stat_uninstall
+- name: remove McAfee Agent by running uninstall
+  command: 
+    cmd: "sh /opt/McAfee/agent/scripts/uninstall.sh"
+  when: stat_uninstall is defined
+  register: uninstall
+  ignore_errors: yes
+- name: Remove the packages if running uninstall doesn't work 
+  yum:
+    name: ['MFEcma', 'MFErt', 'MFEdx'] ## Removing McAfee
+    update_cache: yes
+    state: absent
+  when: uninstall is failed
+- name: Ensure the /etc/ma.d directory exists
+  file:
+    path: /etc/ma.d/
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+- name: touch the /etc/ma.d/ma_environment.conf file
+  file:
+    path: /etc/ma.d/ma_environment.conf
+    state: touch
+- name: Try installing McAfee A/V for PROD
+  script:
+    cmd: install_prd.sh -i
+  register: av_prd_results
+  when: ansible_local['vmInfo']['datacenter'] == "AJPRD" or ansible_local['vmInfo']['datacenter'] == "CSPRD"
+- name: Try installing McAfee A/V for NON
+  script:
+    cmd: install.sh -i
+  register: av_non_results
+  when: ansible_local['vmInfo']['datacenter'] == "AJNON" or ansible_local['vmInfo']['datacenter'] == "CSNON"
+
+- debug:
+    var: av_prd_results.stdout_lines
+  when: av_prd_results.stdout_lines is defined
+
+- debug:
+    var: av_non_results.stdout_lines
+  when: av_non_results.stdout_lines is defined
+
+- name: Check if firewalld is started
+  command: systemctl is-active firewalld
+  register: firewalld
+  ignore_errors: yes
+
+- name: Setup required firewall ports so MPO can talk to host
+  firewalld:
+    port: "{{ item }}"
+    immediate: yes
+    permanent: yes
+    state: enabled
+  loop:
+    - 8081/tcp
+  when: firewalld == 'active'
+
+- name: Check to see if the script failed - PRD
+  fail:
+    msg: "The script failed with the error -> scriptlet failed, exit status 1"
+  when: ( av_prd_results is defined ) and ( "'scriptlet failed' in av_prd_results.stdout" )
+
+- name: Check to see if the script failed - NON
+  fail:
+    msg: "The script failed with the error -> scriptlet failed, exit status 1"
+  when: ( av_non_results is defined ) and ( "'scriptlet failed' in av_non_results.stdout" )

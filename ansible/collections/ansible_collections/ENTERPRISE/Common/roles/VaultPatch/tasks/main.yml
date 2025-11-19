@@ -1,0 +1,198 @@
+---
+# tasks file for VaultPatch
+  serial: 1
+  vars_files:
+  - unseal.yml
+  
+- name: Going into the B&D block
+  block:
+  - name: Setup tokens for cluster B
+    set_fact:
+      unseal_token1: "{{ unseal_token1b }}" 
+      unseal_token2: "{{ unseal_token2b }}" 
+      unseal_token3: "{{ unseal_token3b }}" 
+    when: ansible_local['vault']['cluster'] == 'B' 
+
+  - name: Setup tokens for cluster D
+    set_fact:
+      unseal_token1: "{{ unseal_token1d }}" 
+      unseal_token2: "{{ unseal_token2d }}" 
+      unseal_token3: "{{ unseal_token3d }}" 
+    when: ansible_local['vault']['cluster'] == 'D' 
+
+  - name: Stop the Vault Service
+    systemd:
+      name: vault.service
+      state: stopped
+ 
+  - name: Patch the B&D Nodes
+    yum:
+      name: '*'
+      state: latest
+      exclude: vault-enterprise
+
+  - name: Check if servers needs to be rebooted
+    shell: /bin/needs-restarting -r || /bin/true
+    register: NeedsReboot
+
+  - name: Reboot server after patching
+    reboot:
+      msg: "Reboot initiated by ENTERPRISE Linux Team"
+      reboot_timeout: 600
+      test_command: 'uname -r'
+      post_reboot_delay: 60
+      pre_reboot_delay: 30
+    when: '"Reboot is required" in NeedsReboot.stdout' 
+
+  - name: Confirm vault is running post reboot
+    systemd:
+      name: vault.service
+      state: started
+
+  - name: Build the unseal script
+    template:
+      src: unseal.sh
+      dest: /root/unseal.sh
+      owner: root
+      group: root
+      mode: "0700"
+
+  - name: Unseal the vault
+    shell: /bin/sh /root/unseal.sh
+    register: checkvault
+    no_log: true
+
+  - name: Check vault status
+    script: 
+      cmd: vaultstatus.sh
+    register: vaultstatus
+
+  - debug:
+      msg: "Vault status is offline. Needs manual review"
+    when: vaultstatus.stdout == "Offline"
+
+  when: ansible_local['vault']['cluster'] == 'B" or ansible_local['vault']['cluster'] == 'D'
+
+- name: Going into the C block
+  block:
+  - name: Setup tokens for cluster C
+    set_fact:
+      unseal_token1: "{{ unseal_token1c }}" 
+      unseal_token2: "{{ unseal_token2c }}" 
+      unseal_token3: "{{ unseal_token3c }}" 
+    when: ansible_local['vault']['cluster'] == 'C' 
+
+  - name: Stop vault service
+    systemd:
+      name: vault.service
+      state: stopped
+ 
+  - name: Patch the C Nodes
+    yum:
+      name: '*'
+      state: latest
+      exclude: vault-enterprise
+
+  - name: Check if servers needs to be rebooted
+    shell: /bin/needs-restarting -r || /bin/true
+    register: NeedsReboot
+
+  - name: Reboot server after patching
+    reboot:
+      msg: "Reboot initiated by ENTERPRISE Linux Team"
+      reboot_timeout: 600
+      test_command: 'uname -r'
+      post_reboot_delay: 60
+      pre_reboot_delay: 30
+    when: '"Reboot is required" in NeedsReboot.stdout' 
+
+  - name: Confirm vault is running post reboot
+    systemd:
+      name: vault.service
+      state: started
+
+  - name: Build the unseal script
+    template:
+      src: unseal.sh
+      dest: /root/unseal.sh
+      owner: root
+      group: root
+      mode: "0700"
+
+  - name: Unseal the vault
+    shell: /bin/sh /root/unseal.sh
+    register: checkvault
+    no_log: true
+
+  - name: Check vault status
+    script: 
+      cmd: vaultstatus.sh
+    register: vaultstatus
+
+  - debug:
+      msg: "Vault status is offline. Needs manual review"
+    when: vaultstatus.stdout == "Offline"
+
+  when: ansible_local['vault']['cluster'] == 'C' 
+
+- name: Going into the A block
+  block:
+  - name: Setup tokens for cluster A
+    set_fact:
+      unseal_token1: "{{ unseal_token1a }}" 
+      unseal_token2: "{{ unseal_token2a }}" 
+      unseal_token3: "{{ unseal_token3a }}" 
+    when: ansible_local['vault']['cluster'] == 'A' 
+
+  - name: Stop vault service
+    systemd:
+      name: vault.service
+      state: stopped
+ 
+  - name: Patch the A Nodes
+    yum:
+      name: '*'
+      state: latest
+      exclude: vault-enterprise
+
+  - name: Check if servers needs to be rebooted
+    shell: /bin/needs-restarting -r || /bin/true
+    register: NeedsReboot
+
+  - name: Reboot server after patching
+    reboot:
+      msg: "Reboot initiated by ENTERPRISE Linux Team"
+      reboot_timeout: 600
+      test_command: 'uname -r'
+      post_reboot_delay: 60
+      pre_reboot_delay: 30
+    when: '"Reboot is required" in NeedsReboot.stdout' 
+
+  - name: Confirm vault is running post reboot
+    systemd:
+      name: vault.service
+      state: started
+
+  - name: Build the unseal script
+    template:
+      src: unseal.sh
+      dest: /root/unseal.sh
+      owner: root
+      group: root
+      mode: "0700"
+
+  - name: Unseal the vault
+    shell: /bin/sh /root/unseal.sh
+    register: checkvault
+    no_log: true
+
+  - name: Check vault status
+    script: 
+      cmd: vaultstatus.sh
+    register: vaultstatus
+
+  - debug:
+      msg: "Vault status is offline. Needs manual review"
+    when: vaultstatus.stdout == "Offline"
+
+  when: ansible_local['vault']['cluster'] == 'A' 

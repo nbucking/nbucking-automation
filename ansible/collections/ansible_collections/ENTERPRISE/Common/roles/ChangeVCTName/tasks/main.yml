@@ -1,0 +1,11 @@
+---
+# tasks file for ChangeVCTName
+- name: Rename a virtual machine
+  community.vmware.vmware_object_rename:
+    hostname: '{{ vcenter_hostname | default(omit) }}'
+    username: '{{ vcenter_username | default(omit) }}'
+    password: '{{ vcenter_password | default(omit) }}'
+    new_name: "{{ new_server_hostname }}"
+    object_name: "{{ old_server_hostname }}"
+    object_type: VirtualMachine
+  delegate_to: localhost

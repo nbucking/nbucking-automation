@@ -1,0 +1,137 @@
+---
+# tasks file for TakeASnapshot
+- name: Get Datacenter Information
+  ansible.builtin.include_role:
+    name: GetDatacenterInfo
+  when: my_datacenter is not defined
+
+- name: Get Folder Information
+  ansible.builtin.include_role:
+    name: GetFolderInfo
+  when: my_folder is not defined
+
+- name: Gather info block
+  block:
+  - name: Gather snapshot information about the virtual machine in the given vCenter
+    community.vmware.vmware_guest_snapshot_info:
+      hostname: "{{ vcenter_hostname | default(omit) }}"
+      username: "{{ vcenter_username | default(omit) }}"
+      password: "{{ vcenter_password | default(omit) }}"
+      datacenter: "{{ my_datacenter }}"
+      folder: "{{ my_folder }}"
+      name: "{{ my_vct_servername }}"
+    delegate_to: localhost
+    register: snapshot_info
+
+  - name: Set the variables for amount of snapshots
+    ansible.builtin.set_fact: 
+      qty_snapshots: "{{ snapshot_info['guest_snapshots']['snapshots'] | length }}"
+      ss_creation_time: "{{ snapshot_info['guest_snapshots']['snapshots']['creation_time'] }}"
+    when: snapshot_info['guest_snapshots'] | length > 0
+  
+  - name: Minutes since the snapshot was created
+    ansible.builtin.debug:
+      msg: "{{ }}"
+
+  - debug: msg="There are 0 snapshots on this host"
+    when: snapshot_info['guest_snapshots'] | length == 0
+
+  - debug: msg="There are/is {{ qty_snapshots }} snapshot(s) on this host"
+    when: snapshot_info['guest_snapshots'] | length > 0
+
+  when: VMLOCATION == my_datacenter
+
+# - name: Remove all previous snapshots?
+#   block:
+#   - name: Remove all snapshots for "{{ my_vct_servername }}"
+#     community.vmware.vmware_guest_snapshot:
+#       hostname: "{{ vcenter_hostname | default(omit) }}" 
+#       username: "{{ vcenter_username | default(omit) }}"
+#       password: "{{ vcenter_password | default(omit) }}"
+#       datacenter: "{{ my_datacenter }}"
+#       folder: "{{ my_folder }}"
+#       name: "{{ my_vct_servername }}"
+#       state: remove_all
+#       validate_certs: false
+#     delegate_to: localhost
+
+#   - name: Sending email to the VMWare team for awareness
+#     community.general.mail:
+#       host: 172.26.24.18
+#       port: 25
+#       to: STAMPVMAdmin@tsa.dhs.gov,StampAutomation@tsa.dhs.gov
+#       cc: "{{ tower_user_email | default(omit) }}"
+#       from: StampAutomation@tsa.dhs.gov
+#       subject: "All VMWare Snapshots removed from {{ my_vct_servername }} using Ansible Automation Platform"
+#       body: "Job ID: {{ tower_job_id is defined | ansible.builtin.ternary(tower_job_id,tower_workflow_job_id) }}"
+#     delegate_to: localhost
+
+#   when: VMLOCATION == my_datacenter and remove_prev_snaps == 'YES' and qty_snapshots is defined
+
+# - name: Main Block
+#   block:
+#   - name: Set Description to be added to each snapshot
+#     ansible.builtin.set_fact:
+#       description_text: |
+#         Snapshot taken using Ansible Automation Platform
+#         Job ID: {{ tower_job_id is defined | ansible.builtin.ternary(tower_job_id,tower_workflow_job_id) }}
+#         Creator: {{ tower_user_name is defined | ansible.builtin.ternary(tower_user_name,tower_workflow_job_name) }}
+#         Time: {{ lookup('pipe','date') }}
+#         Snapshot Name: {{ my_snapshot_name }}
+#         User's Description: {{ my_description }}
+#         This snapshot may be safely removed on: {{ my_snapshot_removal_date }}
+      
+
+#   - name: "Create a snapshot for {{ my_vct_servername }}"
+#     community.vmware.vmware_guest_snapshot:
+#       hostname: "{{ vcenter_hostname | default(omit) }}" 
+#       username: "{{ vcenter_username | default(omit) }}"
+#       password: "{{ vcenter_password | default(omit) }}"
+#       datacenter: "{{ my_datacenter }}"
+#       folder: "{{ my_folder }}"
+#       name: "{{ my_vct_servername }}"
+#       state: present
+#       snapshot_name: "{{ my_snapshot_name  }}"
+#       description:   "{{ description_text   | default(omit) }}"
+#       validate_certs: false
+#     register: snapshot
+#     delegate_to: localhost
+  
+#   - name: Gather snapshot information about the virtual machine in the given vCenter
+#     community.vmware.vmware_guest_snapshot_info:
+#       hostname: "{{ vcenter_hostname | default(omit) }}"
+#       username: "{{ vcenter_username | default(omit) }}"
+#       password: "{{ vcenter_password | default(omit) }}"
+#       datacenter: "{{ my_datacenter }}"
+#       folder: "{{ my_folder }}"
+#       name: "{{ my_vct_servername }}"
+#     delegate_to: localhost
+#     register: snapshot_info
+
+  # - debug: var=snapshot_info['guest_snapshots']['snapshots']
+  # - name: Set the variables for amount of snapshots
+  #   ansible.builtin.set_fact: 
+  #     qty_snapshots: "{{ snapshot_info['guest_snapshots']['snapshots'] | length | int }}"
+
+  # - debug: msg="There is {{ qty_snapshots }} snapshot on this host"
+  #   when: qty_snapshots | int == 1 | int
+  
+  # - debug: msg="There are {{ qty_snapshots }} snapshots on this host"
+  #   when: qty_snapshots | int > 1 | int
+
+  # - name: Sending email to the VMWare team for awareness
+  #   community.general.mail:
+  #     host: 172.26.24.18
+  #     port: 25
+  #     to: STAMPVMAdmin@tsa.dhs.gov,StampAutomation@tsa.dhs.gov
+  #     cc: "{{ tower_user_email | default(omit) }}"
+  #     from: StampAutomation@tsa.dhs.gov
+  #     subject: "VMWare Snapshot taken on {{ my_vct_servername }}"
+  #     body: |
+  #       {{ description_text }}
+  #       There are {{ qty_snapshots }} snapshots on this host
+  #   when: snapshot is changed
+  #   delegate_to: localhost
+
+  
+  # when: VMLOCATION == my_datacenter

@@ -1,0 +1,44 @@
+---
+# This role needs to be updated
+
+- name: Set AAP151 Authorized Key for Greenway user
+  authorized_key:
+    user: greenway
+    state: present
+    key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC17KVdxULX3QWbEveKVrQUgkOOlVnSJ08QSmAFZH3MHXtHn10q3tYLnJivfPxmPGGIB4Wf1clFlK9gCLCVCYBRZhm4i920amiOdXZCwXIjdiciM4N3tK0KkvUfU1aKIpjnMufy/sJa3bvMaq+mFr7Hyss756Gls2vrKvREjCdValNNyw25AZ+JprIzDj4zNX12Cj8jYSVxySvXSRzVtZIyE+qshckNhy4x98Mkx2wbOT/WeW4Cz4BAiUxb+T8ikTtMLggnmDv6vi4GK45jsWLszKc7cP9gctr7b40GpGTae+5RhLYjrwon+yf4PXtdtTPmHtEec24jz5fxr5R9HK0au+HRx8fcvc9vVnZo/NwnHJ0XjQ2orTYRUrgH8KyZM5rLBaWSGYcVEWVUG3dr98icK6ZKpSGProQzjFEYdvDCfQbUHZJwjsiN++7rcGtYrKZZg2GPHm3VYuukjoK/UlNYibeeFOHSIGcUvOafak6poQL93ksYkWb4BQN18EEtWX8= greenway@csstsrvlvaap151"
+    exclusive: no
+
+- name: Check if firewalld is active
+  command: /usr/bin/systemctl is-active firewalld
+  register: chk_firewalld
+  ignore_errors: yes
+
+- name: Check if the ssh_access zone is configured
+  shell: 'firewall-cmd --get-active-zones |grep -c ^ssh_access || /bin/true'
+  register: chk_zones 
+  ignore_errors: yes
+  when: chk_firewalld.stdout == "active"
+
+- debug: var=chk_firewalld
+- debug: var=chk_zones
+
+- block:
+  - name: Enable SSH access from AAP servers
+    firewalld:
+      zone: ssh_access
+      permanent: yes
+      source: "{{ item }}"
+      state: enabled
+    loop:
+      - 172.26.58.98
+      - 172.26.58.99
+      - 172.26.58.97
+      - 172.26.58.95
+      - 172.26.58.96
+      - 172.27.58.95
+      - 172.27.58.96
+      - 172.26.58.105
+    notify: "reload firewalld"
+  when: (( chk_firewalld.stdout == "active" ) and ( chk_zones.stdout | int > 0 ))
+
+# EOF

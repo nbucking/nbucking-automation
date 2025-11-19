@@ -1,0 +1,28 @@
+---
+# tasks file for GetDatacenterInfo
+- name: Gather VM Datacenter Info from VCenter
+  community.vmware.vmware_vm_info:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    vm_name: "{{ my_vct_servername }}"
+    validate_certs: false
+  delegate_to: localhost
+  register: vm_info
+  ignore_errors: yes
+
+- name: Stop running plays on host gracefully
+  ansible.builtin.meta: end_host
+  when: vm_info is failed
+
+- name: Main block
+  block:
+  - ansible.builtin.debug:
+      var: vm_info.virtual_machines[0].datacenter
+      verbosity: 1
+
+  - name: Setting the variable for my_datacenter
+    ansible.builtin.set_fact:
+      my_datacenter: "{{ vm_info.virtual_machines[0].datacenter }}"
+  
+  when: vm_info is not failed

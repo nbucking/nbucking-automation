@@ -1,0 +1,4 @@
+---
+# tasks file for Lookup Host in DNS
+- debug: 
+    msg: "The Reverse name for this IP is {{ lookup('community.general.dig', '{{ dnsip }}', '@{{ nameserverIP }}') }}"

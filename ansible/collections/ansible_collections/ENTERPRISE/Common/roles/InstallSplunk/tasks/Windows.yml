@@ -1,0 +1,38 @@
+---
+# tasks file for WinInstallSplunk
+- name: Install and run the custom facts
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Windows.WinFacts
+
+- name: Set Fact for Datacenter name  
+  ansible.builtin.set_fact: 
+    DataCenter: "{{ ansible_local['vmInfo']['datacenter'] }}"
+    capsule: "{{ ansible_local['vmInfo']['capsule'] }}"
+
+- name: Download Software to install
+  ansible.windows.win_get_url:
+    dest: C:\temp
+    url: "https://{{ capsule }}/{{ win_repo_loc }}/Splunk.zip"
+    url_timeout: 60
+    validate_certs: no
+
+- name: Unzip Software
+  community.windows.win_unzip:
+    src: 'C:\temp\Splunk.zip'
+    dest: C:\temp
+    delete_archive: true
+
+- name: Install Splunk Application from msi
+  ansible.windows.win_package:
+    path: https://{{ capsule }}/{{ win_repo_loc }}/{{ pkg_name }}
+    state: present
+    arguments: AGREETOLICENSE=yes
+    validate_certs: false
+
+- name: copy splunk files to installation directory
+  ansible.windows.win_command: 'C:\temp\Splunk\TSA_SOC_Splunk_UF_Deployment_Package\Copy.cmd'
+
+- name: Delete setup files
+  ansible.windows.win_file:
+    path: 'C:\temp\Splunk'
+    state: absent

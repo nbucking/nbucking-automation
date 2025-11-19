@@ -1,0 +1,13 @@
+---
+_hosts: '{{ my_vct_servername }}'
+my_cluster: csssnonlpesx50.dev.example.com
+my_folder: Linux/TVS/DTS
+my_datacenter: CS NON-PROD
+my_hostname: "{{ my_vct_servername | lower }}.{{ my_dns_domain }}"
+my_network_name: "VM - TVS Trusted (DTS, AJ) (LACP)"
+my_netmask: 255.255.252.0
+my_gateway_address: 10.21.8.1
+my_dnsserver1: 10.2.4.100
+my_dnsserver2: 10.2.4.101
+my_dns_domain: dtd.tst.example.com
+my_datastore: Trusted Datastore Cluster (CS)

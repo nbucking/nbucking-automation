@@ -1,0 +1,12 @@
+---
+# vars file for InstallFlexera
+#nexus_url: https://nexus.stamp.tsa.dhs.gov:9090/repository/STAMPLinuxBinaries/InstallFlexera/
+nexus_url: https://csstsrvlvsat151.services.stamp.tsa.dhs.gov/pulp/content/STA/Library/custom/STAMPLinuxBinaries/Software/
+repo_loc: pulp/content/STA/Library/custom/STAMPLinuxBinaries/Software
+aj_beacon: 172.27.51.61
+cs_beacon: 172.26.51.61
+flexera_pkg: managesoft-17.0.1-1.x86_64.rpm
+stage_dir: /var/tmp/staging
+root_user: root
+root_group: root
+

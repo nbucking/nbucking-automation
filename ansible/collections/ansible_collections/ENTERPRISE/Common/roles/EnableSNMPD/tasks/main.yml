@@ -1,0 +1,71 @@
+---
+# tasks file for EnableSNMPD
+- name: Set variables for thisDomain and thisREALM
+  ansible.builtin.set_fact:
+    thisDomain: "{{ ansible_domain }}"
+  when: thisDomain is not defined
+
+- name: Lookup login and password
+  ansible.builtin.set_fact:
+    username:  "{{ lookup('ansible.builtin.csvfile', '{{ thisDomain | lower }} file=snmpd_lookup_table.csv col=1 default=not_found') }}"
+    passwd:    "{{ lookup('ansible.builtin.csvfile', '{{ thisDomain | lower }} file=snmpd_lookup_table.csv col=2 default=not_found') }}"
+  delegate_to: localhost
+
+- name: fail if username and/or passwd are not defined
+  ansible.builtin.fail:
+    msg: "Username and/or passwd are not defined"
+  failed_when: username == "not_found" and passwd == "not_found"
+
+- name: Check to make sure packages are installed
+  ansible.builtin.yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - net-snmp
+    - net-snmp-libs
+    - net-snmp-utils
+
+- name: Add SNMP service to the firewall config
+  firewalld:
+    port: 161/udp
+    permanent: yes
+    state: enabled
+  ignore_errors: yes
+  notify: reload firewalld
+
+
+- name: Put in default snmpd.conf file
+  ansible.builtin.copy:
+    src: snmpd.conf
+    dest: /etc/snmp/snmpd.conf
+    owner: root
+    group: root
+    mode: '0600'
+
+
+- name: Make sure snmpd is stopped
+  ansible.builtin.systemd:
+    name: snmpd
+    state: stopped
+    masked: no
+
+- name: "Add the {{ username }} user to the {{ thisDomain }} domain"
+  ansible.builtin.shell:
+    cmd: "net-snmp-create-v3-user -ro -A {{ passwd | quote }} -X {{ passwd | quote }} -a SHA -x AES128 {{ username }}"
+
+- name: Make sure snmpd is started
+  ansible.builtin.systemd:
+    name: snmpd
+    state: started
+    enabled: yes
+    masked: no
+
+- name: SNMP Walk to make sure the add worked
+  ansible.builtin.shell:
+    cmd: "snmpwalk -v3 -l authPriv -u {{ username }} -a SHA   -A  {{ passwd | quote }} -x AES -X {{ passwd | quote }} -CE sysORTable localhost system"
+  register: snmpwalk
+
+- name: Output the snmp walk to ensure it worked
+  ansible.builtin.debug:
+    var: snmpwalk.stdout
+

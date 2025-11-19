@@ -1,0 +1,197 @@
+; This sample file details the customisations that can be applied during
+; the install of FlexNet Inventory Agent.  Most settings are 
+; commented out, however typical settings are left enabled to allow
+; someone to make quick use of the sample file in a typical scenario.
+
+
+;=========================================================================
+
+; Settings in this section are applied during product installation.
+[Custom Install Settings]
+
+
+; Set one of the following to apply either a machine or a user policy
+; after ManageSoft is installed.
+; N.B. User has precedence if both set.
+;INSTALLUSERPOLICY = 1
+INSTALLMACHINEPOLICY = 1
+
+; Specific policy to bootstrap this managed device with for machine policy.
+; This value is always used by the policy agent when applying machine policy
+; if it is set. This overrides any location specified on the command line to
+; the policy client.
+;BOOTSTRAPPEDPOLICY=$(DownloadRootURL)/Policies/Merged/MANAGESOFT_domain/Machine/Marketing.npl
+
+; Wait for policy to finish before finishing
+;WAITFORPOLICY=1
+
+; Ignore failure when applying policy
+;IGNOREPOLICYFAILURE=1
+
+; Set the following to configure the domain for this ManageSoft managed
+; device.
+;COMPUTERDOMAIN=Windows 2000 domain name
+
+; Additional arguments to policy client.
+POLICYARGS = -o InstallDefaultSchedule=True -o UILevel=Quiet -o PostponeUserInteractionLevel=Quiet -o PostponeByDefault=False
+
+; URL to server containing user/machine policies.
+; N.B "/Policies/Merged/.../<osdname>.osd" automatically appended.
+DEPLOYSERVERURL = https://{{ Beacon }}/ManageSoftDL
+
+; Set product installation directory.
+;TMPMAINDIR = c:\Program Files\ManageSoft
+
+; Prevent product from being uninstall via Add/Remove programs.
+;ALLOWUNINSTALL = 0
+
+; Uncomment to use (fixed) proxy server settings from Microsoft
+; Internet Explorer (if they are configured at managed device
+; installation time). By default (with this setting commented),
+; downloads via HTTP will attempt to directly connect to distribution
+; servers without going via a proxy.
+;INSTALLTYPE = proxy
+
+; Arbitrary command to run at completion of installation.
+;RUNCMD = c:\path_to_exe\<application>.exe
+;RUNCMDARGS = Arg1 "Arg 2" Arg3
+
+; To prevent any Windows Installer initiated reboots.
+;DISALLOWREBOOT = 1
+
+; If set, allows shortcuts to be installed.
+;SHORTCUTSNOINSTALL = 0
+
+; If set, usage agent is disabled
+;USAGEAGENT_DISABLE = False
+
+; If set, web usage is enabled
+;WEB_USAGEAGENT_ENABLE = True
+
+;=========================================================================
+; Settings in this section are applied during product uninstallation.
+[Custom Uninstall Settings]
+
+; If set, forcibly removes any Tracker, Launcher & Schedule Agent registry keys
+; under HKLM during uninstall.
+;DESTRUCTIVEUNINSTALL = 1
+
+; Arbitrary command to run at completion of uninstallation.
+;RUNCMD = c:\utils\<application>.exe
+;RUNCMDARGS = Arg1 "Arg 2" Arg3
+
+;=========================================================================
+; Registry settings to be created under
+; HKLM\Software\ManageSoft Corp\ManageSoft\Common
+[Common]
+;desc0 = Customization\Testing\TestValueName
+;val0  = TestValueValue
+; desc1 =
+; val1  =
+; desc2 =
+; val2  =
+; ... etc..
+
+
+;=========================================================================
+; Registry settings to be created under
+; HKLM\Software\ManageSoft Corp\ManageSoft\Launcher
+[Launcher]
+
+; Configure the default UI timeout used when awaiting a response from
+; users (seconds). ManageSoft product default is 300, although earlier
+; versions had a default to 0 (infinite). Specifying the value here
+; ensures that upgraded installations will get the new default.
+
+;desc0 = UITimeoutWait
+;val0 = 300
+
+;desc1 = Description
+;val1  = Value
+; ... etc.
+
+
+;=========================================================================
+; Registry settings to be created under
+; HKLM\Software\ManageSoft Corp\ManageSoft\Tracker
+[Tracker]
+;desc0 = Description
+;val0  = Value
+; ... etc.
+
+
+;=========================================================================
+; Registry settings to be created under
+; HKLM\Software\ManageSoft Corp\ManageSoft\Schedule Agent
+[Schedule Agent]
+;desc0 = NativeScheduler
+;val0  = ndtask
+; ... etc.
+
+
+;=========================================================================
+; Registry settings to be created under
+; HKLM\Software\ManageSoft Corp\ManageSoft\Policy Client
+[Policy Client]
+;desc0 = PolicySource
+;val0  = Client
+; ... etc.
+
+
+;=========================================================================
+; Registry settings to be created under
+; HKLM\Software\ManageSoft Corp\ManageSoft\Security Agent
+[Security Agent]
+;desc0 = Description
+;val0  = Value
+; ... etc.
+
+
+;=========================================================================
+; Registry settings to be created under
+; HKLM\Software\ManageSoft Corp\ManageSoft\Uploader
+[Uploader]
+;desc0 = Description
+;val0  = Value
+; ... etc.
+
+
+;=========================================================================
+; Registry settings to be created under
+; HKLM\Software\ManageSoft Corp\ManageSoft\Selector
+[Selector]
+;desc0 = Description
+;val0  = Value
+; ... etc.
+
+
+;=========================================================================
+; Registry settings to be created under
+; HKLM\Software\ManageSoft Corp\ManageSoft\NetSelector
+[NetSelector]
+;desc0 = Description
+;val0  = Value
+; ... etc.
+
+;=========================================================================
+; Registry settings to be created under
+; HKLM\Software\ManageSoft Corp\ManageSoft\Usage Agent
+[Usage Agent]
+;desc0 = Description
+;val0  = Value
+; ... etc.
+
+
+;=========================================================================
+; Registry settings to be created under
+; HKLM\Software\ManageSoft Corp\ManageSoft\Usage Agent\Manual Mapper
+; These manually map an executable to an application for application usage
+; recording
+; They need to be sequentially numbered after the general usage agent ones
+; above
+; desc0 = Manual Mapper\Launcher\Application
+; val0 = FlexNet Inventory Agent
+; desc1 = Manual Mapper\Launcher\ExecutablePath
+; val1 = C:\Program Files\ManageSoft\Launcher\ndlaunch.exe
+; desc2 = Manual Mapper\Launcher\Version
+; val2 = 6.5

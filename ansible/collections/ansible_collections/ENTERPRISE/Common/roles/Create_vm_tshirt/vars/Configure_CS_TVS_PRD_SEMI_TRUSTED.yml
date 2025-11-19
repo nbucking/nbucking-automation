@@ -1,0 +1,13 @@
+---
+_hosts: '{{ my_vct_servername }}'
+my_cluster: csstsrvlpesx150
+my_folder: Linux/VCS/PRD
+my_datacenter: CS PRD
+my_hostname: "{{ my_vct_servername | lower }}.{{ my_dns_domain }}"
+my_network_name: VM - TVS Semi-Trusted (PRD)
+my_netmask: 255.255.255.0
+my_gateway_address: 192.168.75.9
+my_dnsserver1: 192.168.75.61
+my_dnsserver2: 192.168.75.62
+my_dns_domain: dmz.example.com
+my_datastore: Trusted Datastore Cluster (CS)

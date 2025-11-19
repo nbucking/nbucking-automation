@@ -1,0 +1,7 @@
+---
+# tasks file
+- name: Make the IP address a reverse dns entry
+- name: Change the status to IP in IPAM 
+  ansible.windows.win_shell: powershell.exe Invoke-SwisVerb $swis IPAM.SubnetManagement ChangeIPStatus  @(""{{ my_ip_address | ansible.utils.ipaddr('revdns') }}"", "{{  }}")
+  args:
+    executable: powershell.exe

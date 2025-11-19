@@ -1,0 +1,4 @@
+---
+# tasks file for DeployCustomFacts---
+- name: Determine if this is Linux or Windows and run install
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}.yml"

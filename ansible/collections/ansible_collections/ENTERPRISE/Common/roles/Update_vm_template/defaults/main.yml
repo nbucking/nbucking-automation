@@ -1,0 +1,18 @@
+---
+# defaults file for Create_vm
+_hosts: CSSTLABLVBLD55
+my_cluster: csssnonlpesx50.dev.example.com
+my_vct_servername: CSSTLABLVBLD55
+my_ip_address: 172.26.60.253
+my_netmask: 255.255.255.0
+my_gateway_address: 172.26.60.1
+my_state: poweredon
+my_datacenter: CS NON-PROD
+my_folder: Automation/Templates
+my_guest_id: rhel8_64Guest
+my_memory_mb: 4048
+my_num_cpu: 4
+my_network_name: VM - GSS Quarantine (LACP)
+my_template: RHEL88_CRED_Template
+new_template_name: "RHEL89_CRED_Template_{{ timestamp }}"
+timestamp: "{{ ansible_date_time.date}}-{{ ansible_date_time.time}}"

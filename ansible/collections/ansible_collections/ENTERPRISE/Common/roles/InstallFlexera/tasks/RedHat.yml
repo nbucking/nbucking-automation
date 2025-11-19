@@ -1,0 +1,106 @@
+---
+# tasks file for InstallFlexera
+- name: Display a banner
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.DisplayBanner
+  vars:
+    os_type: Linux
+    software_name: Flexera
+    software_version:  "{{ flexera_version }}"
+  run_once: true
+
+- name: Check to see if Flexera is already installed
+  ansible.builtin.command: rpm -q managesoft
+  register: Flexera
+  ignore_errors: yes
+
+- name: Fail if Flexera Client is already installed
+  ansible.builtin.fail:
+    msg: Flexera Client is already installed
+  when: Flexera.rc == 0 and reinstall == "no"
+
+- name: Remove flexera installation binary
+  ansible.builtin.yum:
+    name: managesoft
+    state: absent
+
+- name: Remove old flexera directory
+  ansible.builtin.file:
+    path: "{{ flexera_config_dir }}"
+    state: absent
+
+- name: Grab the capsule server name
+  ansible.builtin.set_fact:
+    capsule: "{{ ansible_local['vmInfo']['capsule'] }}"
+
+- name: Get the Flexera package from Satellite
+  ansible.builtin.get_url:
+    url: "https://{{ capsule }}/{{ repo_loc}}/{{ flexera_pkg }}"
+    dest: "{{ stage_dir }}"
+    owner: "{{ root_user }}"
+    group: "{{ root_group }}"
+    mode: '0644'
+    validate_certs: "{{ _validate_certs | default('true')}}"
+  register: get_flexera
+
+- name: Copy the package over to the system
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ stage_dir }}"
+    owner: "{{ root_user }}"
+    mode: '0644'
+  loop:
+    - mgsft_rollout_cert  
+    - mgssetup.sh
+
+- name: Upload the appropriate mgsft_rollout_response file for AJ
+  vars:
+    Beacon: "{{ aj_beacon }}"
+  ansible.builtin.template:
+    src: mgsft_rollout_response.j2
+    dest: "{{ stage_dir }}/mgsft_rollout_response"
+    owner: "{{ root_user }}"
+    group: "{{ root_group }}"
+    mode: 0644
+  when: ansible_local['vmInfo']['datacenter'] == "AJNON" or ansible_local['vmInfo']['datacenter'] == "AJPRD" or ansible_local['vmInfo']['datacenter'] == "D1PRD"
+
+- name: Upload the appropriate mgsft_rollout_response file for CS
+  vars:
+    Beacon: "{{ cs_beacon }}"
+  ansible.builtin.template:
+    src: mgsft_rollout_response.j2
+    dest: "{{ stage_dir }}/mgsft_rollout_response"
+    owner: "{{ root_user }}"
+    group: "{{ root_group }}"
+    mode: 0644
+  when: ansible_local['vmInfo']['datacenter'] == "CSNON" or ansible_local['vmInfo']['datacenter'] == "CSPRD"
+
+- name: Install the Flexera Client for RHEL7
+  ansible.builtin.yum: 
+    name: "{{ stage_dir }}/{{ flexera_pkg }}"
+    disable_gpg_check: yes
+    state: present
+  when: ansible_distribution_major_version == "7"
+
+- name: Install the Flexera Client for RHEL8/9
+  ansible.builtin.shell: 
+    cmd: "rpm -ivh {{ stage_dir}}/{{ flexera_pkg }} --nodigest --nofiledigest"
+  when: ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9"
+
+- name: Check to see if the installation worked
+  ansible.builtin.shell: /usr/bin/grep -ic bootstrap /var/opt/managesoft/etc/config.ini
+  register: InstCheck
+  ignore_errors: yes
+
+- name: Create an alias to point to the systemd service
+  ansible.builtin.file:
+    src: /etc/systemd/system/mgsusageag.service
+    dest: /etc/systemd/system/multi-user.target.wants/Flexera.service
+    owner: root
+    group: root
+    state: link
+    
+- name: Fail if Flexera Client did not install properly
+  ansible.builtin.fail:
+    msg: "Flexera Client did not install properly. Config.ini doesn't have the bootstrap configured"
+  when: InstCheck.stdout|int < 2

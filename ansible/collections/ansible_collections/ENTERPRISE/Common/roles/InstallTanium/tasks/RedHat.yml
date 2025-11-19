@@ -1,0 +1,67 @@
+---
+# tasks file for InstallTanium
+- name: Remove the binary and directory if asked
+  ansible.builtin.include_tasks: RemoveTanium.yml
+  when: remove_tanium is true
+
+- name: Check to see if Tanium Client is already installed
+  ansible.builtin.shell: /opt/Tanium/TaniumClient/TaniumClient -v
+  register: tanium_installed_version
+  ignore_errors: true
+
+- ansible.builtin.debug: 
+    msg: "Tanium version {{ tanium_installed_version.stdout }} is already installed"
+  when: tanium_installed_version.stdout == tanium_version
+
+- name: Quit this playbook if software is already at latest version
+  ansible.builtin.meta: end_host
+  when: tanium_installed_version.stdout == tanium_version
+
+- name: Display a banner
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Common.DisplayBanner
+  vars:
+    os_type: Linux
+    software_name: Tanium
+    software_version: "{{ tanium_version }}"
+  run_once: true
+
+- name: Grab the capsule server name
+  ansible.builtin.set_fact:
+    capsule: "{{ ansible_local['vmInfo']['capsule'] }}"
+
+- name: Install Block
+  block:
+  - name: Install the Tanium Client for RHEL7
+    ansible.builtin.shell:
+      cmd:  "rpm -Uvh --nodigest --nofiledigest https://{{ capsule }}/{{ repo_loc }}/{{ tanium_pkg_rh7 }}"
+    when: ansible_distribution_major_version == "7"
+
+  - name: Install the Tanium Client for RHEL8
+    ansible.builtin.shell:
+      cmd:  "rpm -Uvh --nodigest --nofiledigest https://{{ capsule }}/{{ repo_loc }}/{{ tanium_pkg_rh8 }}"
+    when: ansible_distribution_major_version == "8"
+
+  - name: Install the Tanium Client for RHEL9
+    ansible.builtin.shell:
+      cmd:  "rpm -Uvh --nodigest --nofiledigest https://{{ capsule }}/{{ repo_loc }}/{{ tanium_pkg_rh9 }}"
+    when: ansible_distribution_major_version == "9"
+
+  - name: Install the Tanium Dat File
+    ansible.builtin.copy:
+      src: tanium-init.dat
+      dest: /opt/Tanium/TaniumClient
+      
+  - name: Start the Tanium Service
+    ansible.builtin.systemd:
+      name: taniumclient
+      state: restarted
+  
+  - name: Check to see if Tanium Client is already installed
+    ansible.builtin.shell: /opt/Tanium/TaniumClient/TaniumClient -v
+    register: new_tanium_installed_version
+
+  - ansible.builtin.debug: 
+      msg: "Tanium is at version {{ new_tanium_installed_version.stdout }}"
+
+  when: tanium_installed_version.stdout != tanium_version

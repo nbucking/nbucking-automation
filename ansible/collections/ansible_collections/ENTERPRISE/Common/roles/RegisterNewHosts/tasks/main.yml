@@ -1,0 +1,163 @@
+---
+# Info: Set variables
+#############################################
+- name: Lookup host data in lookup table host_data.csv
+  set_fact:
+    lookupNodename:     "{{ lookup('csvfile', '{{ ansible_nodename }} file=host_data.csv default=not_found col=0') }}"
+    thislocation:       "{{ lookup('csvfile', '{{ ansible_nodename }} file=host_data.csv default=not_found col=1') }}"
+    thisDC:             "{{ lookup('csvfile', '{{ ansible_nodename }} file=host_data.csv default=not_found col=2') }}"
+    thisactivation_key: "{{ lookup('csvfile', '{{ ansible_nodename }} file=host_data.csv default=not_found col=3') }}"
+
+- name: Verify host was found in the host lookup table
+  fail:
+    msg: " Could not find {{ ansible_nodename }} in host lookup table"
+  failed_when: lookupNodename == "not_found"
+
+- name: Verify activation_key was found in the host lookup table
+  fail:
+    msg: " Could not find the activation_key for {{ ansible_nodename}} in host lookup table"
+  failed_when: thisactivation_key == "not_found"
+
+- name: Verify Data center was found in the host lookup table
+  fail:
+    msg: " Could not find the data center for {{ ansible_nodename }} in host lookup table"
+  failed_when: thisDC == "not_found"
+
+- name: Verify location was found in the host lookup table
+  fail:
+    msg: " Could not find the location for {{ ansible_nodename }} in host lookup table"
+  failed_when: thislocation == "not_found"
+
+- name: Lookup location ID in lookup table location_lookup_table.csv
+  set_fact:
+    thislocation_id:    "{{ lookup('csvfile', '{{ thislocation }} file=location_lookup_table.csv default=not_found col=1') }}"
+
+- name: Verify location id was found in the location lookup table
+  fail:
+    msg: " Could not find the location for {{ thislocation }} in host lookup table"
+  failed_when: thislocation_id == "not_found"
+
+- name: Lookup Hostgroup and Hostgroup ID in lookup table hostgroup_lookup_table.csv
+  set_fact:
+    thishostgroup:    "{{ lookup('csvfile', '{{ thisDC }} file=hostgroup_lookup_table.csv default=not_found col=1') }}"
+    thishostgroup_id: "{{ lookup('csvfile', '{{ thisDC }} file=hostgroup_lookup_table.csv default=not_found col=2') }}"
+
+- name: Verify Hostgroup id for data center was found in the hostgroup lookup table
+  fail:
+    msg: " Could not find the hostgroup ID for {{ thishostgroup_id }} in the hostgroup lookup table"
+  failed_when: thishostgroup_id == "not_found"
+
+# Info: Set CAP serve based on datacenter
+#############################################
+- name: Lookup Cap server info data center
+  set_fact:
+    thiscapserver:      "{{ lookup('csvfile', '{{ thisDC }} file=capserver_lookup_table.csv default=not_found col=1') }}"
+    thiscapserverurl:   "{{ lookup('csvfile', '{{ thisDC }} file=capserver_lookup_table.csv default=not_found col=2') }}"
+    thiscapserverip:    "{{ lookup('csvfile', '{{ thisDC }} file=capserver_lookup_table.csv default=not_found col=4') }}"
+
+- name: Verify CAP server for {{ thisDC }} was found in the capserver lookup table
+  fail:
+    msg: " Could not find CAP server in the capserver lookup table for data center {{ thisDC }}"
+  failed_when: thiscapserver == "not_found"
+
+- name: Verify CAP server URL for {{ thisDC }} was found in the capserver lookup table
+  fail:
+    msg: " Could not find CAP server URL in the capserver lookup table for data center {{ thisDC }}"
+  failed_when: thiscapserverurl == "not_found"
+
+- name: Verify CAP server IP for {{ thisDC }} was found in the capserver lookup table
+  fail:
+    msg: " Could not find CAP server IP in the capserver lookup table for data center {{ thisDC }}"
+  failed_when: thiscapserverip == "not_found"
+
+#- name: Set CAP serve for AJNON
+#  set_fact:
+#    thiscapserverip: 172.27.58.43
+#  when: thisDC == "AJNON"
+#
+#- name: Set CAP serve for AJPRD
+#  set_fact:
+#    thiscapserverip: 172.27.58.42
+#  when: thisDC == "AJPRD"
+#
+#- name: Set CAP serve for CSNON
+#  set_fact:
+#    thiscapserverip: 172.26.58.43
+#  when: thisDC == "CSNON"
+#
+#- name: Set CAP serve for CSPRD
+#  set_fact:
+#    thiscapserverip: 172.26.58.42
+#  when: thisDC == "CSPRD"
+#
+#- name: Verify CAP server ip is defined
+#  fail:
+#    msg: " Could not set CAP server ip for {{ thiscapserver }}"
+#  failed_when: thiscapserverip is undefined
+
+- debug:
+    msg: "{{ ansible_nodename }} {{ thislocation }} {{ thisDC }} {{ thisactivation_key }} {{ thiscapserver }} {{ thiscapserverip }}"
+
+#- name: Add greenway user and to paladin as secondary group
+#  user:
+#    name: greenway
+#    group: paladin
+#    append: yes
+#    state: present
+#    expires: -1
+
+# Info: Add the foreman-proxy keys for the greenway user
+#############################################
+#- name: Set Authorized Key for Greenway user
+#  authorized_key:
+#    user: greenway
+#    state: present
+#    key: "ssh-rsa ## AAAAB3NzaC1yc2EAAAADAQABAAABgQDRnd/7x17OVJYWKoPbaHqZN3dAGNiIEpKIkghRGHVPs38EZk5pwHCSte0lkC4oiX7nyh7Sy4AAvblKfYxHnAdo7k9iR603C/50uC44sXpnNYfr1q0gbWoLmkJLTz75pqF4UP+Polxla3oCyPNdsRizTAvCDOFeqCcXf0F8EK7/G7D4YoAGFktuSQroiQreo2CekIZWhYC0kIWC7CbhgUWEV6Bwb+CpziYb9fp9WouQanuuuC/uAC532GfmL8K+Ic9hmJhkax1FiYXbZAeU8zH5EU0lcRmN2ZUmqD/0mPIW34u/qZBebSrx1+3JQHymE/p0hyL+j5FTFkU6YaGDQNiZ5C4Hs5mvVgc6sw6CaVimVG54NyW2q+GoCbIZx53iMRYT8bvP+DNEng+Dp0nuJNaHKQNrgUEI03aWe4HCXeHIT6m3QHtwV9xXmks6PBAKTReT+5gD+szfKY0THjDunTFirtxMcAHnNeFNsAORD0tPn8zMORdtGbrKUiY0gGhVEv0= foreman-proxy@csstsrvlvcap152.services.stamp.tsa.dhs.gov"
+#    exclusive: no
+
+- name: Clean yum cache file and do a yum clean all
+  file: 
+    path: "{{ item }}"
+    state: absent
+  with_items:
+   - /etc/puppetlabs/puppet/ssl/
+   - /var/cache/yum/
+
+- name: Unregister server from cap server
+  redhat_subscription:
+    state: absent
+
+- name: Clean subscription-manager
+  command: '/usr/sbin/subscription-manager clean'
+
+- name: Remove katello-ca package
+  yum:
+    name: katello-ca*
+    state: absent
+# Info: Update the /etc/hosts file
+#############################################
+
+- name: Add new cap server to /etc/hosts file
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ thiscapserverip }}            {{ thiscapserver }}"
+    state: present
+
+- name: Install katello-ca for cap server
+  yum:
+    name: http://{{ thiscapserver }}/pub/katello-ca-consumer-latest.noarch.rpm
+    disable_gpg_check: yes
+    state: present
+
+- name: Set register_host fact
+  set_fact:
+    register_host: "curl -sS --insecure '{{ thiscapserverurl }}/register?activation_keys={{ thisactivation_key }}&hostgroup_id={{ thishostgroup_id }}&location_id={{ thislocation_id }}&organization_id=1&update_packages=false' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo4LCJpYXQiOjE2Nzk1MTk4NzgsImp0aSI6IjBiOWM5MDc2MmJlZTE1Y2U5ZGRhMmY0NTkzYzMxMDA4NDdlOWM2YzJkNDkzNWVmM2M0NTAxNzIwZjkwMTdhZmMiLCJzY29wZSI6InJlZ2lzdHJhdGlvbiNnbG9iYWwgcmVnaXN0cmF0aW9uI2hvc3QifQ.6Imz7BAG-TC5J4WzItVBrg6x9VLE84sfvqDHQIjQmkw' | bash"
+
+- name: Run the register host curl command
+  shell: "{{ register_host }}"
+  register: register_host_output
+
+- debug:
+    var: register_host_output
+
+# EOF

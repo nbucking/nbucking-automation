@@ -1,0 +1,25 @@
+---
+# - debug: var=newvm
+
+- name: "Set variables for {{ newvm.my_vct_servername }}"
+  set_fact:
+    my_ip_address: "{{ newvm.my_ip_address }}"
+    my_vct_servername: "{{ newvm.my_vct_servername }}"
+    my_server_details: "{{ newvm.my_server_details }}"
+    my_server_size: "{{ newvm.my_server_size }}"
+    my_hd_details: "{{ newvm.my_hd_details }}"
+    my_disk_controller_type: "{{ newvm.my_disk_controller_type | default(omit) }}"
+
+- name: "Build server: {{ my_vct_servername }}"
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Linux.Create_vm_tshirt
+
+- name: "Set variables for {{ my_vct_servername }}"
+  ansible.builtin.set_stats:
+    data:
+      disk_size_gb: "{{ ansible_facts.disk_size_gb }}"
+      physical_volume: "{{ ansible_facts.physical_volume }}"
+      volume_group: "{{ ansible_facts.volume_group }}"
+      logical_volume: "{{ ansible_facts.logical_volume }}"
+      mount_point: "{{ ansible_facts.mount_point }}"
+  when: my_hd_details is defined

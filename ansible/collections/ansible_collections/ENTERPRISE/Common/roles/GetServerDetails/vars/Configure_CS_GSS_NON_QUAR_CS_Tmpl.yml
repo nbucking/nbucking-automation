@@ -1,0 +1,18 @@
+---
+my_vct_servername: Win19Template
+_hosts: "{{ my_vct_servername }}"
+my_cluster: csssnonlpesx50.dev.example.com
+my_folder: Automation/Windows
+my_datacenter: CS NON-PROD
+my_hostname: "{{ my_vct_servername | lower }}"
+my_network_name: GSS Quarantine
+my_netmask: 255.255.255.0
+my_gateway_address: 172.26.60.1
+my_dnsserver1: 10.2.24.101
+my_dnsserver2: 10.2.24.103
+my_dns_domain: dev.example.com
+my_datastore: Trusted Datastore Cluster (CS)
+my_ip_address: 172.26.60.10
+old_template_name: Win19OneDiskTmpl
+new_template_name: "Windows2019_{{ timestamp }}"
+timestamp: "{{ ansible_date_time.date}}-{{ ansible_date_time.time}}"

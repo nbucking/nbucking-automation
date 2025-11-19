@@ -1,0 +1,8 @@
+---
+# tasks file
+- name: Store file on localhost
+  ansible.builtin.fetch:
+    src:  "{{ fetch_src | quote }}"
+    dest: "{{ fetch_dst }}"
+    flat: yes
+  # delegate_to: localhost

@@ -1,0 +1,37 @@
+---
+# tasks file for WinInstallTrellix
+- name: Install and run the custom facts
+  ansible.builtin.include_role:
+    name: ENTERPRISE.Windows.WinFacts
+
+- name: Grab the capsule server name
+  ansible.builtin.set_fact:
+    capsule: "{{ ansible_local['vmInfo']['capsule'] }}"
+
+# - name: Set Fact for Datacenter name  
+#   ansible.builtin.set_fact: DataCenter="{{ ansible_local['vmInfo']['DataCenter'] }}"
+
+# #  ansible_local['vmInfo']['DataCenter']
+# - name: "Grab the variables for DataCenter"
+#   ansible.builtin.include_vars: Configure_{{ DataCenter }}.yml
+
+- name: Download Software to install
+  ansible.windows.win_get_url:
+    dest: C:\temp
+    url: "https://{{ capsule }}/pulp/content/STA/Library/custom/WindowsTeam/Software/Trellix.zip"
+    url_timeout: 60
+    validate_certs: no
+
+- name: Unzip Software
+  community.windows.win_unzip:
+    src: 'C:\temp\{{ mcafee_agent }}.zip'
+    dest: C:\temp
+    delete_archive: true
+
+- name: Run the setup command to install Trellix
+  ansible.windows.win_command: 'C:\temp\{{ mcafee_agent }}\Setup.cmd'
+
+- name: Delete setup files
+  ansible.windows.win_file:
+    path: 'C:\temp\{{ mcafee_agent }}'
+    state: absent

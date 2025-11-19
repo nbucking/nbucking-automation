@@ -1,0 +1,71 @@
+---
+# - name: Lookup login and password
+#   ansible.builtin.set_fact:
+#     login:  "{{ lookup('ansible.builtin.csvfile', 'csssnonlpesx50.dev.example.com file=newvms col=1') }}"
+#     passwd: "{{ lookup('ansible.builtin.csvfile', 'csssnonlpesx50.dev.example.com file=newvms col=2') }}"
+#   delegate_to: localhost
+- name: Download the CSV file
+  ansible.builtin.get_url:
+    url: https://csstsrvlvsat151.services.stamp.tsa.dhs.gov/pulp/content/STA/Library/custom/STAMPLinuxBinaries/Configuration/serverdetails.csv
+    dest: /var/tmp/serverdetails.csv
+    mode: '0644'
+    validate_certs: no
+  delegate_to: localhost
+
+- name: Read CSV file
+  community.general.read_csv:
+    path: /var/tmp/serverdetails.csv
+  register: serverdetails
+  delegate_to: localhost
+
+
+- name: Create shell vm
+  community.vmware.vmware_guest:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    # This is hostname of particular ESXi server on which user wants VM to be deployed
+    #esxi_hostname: "{{ esxi_hostname | default(omit) }}"
+    cluster: "{{ item.my_cluster }}"
+    validate_certs: false
+
+    name: "{{ item.my_vct_servername }}"
+    datacenter: "{{ item.my_datacenter }}"
+    folder: "{{ item.my_folder }}"
+    guest_id: "{{ item.my_guest_id  }}"
+    disk:
+    - size_gb: 250
+      type: eagerzeroedthick
+      datastore: "{{ item.my_datastore }}"
+    hardware:
+      boot_firmware: "efi"
+      hotadd_cpu: true
+      hotadd_memory: true
+      memory_mb: "{{ item.my_memory_mb }}"
+      num_cpus:  "{{ item.my_num_cpus }}"
+      scsi: paravirtual
+    networks:
+    - name: "{{ item.my_network_name }}"
+      connected: true
+      start_connected: true
+      ip: "{{ item.my_ip_address }}"
+      netmask: "{{ item.my_netmask }}"
+      gateway: "{{ item.my_gateway_address }}"
+      device_type: vmxnet3
+      type: static
+    customization:
+      hostname: "{{ item.my_hostname }}"
+      dns_servers:
+      - "{{ item.my_dnsserver1 }}"
+      - "{{ item.my_dnsserver2 }}"
+      dns_suffix:
+      - "{{ item.my_dns_domain }}"
+      domain: "{{ item.my_dns_domain }}"
+    template: "{{ item.my_template }}"
+    state: "{{ item.my_state }}"
+    wait_for_ip_address: true
+    wait_for_ip_address_timeout: 300
+  delegate_to: localhost
+  register: deploy_vm
+  loop: "{{ serverdetails.list }}"
+  when: item.my_datacenter == VMLOCATION

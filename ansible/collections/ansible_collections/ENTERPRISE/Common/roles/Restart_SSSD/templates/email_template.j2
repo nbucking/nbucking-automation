@@ -1,0 +1,9 @@
+Subject: Ansible RestartSSSD Report
+
+The following hosts were unreachable or failed during the RestartSSSD play:
+
+{% for host in failed_hosts %}
+- {{ host }}
+{% endfor %}
+
+Please investigate these hosts.

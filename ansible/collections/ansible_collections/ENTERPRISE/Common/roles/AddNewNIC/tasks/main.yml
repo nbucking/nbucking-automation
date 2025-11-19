@@ -1,0 +1,33 @@
+---
+# tasks file for Add New NIC to host
+- name: Get Datacenter Information
+  ansible.builtin.include_role:
+    name: GetDatacenterInfo
+  when: my_datacenter is not defined
+
+- name: Run only if the VMLOCATION matches my_datacenter
+  debug:
+    msg: "Skipping this vcenter server"
+  when: VMLOCATION != my_datacenter
+
+- name: Get Folder Information
+  ansible.builtin.include_role:
+    name: GetFolderInfo
+  when: my_folder is not defined
+
+- name: Add new NIC 
+  community.vmware.vmware_guest_network:
+    hostname: "{{ vcenter_hostname | default(omit) }}" 
+    username: "{{ vcenter_username | default(omit) }}"
+    password: "{{ vcenter_password | default(omit) }}"
+    validate_certs: false
+    name: "{{ my_vct_servername | upper }}"
+    datacenter: "{{ my_datacenter }}"
+    folder: "{{ my_folder }}"
+    network_name: "{{ my_network_name }}"
+    label: "{{ my_network_label | default(omit) }}"
+    state: present
+  delegate_to: localhost
+  register: addNIC
+  when: VMLOCATION == my_datacenter
+

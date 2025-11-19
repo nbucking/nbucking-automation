@@ -1,0 +1,4 @@
+---
+# tasks file for VerifyAppSetup
+- name: "Run the task for {{ ansible_facts['os_family'] }}_{{ application }}"
+  ansible.builtin.include_tasks: "{{ ansible_facts['os_family'] }}_{{ application }}.yml"

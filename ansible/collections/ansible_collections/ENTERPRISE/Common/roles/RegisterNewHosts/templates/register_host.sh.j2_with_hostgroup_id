@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+
+curl -sS --insecure 'https://{{ thiscapserver }}:9090/register?{{ thisactivation_key }}&hostgroup_id={{ thishostgroup_id }}&location_id={{ thislocation_id }}&organization_id=1&update_packages=false' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo4LCJpYXQiOjE2Nzk1MTk4NzgsImp0aSI6IjBiOWM5MDc2MmJlZTE1Y2U5ZGRhMmY0NTkzYzMxMDA4NDdlOWM2YzJkNDkzNWVmM2M0NTAxNzIwZjkwMTdhZmMiLCJzY29wZSI6InJlZ2lzdHJhdGlvbiNnbG9iYWwgcmVnaXN0cmF0aW9uI2hvc3QifQ.6Imz7BAG-TC5J4WzItVBrg6x9VLE84sfvqDHQIjQmkw' | bash
+
+# EOF

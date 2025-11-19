@@ -1,0 +1,4 @@
+---
+# tasks file for GetServerDetails
+- name: "Grab the variables to build a server: {{ my_vct_servername }}"
+  ansible.builtin.include_vars: Configure_{{ my_server_details }}.yml

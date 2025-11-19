@@ -1,0 +1,85 @@
+---
+# tasks file for Register_to_Satellite
+- name: Add the capsule servers to the /etc/hosts file
+  blockinfile:
+    path: /etc/hosts
+    block: |
+      172.26.58.42     csstsrvlvcap151.services.stamp.tsa.dhs.gov     csstsrvlvcap151
+      172.27.58.42     ajstsrvlvcap151.services.stamp.tsa.dhs.gov     ajstsrvlvcap151
+      172.26.58.43     csstsrvlvcap152.services.stamp.tsa.dhs.gov     csstsrvlvcap152
+      172.27.58.43     ajstsrvlvcap152.services.stamp.tsa.dhs.gov     ajstsrvlvcap152
+      172.26.24.124    nexus.stamp.tsa.dhs.gov
+
+
+- name: Install katello-ca for RH SAT for AJNON RHEL8
+  shell:
+    cmd: rpm -Uvh http://ajstsrvlvcap152.services.stamp.tsa.dhs.gov/pub/katello-ca-consumer-latest.noarch.rpm
+  when: ( ansible_local['vmInfo']['datacenter'] == "AJNON" and ansible_distribution_major_version == "8" )
+
+- name: Install katello-ca for RH SAT for AJPRD RHEL8
+  shell:
+    cmd: rpm -Uvh http://ajstsrvlvcap151.services.stamp.tsa.dhs.gov/pub/katello-ca-consumer-latest.noarch.rpm
+  when: ( ansible_local['vmInfo']['datacenter'] == "AJPRD" and ansible_distribution_major_version == "8" )
+
+- name: Install katello-ca for RH SAT for CSNON RHEL8
+  shell:
+    cmd: rpm -Uvh http://csstsrvlvcap152.services.stamp.tsa.dhs.gov/pub/katello-ca-consumer-latest.noarch.rpm
+  #when: ansible_distribution_major_version == "8"
+  when: ( ansible_local['vmInfo']['datacenter'] == "CSNON" and ansible_distribution_major_version == "8" )
+
+- name: Install katello-ca for RH SAT for CSPRD RHEL8
+  shell:
+    cmd: rpm -Uvh http://csstsrvlvcap151.services.stamp.tsa.dhs.gov/pub/katello-ca-consumer-latest.noarch.rpm
+  when: ( ansible_local['vmInfo']['datacenter'] == "CSPRD" and ansible_distribution_major_version == "8" )
+
+- name: Register RHEL 8 hosts to Satellite             
+  community.general.redhat_subscription:
+    state: present   
+    activationkey: "sta-reposet-el8-key"
+    org_id: "STA"   
+  retries: 20      
+  delay: 3        
+  async: 600     
+  when: ansible_distribution_major_version == "8" 
+  ignore_errors: yes                                                                         
+  register: result                                                                           
+  until: result is not failed
+
+- name: Update the operating system
+  dnf:
+    name: '*'
+    state: latest
+
+- name: Install required packages
+  yum:
+    name: 
+      - puppet-agent
+      - katello-host-tools
+      - samba-client-libs.x86_64
+      - samba-common.noarch
+      - samba-common-libs.x86_64
+      - samba-common-tools.x86_64
+      - samba-libs.x86_64                                                                          
+      - samba-winbind.x86_64                                                                       
+      - samba-winbind-clients.x86_64                                                               
+      - samba-winbind-modules.x86_64                                                               
+      - oddjob.x86_64                                                                              
+      - oddjob-mkhomedir.x86_64                                                                    
+      - yum-utils                                                                                  
+      - nmap-ncat                                                                                  
+    state: present
+
+- name: Check if reboot is required
+  shell: "/usr/bin/needs-restarting -r || /bin/true"
+  register: reboot_required
+
+- name: Reboot system after patching
+  reboot:
+    msg: "Reboot initiated by Automation Team using Ansible"
+    reboot_timeout: 600
+    test_command: 'uname -r'
+    post_reboot_delay: 60
+    pre_reboot_delay: 30
+  when: '"Reboot is required" in reboot_required.stdout'
+
+- debug: msg="Your VM {{ ansible_hostname }} is patched and ready"

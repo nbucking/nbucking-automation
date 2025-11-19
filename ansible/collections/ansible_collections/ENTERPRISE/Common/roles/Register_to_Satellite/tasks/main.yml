@@ -1,0 +1,105 @@
+---
+# tasks file for Register_to_Satellite
+- name: Add the capsule servers to the /etc/hosts file
+  blockinfile:
+    path: /etc/hosts
+    marker: "# {mark} Added by Automation Build Script"
+    block: |
+      172.26.58.41     csstsrvlvsat151.services.stamp.tsa.dhs.gov     csstsrvlvsat151
+      172.26.58.42     csstsrvlvcap151.services.stamp.tsa.dhs.gov     csstsrvlvcap151
+      172.27.58.42     ajstsrvlvcap151.services.stamp.tsa.dhs.gov     ajstsrvlvcap151
+      172.26.58.43     csstsrvlvcap152.services.stamp.tsa.dhs.gov     csstsrvlvcap152
+      172.27.58.43     ajstsrvlvcap152.services.stamp.tsa.dhs.gov     ajstsrvlvcap152
+      172.26.24.124    nexus.stamp.tsa.dhs.gov
+
+
+- name: Install katello-ca for RH SAT for AJNON RHEL8
+  shell:
+    cmd: rpm -Uvh http://ajstsrvlvcap152.services.stamp.tsa.dhs.gov/pub/katello-ca-consumer-latest.noarch.rpm
+  when: ( ansible_local['vmInfo']['datacenter'] == "AJNON" or my_datacenter == "AJ NON-PROD" )
+
+- name: Install katello-ca for RH SAT for AJPRD RHEL8
+  shell:
+    cmd: rpm -Uvh http://ajstsrvlvcap151.services.stamp.tsa.dhs.gov/pub/katello-ca-consumer-latest.noarch.rpm
+  when: ( ansible_local['vmInfo']['datacenter'] == "AJPRD" or my_datacenter == "AJ PROD" )
+
+- name: Install katello-ca for RH SAT for CSNON RHEL8
+  shell:
+    cmd: rpm -Uvh http://csstsrvlvcap152.services.stamp.tsa.dhs.gov/pub/katello-ca-consumer-latest.noarch.rpm
+  when: ( ansible_local['vmInfo']['datacenter'] == "CSNON" or my_datacenter == "CS NON-PROD" )
+
+- name: Install katello-ca for RH SAT for CSPRD RHEL8
+  shell:
+    cmd: rpm -Uvh http://csstsrvlvcap151.services.stamp.tsa.dhs.gov/pub/katello-ca-consumer-latest.noarch.rpm
+  when: ( ansible_local['vmInfo']['datacenter'] == "CSPRD" or my_datacenter == "CS PROD" ) 
+
+- name: Register RHEL 8 hosts to Satellite 
+  community.general.redhat_subscription:
+    state: present   
+    activationkey: "sta-reposet-el8-key"
+    org_id: "STA"   
+  retries: 20      
+  delay: 3        
+  async: 600     
+  when: ansible_distribution_major_version == "8" 
+  ignore_errors: yes                                                                         
+  register: result                                                                           
+  until: result is not failed
+
+- name: Register RHEL 7 hosts to Satellite             
+  community.general.redhat_subscription:
+    state: present   
+    activationkey: "sta-reposet-el7-key"
+    org_id: "STA"   
+  retries: 20      
+  delay: 3        
+  async: 600     
+  when: ansible_distribution_major_version == "7" 
+  ignore_errors: yes                                                                         
+  register: result                                                                           
+  until: result is not failed
+
+- name: Update the operating system
+  yum:
+    name: '*'
+    state: latest
+
+- name: Install required packages
+  yum:
+    name: 
+      - katello-host-tools
+      - samba-client-libs.x86_64
+      - samba-common.noarch
+      - samba-common-libs.x86_64
+      - samba-common-tools.x86_64
+      - samba-libs.x86_64
+      - samba-winbind.x86_64
+      - samba-winbind-clients.x86_64
+      - samba-winbind-modules.x86_64
+      - oddjob.x86_64
+      - oddjob-mkhomedir.x86_64
+      - yum-utils
+      - nmap-ncat
+      - mailx
+    state: present
+
+- name: Check if reboot is required
+  shell: "/usr/bin/needs-restarting -r || /bin/true"
+  register: reboot_required
+
+- name: Reboot system after patching
+  reboot:
+    msg: "Reboot initiated by Automation Team using Ansible"
+    reboot_timeout: 600
+    test_command: 'uname -r'
+    post_reboot_delay: 60
+    pre_reboot_delay: 30
+  when: '"Reboot is required" in reboot_required.stdout'
+
+- name: Add greenway authorized keys to system
+  ansible.posix.authorized_key:
+    user: greenway
+    state: present
+    key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC17KVdxULX3QWbEveKVrQUgkOOlVnSJ08QSmAFZH3MHXtHn10q3tYLnJivfPxmPGGIB4Wf1clFlK9gCLCVCYBRZhm4i920amiOdXZCwXIjdiciM4N3tK0KkvUfU1aKIpjnMufy/sJa3bvMaq+mFr7Hyss756Gls2vrKvREjCdValNNyw25AZ+JprIzDj4zNX12Cj8jYSVxySvXSRzVtZIyE+qshckNhy4x98Mkx2wbOT/WeW4Cz4BAiUxb+T8ikTtMLggnmDv6vi4GK45jsWLszKc7cP9gctr7b40GpGTae+5RhLYjrwon+yf4PXtdtTPmHtEec24jz5fxr5R9HK0au+HRx8fcvc9vVnZo/NwnHJ0XjQ2orTYRUrgH8KyZM5rLBaWSGYcVEWVUG3dr98icK6ZKpSGProQzjFEYdvDCfQbUHZJwjsiN++7rcGtYrKZZg2GPHm3VYuukjoK/UlNYibeeFOHSIGcUvOafak6poQL93ksYkWb4BQN18EEtWX8= greenway@csstsrvlvaap151"
+
+- debug: msg="Your VM {{ ansible_hostname }} is patched and ready"

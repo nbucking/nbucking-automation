@@ -1,0 +1,6 @@
+---
+# vars file for WinInstallSplunk
+capsule: ajstsrvlvcap151.services.stamp.tsa.dhs.gov
+tools_url: "https://{{ capsule }}/pulp/content/STA/Library/custom/WindowsTeam/Software/"
+splunk_agent: Splunk
+pkg_name: splunkforwarder-9.2.2-d76edf6f0a15-x64-release.msi

@@ -1,0 +1,247 @@
+## Sudoers allows particular users to run various commands as
+## the root user, without needing the root password.
+##
+## Examples are provided at the bottom of the file for collections
+## of related commands, which can then be delegated out to particular
+## users or groups.
+##
+## This file must be edited with the 'visudo' command.
+Defaults    listpw  =  never
+Defaults    !visiblepw
+Defaults    always_set_home
+Defaults    match_group_by_gid
+Defaults    always_query_group_plugin
+
+Defaults    env_reset
+Defaults    env_keep =  "COLORS DISPLAY HOSTNAME HISTSIZE KDEDIR LS_COLORS"
+Defaults    env_keep += "MAIL PS1 PS2 QTDIR USERNAME LANG LC_ADDRESS LC_CTYPE"
+Defaults    env_keep += "LC_COLLATE LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES"
+Defaults    env_keep += "LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE"
+Defaults    env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"
+Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin
+## Command Aliases
+## These are groups of related commands...
+{% if inventory_hostname in groups['DEVSMS'] or inventory_hostname in groups['TSTSMS'] or inventory_hostname in groups['STGSMS'] or inventory_hostname in groups['AJSGPRDSMS'] %}
+Cmnd_Alias SU_MQM      = /bin/su - mqm
+Cmnd_Alias SU_MQBRK    = /bin/su - mqbrk01
+Cmnd_Alias SU_CSGDZWRK = /bin/su - csgdzwrk
+Cmnd_Alias SU_AGGREGAT = /bin/su - aggregat
+{% endif %}
+{% if inventory_hostname in groups['DEVORC'] or inventory_hostname in groups['TSTORC'] or inventory_hostname in groups['STGORC']  or inventory_hostname in groups['AJSGPRDORC'] %}
+Cmnd_Alias SU_ORACLE   = /bin/su - oracle
+{% endif %}
+{% if inventory_hostname in groups['DEVAPP'] or inventory_hostname in groups['TSTAPP'] or inventory_hostname in groups['STGAPP'] or inventory_hostname in groups['AJSGPRDAPP'] %}
+Cmnd_Alias SU_SGAPP    = /bin/su - sgapp
+Cmnd_Alias SU_AGGREGAT = /bin/su - aggregat
+{% endif %}
+{% if inventory_hostname in groups['AFSPNON'] %}  
+Cmnd_Alias SU_SSAPP    = /bin/su - ssapp, /usr/bin/su - ssapp
+{% endif %}
+{% if inventory_hostname in groups['AJSGPRDAFSP'] %}
+Cmnd_Alias SU_SSAPP    = /bin/su - ssapp
+Cmnd_Alias JOURNALCTL  = /bin/journalctl*
+Cmnd_Alias DOCKERLOG   = /bin/docker logs*
+Cmnd_Alias DOCKERSTAT  = /bin/docker stats*
+Cmnd_Alias DOCKERPS    = /bin/docker ps*
+{% endif %}
+## The COMMANDS section may have other options added to it.
+##
+root                     ALL=(ALL) NOPASSWD: ALL
+paladin                  ALL=(ALL) NOPASSWD: ALL
+scanadm                  ALL=(ALL) NOPASSWD: ALL
+nessus                   ALL=(ALL) NOPASSWD: ALL
+greenway                 ALL=(ALL) NOPASSWD: ALL
+%wheel                   ALL=(ALL) NOPASSWD: ALL
+st-iad-nessus            ALL=(ALL) NOPASSWD: ALL
+{% if inventory_hostname in groups['AJSGDEVALL'] %}
+sg-aj-dev-lnxadm         ALL=(ALL) NOPASSWD: ALL
+sg-cs-dev-lnxadm         ALL=(ALL) NOPASSWD: ALL
+sg-aj_dev-maadm          ALL=(ALL) NOPASSWD: ALL
+sg-cs_dev-maadm          ALL=(ALL) NOPASSWD: ALL
+sg-cs_dev-nbuadm         ALL=(ALL) NOPASSWD: ALL
+sg-aj_dev-nbuadm         ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+{% if inventory_hostname in groups['AJSGTSTALL'] %}
+sg-aj-tst-lnxadm         ALL=(ALL) NOPASSWD: ALL
+sg-cs-tst-lnxadm         ALL=(ALL) NOPASSWD: ALL
+sg-aj_tst-maadm          ALL=(ALL) NOPASSWD: ALL
+sg-cs_tst-maadm          ALL=(ALL) NOPASSWD: ALL
+sg-cs_tst-nbuadm         ALL=(ALL) NOPASSWD: ALL
+sg-aj_tst-nbuadm         ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+{% if inventory_hostname in groups['AJSGSTGALL'] %}
+sg-aj-stg-lnxadm         ALL=(ALL) NOPASSWD: ALL
+sg-cs-stg-lnxadm         ALL=(ALL) NOPASSWD: ALL
+sg-aj_stg-maadm          ALL=(ALL) NOPASSWD: ALL
+sg-cs_stg-maadm          ALL=(ALL) NOPASSWD: ALL
+sg-cs_stg-nbuadm         ALL=(ALL) NOPASSWD: ALL
+sg-aj_stg-nbuadm         ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+{% if inventory_hostname in groups['AJSGPRDALL'] or inventory_hostname in groups['AJSGPRDMON'] %}
+sg-aj-prd-lnxadm         ALL=(ALL) NOPASSWD: ALL
+sg-cs-prd-lnxadm         ALL=(ALL) NOPASSWD: ALL
+sg-aj_prd-maadm          ALL=(ALL) NOPASSWD: ALL
+sg-cs_prd-maadm          ALL=(ALL) NOPASSWD: ALL
+sg-cs_prd-nbuadm         ALL=(ALL) NOPASSWD: ALL
+sg-aj_prd-nbuadm         ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+{% if inventory_hostname in groups['AFSPDEV'] %}
+ssapp                    ALL=(ALL) NOPASSWD: ALL
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: SU_SSAPP
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: SU_SSAPP
+sg-aj_dev-vcsadm         ALL=(ALL) NOPASSWD: ALL
+sg-cs_dev-vcsadm         ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+{% if inventory_hostname in groups['AFSPTST'] %}
+ssapp                    ALL=(ALL) NOPASSWD: ALL
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: SU_SSAPP
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: SU_SSAPP
+sg-aj_tst-developers     ALL=(ALL) NOPASSWD: SU_SSAPP
+sg-cs_tst-developers     ALL=(ALL) NOPASSWD: SU_SSAPP
+sg-aj_dev-vcsadm         ALL=(ALL) NOPASSWD: ALL
+sg-cs_dev-vcsadm         ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+{% if inventory_hostname in groups['AFSPSTG'] %}
+ssapp                    ALL=(ALL) NOPASSWD: ALL
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: SU_SSAPP
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: SU_SSAPP
+sg-aj_stg-developers     ALL=(ALL) NOPASSWD: SU_SSAPP
+sg-cs_stg-developers     ALL=(ALL) NOPASSWD: SU_SSAPP
+sg-aj_dev-vcsadm         ALL=(ALL) NOPASSWD: ALL
+sg-cs_dev-vcsadm         ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+{% if inventory_hostname in groups['AJSGPRDAFSP'] %}
+ssapp                    ALL=(ALL) NOPASSWD: ALL
+sg-aj_prd-vcsadm         ALL=(ALL) NOPASSWD: ALL
+sg-cs_prd-vcsadm         ALL=(ALL) NOPASSWD: ALL
+sg-aj_prd-govspt         ALL=(ALL) NOPASSWD: ALL
+sg-cs_prd-govspt         ALL=(ALL) NOPASSWD: ALL
+sg-cs_prd-afspro         ALL=(ALL) NOPASSWD: JOURNALCTL, DOCKERPS, DOCKERSTAT, DOCKERLOG 
+sg-aj_prd-afspro         ALL=(ALL) NOPASSWD: JOURNALCTL, DOCKERPS, DOCKERSTAT, DOCKERLOG 
+{% endif %}
+{% if inventory_hostname in groups['DEVORC'] %}
+sg-cs_dev-dbadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-aj_dev-dbadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-aj_dev-dmadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-cs_dev-dmadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+{% endif %}
+{% if inventory_hostname in groups['TSTORC'] %}
+sg-aj_tst-dbadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-cs_tst-dbadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-aj_tst-developer      ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-cs_tst-developer      ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-aj_tst-dmadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-cs_tst-dmadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+{% endif %}
+{% if inventory_hostname in groups['STGORC'] %}
+sg-aj_stg-dbadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-cs_stg-dbadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-aj_stg-developer      ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-cs_stg-developer      ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-aj_stg-dmadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-cs_stg-dmadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+{% endif %}
+{% if inventory_hostname in groups['AJSGPRDORC'] %}
+sg-cs_prd-dbadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-aj_prd-dbadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-aj_prod-lpsadm        ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-cs_prod-lpsadm        ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-cs_prd-dmadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+sg-aj_prd-dmadm          ALL=(ALL) NOPASSWD: SU_ORACLE
+{% endif %}
+{% if inventory_hostname in groups['DEVSMS'] %}
+sg-aj_dev-mqadm          ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM
+sg-cs_dev-mqadm          ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM,SU_AGGREGAT,SU_CSGDZWRK
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM,SU_AGGREGAT,SU_CSGDZWRK
+{% endif %}
+{% if inventory_hostname in groups['TSTSMS'] %}
+sg-aj_tst-mqadm          ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM                                      
+sg-cs_tst-mqadm          ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM,SU_AGGREGAT,SU_CSGDZWRK
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM,SU_AGGREGAT,SU_CSGDZWRK
+sg-aj_tst-developer      ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM,SU_AGGREGAT,SU_CSGDZWRK
+sg-cs_tst-developer      ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM,SU_AGGREGAT,SU_CSGDZWRK
+{% endif %}
+{% if inventory_hostname in groups['STGSMS'] %}
+sg-aj_stg-mqadm          ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM
+sg-cs_stg-mqadm          ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM,SU_AGGREGAT,SU_CSGDZWRK
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM,SU_AGGREGAT,SU_CSGDZWRK
+sg-aj_stg-developer      ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM,SU_AGGREGAT,SU_CSGDZWRK
+sg-cs_stg-developer      ALL=(ALL) NOPASSWD: SU_MQBRK,SU_MQM,SU_AGGREGAT,SU_CSGDZWRK
+{% endif %}
+{% if inventory_hostname in groups['AJSGPRDSMSAD'] %}
+sg-aj_prd-mqadm          ALL=(ALL) NOPASSWD: SU_MQBRK, SU_MQM
+sg-cs_prd-mqadm          ALL=(ALL) NOPASSWD: SU_MQBRK, SU_MQM
+sg-aj_prd-dmadm          ALL=(ALL) NOPASSWD: SU_MQBRK, SU_MQM, SU_AGGREGAT, SU_CSGDZWRK
+sg-cs_prd-dmadm          ALL=(ALL) NOPASSWD: SU_MQBRK, SU_MQM, SU_AGGREGAT, SU_CSGDZWRK 
+sg-aj_prod-lpsadm        ALL=(ALL) NOPASSWD: SU_MQBRK, SU_MQM, SU_AGGREGAT, SU_CSGDZWRK
+sg-cs_prod-lpsadm        ALL=(ALL) NOPASSWD: SU_MQBRK, SU_MQM, SU_AGGREGAT, SU_CSGDZWRK
+{% endif %}
+{% if inventory_hostname in groups['DEVWEB'] %}
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: ALL
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+{% if inventory_hostname in groups['TSTWEB'] %}
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: ALL
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: ALL
+sg-aj_tst-developer      ALL=(ALL) NOPASSWD: ALL
+sg-cs_tst-developer      ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+{% if inventory_hostname in groups['STGWEB'] %}
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: ALL
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: ALL
+sg-aj_stg-developer      ALL=(ALL) NOPASSWD: ALL
+sg-cs_stg-developer      ALL=(ALL) NOPASSWD: ALL
+{% endif %}
+{% if inventory_hostname in groups['AJSGPRDWEB'] %}
+##SG DEV TEAM
+sschmidt                 ALL=(ALL) ALL 
+{% endif %}
+{% if inventory_hostname in groups['DEVAPP'] %}
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: SU_SGAPP, SU_AGGREGAT
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: SU_SGAPP, SU_AGGREGAT
+{% endif %}
+{% if inventory_hostname in groups['TSTAPP'] %}
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: ALL
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: ALL
+sg-aj_tst-developer      ALL=(ALL) NOPASSWD: SU_SGAPP, SU_AGGREGAT
+sg-cs_tst-developer      ALL=(ALL) NOPASSWD: SU_SGAPP, SU_AGGREGAT
+{% endif %}
+{% if inventory_hostname in groups['STGAPP'] %}
+sg-aj_dev-developer      ALL=(ALL) NOPASSWD: SU_SGAPP, SU_AGGREGAT
+sg-cs_dev-developer      ALL=(ALL) NOPASSWD: SU_SGAPP, SU_AGGREGAT
+sg-aj_stg-developer      ALL=(ALL) NOPASSWD: SU_SGAPP, SU_AGGREGAT
+sg-cs_stg-developer      ALL=(ALL) NOPASSWD: SU_SGAPP, SU_AGGREGAT
+{% endif %}
+{% if inventory_hostname in groups['AJSGPRDAPP'] %}
+sg-aj_prod-lpsadm        ALL=(ALL) NOPASSWD: SU_SGAPP, SU_AGGREGAT
+sg-cs_prod-lpsadm        ALL=(ALL) NOPASSWD: SU_SGAPP, SU_AGGREGAT
+sg-aj_prd-dmadm          ALL=(ALL) NOPASSWD: SU_SGAPP, SU_AGGREGAT
+sg-cs_prd-dmadm          ALL=(ALL) NOPASSWD: SU_SGAPP, SU_AGGREGAT
+{% endif %}
+{% if inventory_hostname in groups['AJSGPRDSMSNOAD'] %}
+##SG DATA MANAGEMENT
+omata                    ALL=SU_MQBRK, SU_MQM, SU_AGGREGAT, SU_CSGDZWRK 
+rwalker                  ALL=SU_MQBRK, SU_MQM, SU_AGGREGAT, SU_CSGDZWRK 
+pitoua                   ALL=SU_MQBRK, SU_MQM, SU_AGGREGAT, SU_CSGDZWRK 
+arech                    ALL=SU_MQBRK, SU_MQM, SU_AGGREGAT, SU_CSGDZWRK 
+tknott                   ALL=SU_MQBRK, SU_MQM, SU_AGGREGAT, SU_CSGDZWRK 
+svempati                 ALL=SU_MQBRK, SU_MQM, SU_AGGREGAT, SU_CSGDZWRK 
+
+##STAMP BACKUP TEAM
+rjames                   ALL=(ALL) ALL
+
+##SG MISSION ASSURANCE 
+srahman                  ALL=SU_AGGREGAT, SU_CSGDZWRK
+
+##SG DEV TEAM
+sschmidt                 ALL=SU_MQBRK, SU_MQM, SU_AGGREGAT, SU_CSGDZWRK
+{% endif %}

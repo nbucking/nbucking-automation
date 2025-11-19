@@ -1,0 +1,45 @@
+---
+# tasks file for TemplateRole
+- name: Deploy Sudoers file for SG
+  template:
+    src: SG_sudoers.j2  
+    dest: /etc/sudoers
+    owner: root
+    group: root
+    mode: 0440
+    backup: yes
+    validate: /usr/sbin/visudo -cf %s
+  when: ansible_local['vmInfo']['tenant'] == "SG"
+
+- name: Deploy Sudoers file for TIM
+  template:
+    src: TIM_sudoers.j2  
+    dest: /etc/sudoers
+    owner: root
+    group: root
+    mode: 0440
+    backup: yes
+    validate: /usr/sbin/visudo -cf %s
+  when:  ansible_local['vmInfo']['tenant'] == "TM"
+
+- name: Deploy Sudoers file for ENTERPRISE
+  template:
+    src: STAMP_sudoers.j2 
+    dest: /etc/sudoers
+    owner: root
+    group: root
+    mode: 0440
+    backup: yes
+    validate: /usr/sbin/visudo -cf %s
+  when:  ( ansible_local['vmInfo']['tenant'] == "SS"  or  ansible_local['vmInfo']['tenant'] == "ST"  )
+
+- name: Deploy Sudoers file for TVS
+  template:
+    src: TVS_sudoers.j2 
+    dest: /etc/sudoers
+    owner: root
+    group: root
+    mode: 0440
+    backup: yes
+    validate: /usr/sbin/visudo -cf %s
+  when: ansible_local['vmInfo']['tenant'] == "TV"

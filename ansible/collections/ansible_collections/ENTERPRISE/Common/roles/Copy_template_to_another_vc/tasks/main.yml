@@ -1,0 +1,20 @@
+---
+# tasks file for TemplateRole
+- name: clone a template across VC
+  community.vmware.vmware_guest_cross_vc_clone:
+    hostname: '{{ vcenter_hostname | default(omit) }}'
+    username: '{{ vcenter_username | default(omit) }}'
+    password: '{{ vcenter_password | default(omit) }}'
+    name: "RHEL88_CRED_Template"
+    destination_vm_name: "cloned_RHEL88_CRED_Template"
+    destination_vcenter: '{{ destination_vcenter_hostname }}'
+    destination_vcenter_username: '{{ destination_vcenter_username }}'
+    destination_vcenter_password: '{{ destination_vcenter_password }}'
+    destination_vcenter_port: '{{ destination_vcenter_port }}'
+    destination_vcenter_validate_certs: '{{ destination_vcenter_validate_certs }}'
+    destination_host: '{{ destination_esxi }}'
+    destination_datastore: '{{ destination_datastore }}'
+    destination_vm_folder: '{{ destination_vm_folder }}'
+    state: present
+  register: cross_vc_clone_from_template
+  #delegate_to: localhost

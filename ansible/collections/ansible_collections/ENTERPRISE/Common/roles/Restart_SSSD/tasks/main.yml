@@ -1,0 +1,71 @@
+---
+# tasks file for Restart_SSSD
+- name: Ensure OS is not RHEL 7
+  ansible.builtin.debug:
+    msg: This role is not for RHEL 7 servers
+  when: ansible_distribution_major_version == "7"
+
+- name: Exit playbook gracefully if host is running RHEL7
+  ansible.builtin.meta: end_host
+  when: ansible_distribution_major_version == "7"
+
+- name: Create /root/bin
+  ansible.builtin.file:
+    path: /root/bin
+    owner: root
+    group: root
+    mode: '0755'
+    state: directory
+
+- name: Copy RestartSSSD.sh
+  ansible.builtin.copy:
+    src: Restart_SSSD.sh
+    dest: /root/bin/Restart_SSSD.sh
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Restart SSSD
+  ansible.builtin.shell: /root/bin/Restart_SSSD.sh
+  register: outputRestartSSSD
+
+- ansible.builtin.debug: msg={{ outputRestartSSSD.stdout_lines }}
+
+- name: Set fact for failed and unreachable hosts
+  ansible.builtin.set_fact:
+    failed_hosts: "{{ ansible_play_hosts_all | difference(ansible_play_hosts) }}"
+  delegate_to: localhost
+  run_once: true
+
+- name: Create email body
+  ansible.builtin.template:
+    src: email_template.j2
+    dest: /tmp/restart_sssd_report.txt
+    owner: root
+    group: root
+    mode: '0644'
+  when: failed_hosts | length > 0
+  run_once: true
+  delegate_to: localhost
+
+- name: Send the results to the admin
+  community.general.mail:
+    host: 172.28.26.64
+    port: 25
+    to: "{{ user_defined_email }}"
+    from: StampAutomation@tsa.dhs.gov
+    subject: "Results of Restart SSSD script - {{ tower_job_launch_type }} - {{ tower_job_id }}"
+    body: "{{ lookup('file', '/tmp/restart_sssd_report.txt') }}"
+  when: failed_hosts | length > 0
+  run_once: true
+  delegate_to: localhost
+
+- name: Clean up the failed nodes file
+  ansible.builtin.file:
+    path: /tmp/restart_sssd_report.txt
+    state: absent
+  when: failed_hosts | length > 0
+  run_once: true
+  delegate_to: localhost
+
+# EOF

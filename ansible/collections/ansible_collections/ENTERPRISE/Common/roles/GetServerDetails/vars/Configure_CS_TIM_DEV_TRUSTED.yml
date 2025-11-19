@@ -1,0 +1,13 @@
+---
+_hosts: '{{ my_vct_servername }}'
+my_cluster: csstsrvlpesx140
+my_folder: Linux/TIM/DEV
+my_datacenter: CS PRD
+my_hostname: "{{ my_vct_servername | lower }}.{{ my_dns_domain }}"
+my_network_name: "TIM Trusted (DEV)"
+my_netmask: 255.255.252.0
+my_gateway_address: 10.2.24.1
+my_dnsserver1: 10.2.4.129
+my_dnsserver2: 10.2.8.129
+my_dns_domain: dev.example.com
+my_datastore: ESX140 Trusted Datastore Cluster (CS)

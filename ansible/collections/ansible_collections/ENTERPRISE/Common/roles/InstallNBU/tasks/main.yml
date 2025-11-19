@@ -1,0 +1,108 @@
+---
+# tasks file for InstallNBU
+# - name: Grab version of NBU
+#   ansible.builtin.shell: cat /usr/openv/netbackup/bin/version |awk '{print $2}'
+#   register: nbu_version
+
+# - name: Show current version of NBU
+#   ansible.builtin.debug: var=nbu_version.stdout
+
+- name: Check to see if /usr/openv/netbackup/bp.conf exists
+  ansible.builtin.stat:
+    path: /usr/openv/netbackup/bp.conf
+  register: bp
+
+- name: Fail if bp.conf does not exist
+  ansible.builtin.fail:
+    msg: "Found a bp.conf file. Manual intervention needed"
+  when: bp.stat.isreg is defined
+
+- name: Remount directories with exec so we can run ansible scripts (will reset after reboot)
+  ansible.builtin.shell: /usr/bin/mount -o remount,exec "{{ mounts }}"
+  loop:
+    - /var/tmp
+    - /home
+    - /tmp
+  ignore_errors: true
+  loop_control:
+    loop_var: mounts
+
+- name: Install required RHEL packages
+  ansible.builtin.yum:
+    name: libnsl
+    state: present
+  when: ansible_distribution_major_version == "8"
+   
+- name: Add host entries for backup bur ip address
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: |
+      {{ bur_ip_address }}     {{ client_name }}
+      {{ server_bur_ip_address }}     {{ server_name }}
+    state: present
+
+- name: Grab the capsule server name
+  ansible.builtin.set_fact:
+    capsule: "{{ ansible_local['vmInfo']['capsule'] }}"
+
+- name: Create the staging directory
+  ansible.builtin.file:
+    path: "{{ stage_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Download the NetBackup installation
+  ansible.builtin.get_url:
+    url: "https://{{ capsule }}/{{ repo_loc }}/{{ netbackup_tar }}"
+    dest: "{{ stage_dir }}"
+    owner: "{{ root_user }}"
+    group: "{{ root_group }}"
+    mode: '0750'
+  register: get_netbackup
+
+- name: Untar and unzip NetBackup tarball
+  ansible.builtin.unarchive:
+    src: "{{ stage_dir }}/{{ netbackup_tar }}"
+    dest: "{{ stage_dir }}"
+    remote_src: yes
+
+- name: Set permissions for files
+  ansible.builtin.command: "chmod -R 777 {{ stage_dir }}/NBU/"
+
+- name: Set variables for AJ hosts
+  ansible.builtin.set_fact:
+    fingerprint: 61:50:61:AF:95:92:F4:5C:1F:DF:73:67:56:93:29:E8:A5:23:AC:4E
+    #server_name: ajssprdwpnbu51
+  when: ansible_local['vmInfo']['location'] == "AJ"
+
+- name: Set variables for CS hosts
+  ansible.builtin.set_fact:
+    fingerprint: C2:54:57:64:07:4F:FB:EC:33:4E:84:46:13:B9:68:B2:54:08:6C:E8
+    #server_name: csssprdwpnbu51
+  when: ansible_local['vmInfo']['location'] == "CS"
+
+- name: Copy the answers file to /tmp
+  ansible.builtin.template:
+    src: NBInstallAnswer.conf.j2
+    dest: /tmp/NBInstallAnswer.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Run Install Command
+  ansible.builtin.shell: "/bin/bash ./install"
+  args:
+    chdir: "{{ stage_dir }}/NBU/"
+  register: nbu_out
+  environment:
+    PROCEED_WITH_INSTALL: yes
+
+- ansible.builtin.debug: msg={{ nbu_out.stdout_lines }}
+
+# - name: Setup firewall ports on host
+#   ansible.posix.firewalld:
+
+- name: Remove the netbackup install directory
+  ansible.builtin.file:
+    path: "{{ stage_dir }}"
+    state: absent
