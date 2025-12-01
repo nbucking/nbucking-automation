@@ -1,0 +1,83 @@
+stages:
+  - meta
+
+create_labels_and_milestones:
+  stage: meta
+  image: alpine:3.19
+  rules:
+    # Only allow manual run from web UI
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+  variables:
+    GITLAB_URL: "https://gitlab.com"
+    PROJECT_PATH: "nbucking-group/nbucking-project"
+  script:
+    - apk add --no-cache curl python3
+    - |
+      ENCODED_PATH=$(python3 - << 'PY'
+      import urllib.parse
+      print(urllib.parse.quote("nbucking-group/nbucking-project", safe=""))
+      PY
+      )
+      PROJECT_JSON=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_PAT" \
+        "$GITLAB_URL/api/v4/projects/$ENCODED_PATH")
+      PROJECT_ID=$(printf '%s\n' "$PROJECT_JSON" | python3 - << 'PY'
+      import json,sys
+      data=json.load(sys.stdin)
+      print(data.get("id",""))
+      PY
+      )
+      echo "Using project ID: $PROJECT_ID"
+
+      create_label () {
+        name="$1"; color="$2"; desc="$3"
+        echo "Creating label: $name"
+        curl -sS --request POST \
+          --header "PRIVATE-TOKEN: $GITLAB_PAT" \
+          --data-urlencode "name=$name" \
+          --data "color=$color" \
+          --data-urlencode "description=$desc" \
+          "$GITLAB_URL/api/v4/projects/$PROJECT_ID/labels" >/dev/null
+      }
+
+      create_milestone () {
+        title="$1"; desc="$2"
+        echo "Creating milestone: $title"
+        curl -sS --request POST \
+          --header "PRIVATE-TOKEN: $GITLAB_PAT" \
+          --data-urlencode "title=$title" \
+          --data-urlencode "description=$desc" \
+          "$GITLAB_URL/api/v4/projects/$PROJECT_ID/milestones" >/dev/null
+      }
+
+      # Labels
+      create_label "type:bug"     "#d9534f" "Bugs, defects, regressions"
+      create_label "type:feature" "#5cb85c" "New user-facing functionality"
+      create_label "type:chore"   "#f0ad4e" "Maintenance, refactors, infra"
+      create_label "type:doc"     "#5bc0de" "Documentation-only work"
+      create_label "type:test"    "#428bca" "Testing-related work"
+
+      create_label "priority:critical" "#ff0000" "Production down, security issues, urgent"
+      create_label "priority:high"     "#ff7f0e" "High-priority work"
+      create_label "priority:medium"   "#1f77b4" "Normal-priority work"
+      create_label "priority:low"      "#2ca02c" "Low-priority / nice-to-have"
+
+      create_label "area:api"      "#9467bd" "API endpoints, business logic"
+      create_label "area:infra"    "#8c564b" "CI/CD, Docker, pipelines, infrastructure"
+      create_label "area:security" "#e377c2" "Security-related work"
+      create_label "area:ux"       "#7f7f7f" "API surface, usability, docs as interface"
+
+      create_label "status:needs-triage" "#bcbd22" "New issues needing triage"
+      create_label "status:ready"        "#17becf" "Ready to be worked on"
+      create_label "status:blocked"      "#d62728" "Blocked on some dependency"
+
+      create_label "breaking-change"   "#000000" "Breaking changes"
+      create_label "good-first-issue" "#00b894" "Issues suitable for newcomers"
+      create_label "needs-info"       "#fdcb6e" "Needs more information or clarification"
+
+      # Milestones
+      create_milestone "M1: Initial scaffold & CI" \
+        "Base .NET 8 Web API, Docker, devcontainer, health endpoint, GitLab CI build/test pipeline."
+      create_milestone "M2: Core API v1" \
+        "Initial real endpoints, configuration, logging, metrics, basic auth decisions."
+      create_milestone "M3: Production hardening" \
+        "Monitoring, alerting, SLOs, backups, security review, production-readiness tasks."
