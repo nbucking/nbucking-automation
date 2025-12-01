@@ -9,23 +9,15 @@ create_labels_and_milestones:
     - if: '$CI_PIPELINE_SOURCE == "web"'
   variables:
     GITLAB_URL: "https://gitlab.com"
-    PROJECT_PATH: "nbucking-group/nbucking-project"
   script:
     - apk add --no-cache curl python3
     - |
-      ENCODED_PATH=$(python3 - << 'PY'
-      import urllib.parse
-      print(urllib.parse.quote("nbucking-group/nbucking-project", safe=""))
-      PY
-      )
-      PROJECT_JSON=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_PAT" \
-        "$GITLAB_URL/api/v4/projects/$ENCODED_PATH")
-      PROJECT_ID=$(printf '%s\n' "$PROJECT_JSON" | python3 - << 'PY'
-      import json,sys
-      data=json.load(sys.stdin)
-      print(data.get("id",""))
-      PY
-      )
+      if [ -z "${GITLAB_PAT:-}" ]; then
+        echo "GITLAB_PAT is not set. Define it as a masked CI/CD variable." >&2
+        exit 1
+      fi
+
+      PROJECT_ID="$CI_PROJECT_ID"
       echo "Using project ID: $PROJECT_ID"
 
       create_label () {
