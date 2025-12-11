@@ -1,75 +1,36 @@
 stages:
-  - meta
+  - build
+  - deploy
 
-create_labels_and_milestones:
-  stage: meta
-  image: alpine:3.19
-  rules:
-    # Only allow manual run from web UI
-    - if: '$CI_PIPELINE_SOURCE == "web"'
-  variables:
-    GITLAB_URL: "https://gitlab.com"
+variables:
+  IMAGE_NAME: $CI_REGISTRY_IMAGE/web
+  DOCKER_DRIVER: overlay2
+
+build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.23.0-debug
+    entrypoint: [""]
   script:
-    - apk add --no-cache curl python3
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - |
-      if [ -z "${GITLAB_PAT:-}" ]; then
-        echo "GITLAB_PAT is not set. Define it as a masked CI/CD variable." >&2
-        exit 1
-      fi
+      /kaniko/executor \
+        --context $CI_PROJECT_DIR/src/NbuckingProject.Web \
+        --dockerfile $CI_PROJECT_DIR/src/NbuckingProject.Web/Dockerfile \
+        --destination $IMAGE_NAME:latest \
+        --destination $IMAGE_NAME:$CI_COMMIT_SHORT_SHA \
+        --cache=true \
+        --cache-ttl=24h
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "web"
 
-      PROJECT_ID="$CI_PROJECT_ID"
-      echo "Using project ID: $PROJECT_ID"
-
-      create_label () {
-        name="$1"; color="$2"; desc="$3"
-        echo "Creating label: $name"
-        curl -sS --request POST \
-          --header "PRIVATE-TOKEN: $GITLAB_PAT" \
-          --data-urlencode "name=$name" \
-          --data "color=$color" \
-          --data-urlencode "description=$desc" \
-          "$GITLAB_URL/api/v4/projects/$PROJECT_ID/labels" >/dev/null
-      }
-
-      create_milestone () {
-        title="$1"; desc="$2"
-        echo "Creating milestone: $title"
-        curl -sS --request POST \
-          --header "PRIVATE-TOKEN: $GITLAB_PAT" \
-          --data-urlencode "title=$title" \
-          --data-urlencode "description=$desc" \
-          "$GITLAB_URL/api/v4/projects/$PROJECT_ID/milestones" >/dev/null
-      }
-
-      # Labels
-      create_label "type:bug"     "#d9534f" "Bugs, defects, regressions"
-      create_label "type:feature" "#5cb85c" "New user-facing functionality"
-      create_label "type:chore"   "#f0ad4e" "Maintenance, refactors, infra"
-      create_label "type:doc"     "#5bc0de" "Documentation-only work"
-      create_label "type:test"    "#428bca" "Testing-related work"
-
-      create_label "priority:critical" "#ff0000" "Production down, security issues, urgent"
-      create_label "priority:high"     "#ff7f0e" "High-priority work"
-      create_label "priority:medium"   "#1f77b4" "Normal-priority work"
-      create_label "priority:low"      "#2ca02c" "Low-priority / nice-to-have"
-
-      create_label "area:api"      "#9467bd" "API endpoints, business logic"
-      create_label "area:infra"    "#8c564b" "CI/CD, Docker, pipelines, infrastructure"
-      create_label "area:security" "#e377c2" "Security-related work"
-      create_label "area:ux"       "#7f7f7f" "API surface, usability, docs as interface"
-
-      create_label "status:needs-triage" "#bcbd22" "New issues needing triage"
-      create_label "status:ready"        "#17becf" "Ready to be worked on"
-      create_label "status:blocked"      "#d62728" "Blocked on some dependency"
-
-      create_label "breaking-change"   "#000000" "Breaking changes"
-      create_label "good-first-issue" "#00b894" "Issues suitable for newcomers"
-      create_label "needs-info"       "#fdcb6e" "Needs more information or clarification"
-
-      # Milestones
-      create_milestone "M1: Initial scaffold & CI" \
-        "Base .NET 8 Web API, Docker, devcontainer, health endpoint, GitLab CI build/test pipeline."
-      create_milestone "M2: Core API v1" \
-        "Initial real endpoints, configuration, logging, metrics, basic auth decisions."
-      create_milestone "M3: Production hardening" \
-        "Monitoring, alerting, SLOs, backups, security review, production-readiness tasks."
+deploy:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  script:
+    - echo "Deployment triggered for $IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
+    - echo "Apply manifests manually or via CD tool"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual

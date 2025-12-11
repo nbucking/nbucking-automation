@@ -1,0 +1,39 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nbucking-web
+  namespace: default
+  labels:
+    app: nbucking-web
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - nbucking.net
+    - www.nbucking.net
+    secretName: nbucking-tls
+  rules:
+  - host: nbucking.net
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nbucking-web
+            port:
+              number: 80
+  - host: www.nbucking.net
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nbucking-web
+            port:
+              number: 80

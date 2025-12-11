@@ -1,0 +1,6 @@
+@NbuckingProject.Api_HostAddress = http://localhost:5090
+
+GET {{NbuckingProject.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
