@@ -18,6 +18,16 @@ public class HomeController : Controller
         return View();
     }
 
+    public IActionResult Bio()
+    {
+        return View();
+    }
+
+    public IActionResult Technical()
+    {
+        return View();
+    }
+
     public IActionResult Privacy()
     {
         return View();

@@ -1,0 +1,145 @@
+@{
+    ViewData["Title"] = "How This Site Was Built";
+}
+
+<div class="container" style="max-width: 900px;">
+    <h1 class="mb-4">How This Site Was Built</h1>
+    
+    <p class="lead mb-5">
+        This site is a showcase of modern DevOps practices, running on Kubernetes with automated deployments, 
+        SSL certificates, and OAuth2 authentication.
+    </p>
+
+    <section class="mb-5">
+        <h2>Architecture Overview</h2>
+        <p>
+            The site runs as a containerized ASP.NET Core application deployed to a Kubernetes cluster. It leverages 
+            cloud-native patterns for scalability, reliability, and security.
+        </p>
+    </section>
+
+    <section class="mb-5">
+        <h2>Application Stack</h2>
+        <ul>
+            <li><strong>.NET 8</strong> - Modern, cross-platform framework for building web applications</li>
+            <li><strong>ASP.NET Core MVC</strong> - Web framework for building the user interface</li>
+            <li><strong>Bootstrap 5</strong> - Responsive front-end framework for clean, mobile-friendly design</li>
+            <li><strong>Docker</strong> - Containerization for consistent deployments across environments</li>
+        </ul>
+    </section>
+
+    <section class="mb-5">
+        <h2>Kubernetes Deployment</h2>
+        <p>
+            The application runs on <strong>K3s</strong>, a lightweight Kubernetes distribution, deployed on Oracle Cloud Infrastructure 
+            using ARM64 (aarch64) architecture for cost efficiency.
+        </p>
+        <h4>Key Components:</h4>
+        <ul>
+            <li><strong>Deployment</strong> - Manages 2 replicas of the web application for high availability</li>
+            <li><strong>Service</strong> - ClusterIP service exposing the application internally on port 80</li>
+            <li><strong>Ingress</strong> - Traefik ingress controller routing external traffic to the service</li>
+        </ul>
+    </section>
+
+    <section class="mb-5">
+        <h2>Container Registry & CI/CD</h2>
+        <p>
+            Docker images are built for ARM64 architecture and stored in <strong>GitLab Container Registry</strong>. 
+            Kubernetes pulls these images using deploy tokens for secure authentication.
+        </p>
+        <p>
+            The deployment process involves:
+        </p>
+        <ol>
+            <li>Building multi-stage Docker images optimized for size</li>
+            <li>Pushing images to GitLab registry with proper tagging</li>
+            <li>Kubernetes pulling the latest images automatically</li>
+            <li>Rolling updates with zero downtime</li>
+        </ol>
+    </section>
+
+    <section class="mb-5">
+        <h2>SSL/TLS Certificates</h2>
+        <p>
+            The site uses <strong>cert-manager</strong> to automatically provision and renew SSL certificates from Let's Encrypt. 
+            This ensures all traffic is encrypted via HTTPS without manual certificate management.
+        </p>
+        <p>
+            Cert-manager handles:
+        </p>
+        <ul>
+            <li>Automatic certificate issuance via ACME protocol</li>
+            <li>HTTP-01 challenge validation</li>
+            <li>Certificate renewal before expiration</li>
+            <li>TLS secret management in Kubernetes</li>
+        </ul>
+    </section>
+
+    <section class="mb-5">
+        <h2>OAuth2 Proxy</h2>
+        <p>
+            For secure authentication, the site can be protected by <strong>oauth2-proxy</strong>, which provides:
+        </p>
+        <ul>
+            <li>Single sign-on (SSO) integration</li>
+            <li>Authentication via OAuth2 providers (Google, GitHub, etc.)</li>
+            <li>Authorization and access control</li>
+            <li>Session management</li>
+        </ul>
+    </section>
+
+    <section class="mb-5">
+        <h2>Ingress & Routing</h2>
+        <p>
+            <strong>Traefik</strong> serves as the ingress controller, handling:
+        </p>
+        <ul>
+            <li>HTTP to HTTPS redirection</li>
+            <li>Virtual host routing for nbucking.net and www.nbucking.net</li>
+            <li>TLS termination</li>
+            <li>Load balancing across pod replicas</li>
+        </ul>
+    </section>
+
+    <section class="mb-5">
+        <h2>Infrastructure</h2>
+        <p>
+            The entire stack runs on <strong>Oracle Cloud Infrastructure</strong> free tier, demonstrating how modern 
+            cloud-native applications can be built cost-effectively while maintaining enterprise-grade patterns.
+        </p>
+    </section>
+
+    <section class="mb-5">
+        <h2>Technologies Summary</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Frontend & Application</h5>
+                <ul>
+                    <li>ASP.NET Core 8 MVC</li>
+                    <li>Bootstrap 5</li>
+                    <li>jQuery</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h5>Infrastructure & DevOps</h5>
+                <ul>
+                    <li>K3s Kubernetes</li>
+                    <li>Docker</li>
+                    <li>Traefik</li>
+                    <li>cert-manager</li>
+                    <li>oauth2-proxy</li>
+                    <li>GitLab CI/CD</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <h2>Source Code</h2>
+        <p>
+            The source code and Kubernetes manifests are managed in a private GitLab repository with proper version control 
+            and automated deployment pipelines.
+        </p>
+    </section>
+</div>

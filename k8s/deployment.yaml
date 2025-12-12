@@ -16,7 +16,7 @@ spec:
         app: nbucking-web
     spec:
       imagePullSecrets:
-      - name: gitlab-regcred
+      - name: gitlab-registry
       containers:
       - name: web
         image: registry.gitlab.com/nbucking-group/nbucking-project/web:latest
