@@ -27,8 +27,23 @@ build:
 
 deploy:
   stage: deploy
-  image: bitnami/kubectl:latest
+  image:
+    name: bitnami/kubectl:1.30
+    entrypoint: [""]
   script:
+    - mkdir -p ~/.kube
+    - |
+      if [ -n "$KUBECONFIG_CONTENT" ]; then
+        printf "%s" "$KUBECONFIG_CONTENT" > ~/.kube/config;
+      elif [ -n "$KUBE_CONFIG_B64" ]; then
+        printf "%s" "$KUBE_CONFIG_B64" | base64 -d > ~/.kube/config;
+      else
+        echo "Kubeconfig not provided; set KUBECONFIG_CONTENT or KUBE_CONFIG_B64";
+        exit 1;
+      fi
+    - chmod 600 ~/.kube/config
+    - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
+    - kubectl version --client
     - echo "Deployment triggered for $IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
     - echo "Apply manifests manually or via CD tool"
   rules:
