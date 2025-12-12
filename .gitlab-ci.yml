@@ -19,6 +19,7 @@ build:
         --dockerfile $CI_PROJECT_DIR/src/NbuckingProject.Web/Dockerfile \
         --destination $IMAGE_NAME:latest \
         --destination $IMAGE_NAME:$CI_COMMIT_SHORT_SHA \
+        --customPlatform=linux/arm64 \
         --cache=true \
         --cache-ttl=24h
   rules:
@@ -44,8 +45,12 @@ deploy:
     - chmod 600 ~/.kube/config
     - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
     - kubectl version --client
-    - echo "Deployment triggered for $IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
-    - echo "Apply manifests manually or via CD tool"
+    - echo "Deploying $IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
+    - kubectl set image deployment/nbucking-web web=$IMAGE_NAME:$CI_COMMIT_SHORT_SHA -n default
+    - kubectl rollout restart deployment/nbucking-web -n default
+    - kubectl rollout status deployment/nbucking-web -n default --timeout=120s
+    - echo "Deployment successful!"
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: manual
+  needs:
+    - build
