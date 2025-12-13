@@ -1,5 +1,6 @@
 stages:
   - build
+  - deploy
 
 variables:
   IMAGE_NAME: $CI_REGISTRY_IMAGE/web
@@ -21,7 +22,35 @@ build:
         --customPlatform=linux/arm64 \
         --cache=true \
         --cache-ttl=24h
-    - echo "Image built - Pull and deploy locally with 'kubectl rollout restart deployment/nbucking-web -n default'"
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_PIPELINE_SOURCE == "web"
+
+deploy:
+  stage: deploy
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  script:
+    - mkdir -p ~/.kube
+    - |
+      if [ -n "$KUBECONFIG_CONTENT" ]; then
+        printf "%s" "$KUBECONFIG_CONTENT" > ~/.kube/config;
+      elif [ -n "$KUBE_CONFIG_B64" ]; then
+        printf "%s" "$KUBE_CONFIG_B64" | base64 -d > ~/.kube/config;
+      else
+        echo "Kubeconfig not provided; set KUBECONFIG_CONTENT or KUBE_CONFIG_B64";
+        exit 1;
+      fi
+    - chmod 600 ~/.kube/config
+    - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
+    - kubectl version --client
+    - echo "Deploying $IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
+    - kubectl set image deployment/nbucking-web web=$IMAGE_NAME:$CI_COMMIT_SHORT_SHA -n default
+    - kubectl rollout restart deployment/nbucking-web -n default
+    - kubectl rollout status deployment/nbucking-web -n default --timeout=120s
+    - echo "Deployment successful!"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  needs:
+    - build
