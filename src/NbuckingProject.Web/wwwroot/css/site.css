@@ -20,3 +20,53 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* CSS Variables for theming */
+:root {
+  --bg-color: #ffffff;
+  --text-color: #212529;
+  --navbar-bg: #ffffff;
+  --navbar-text: #212529;
+  --border-color: #dee2e6;
+  --footer-text: #6c757d;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #1a1a1a;
+    --text-color: #e9ecef;
+    --navbar-bg: #2d2d2d;
+    --navbar-text: #e9ecef;
+    --border-color: #495057;
+    --footer-text: #adb5bd;
+  }
+}
+
+/* Apply theme colors */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.navbar-light {
+  background-color: var(--navbar-bg) !important;
+}
+
+.navbar-light .navbar-brand,
+.navbar-light .nav-link {
+  color: var(--navbar-text) !important;
+}
+
+.navbar-light .nav-link:hover {
+  opacity: 0.8;
+}
+
+.border-bottom,
+.border-top {
+  border-color: var(--border-color) !important;
+}
+
+.text-muted {
+  color: var(--footer-text) !important;
+}
