@@ -23,14 +23,32 @@ This document provides step-by-step procedures for configuring AVI load balancer
 - **Ports**: TCP 587, TCP 465 (optional), TCP 443
 - **Purpose**: Allow load balancer to reach Exchange backend servers
 
-#### 3. Optional: Direct Access for Testing
-- **Source**: Test/admin workstations
+#### 3. Application Servers to Exchange CAS (Direct EWS Access)
+- **Source**: Application servers using EWS
+- **Destination**: All Exchange CAS server IPs
+- **Ports**: TCP 443
+- **Purpose**: Direct EWS access for Autodiscover redirects or non-load-balanced sessions
+- **Note**: Required unless all EWS URLs point exclusively to load balancer VIP
+
+#### 4. Optional: Admin/Test Direct Access
+- **Source**: Admin/test workstations
 - **Destination**: Exchange CAS server IPs
 - **Ports**: TCP 587, TCP 465, TCP 443
-- **Purpose**: Allow direct testing bypassing load balancer
-- **Note**: Can be removed after successful migration
+- **Purpose**: Direct testing and troubleshooting bypassing load balancer
+- **Note**: Can be temporary for migration period
 
 **💡 Tip:** If Exchange servers already have firewall rules for Port 25 from the load balancer, you can modify those rules to include ports 587, 465, and 443 instead of creating new rules.
+
+**⚠️ EWS Direct Access:** Application servers using EWS typically need direct access to Exchange CAS servers (TCP/443) because:
+- Autodiscover may return individual CAS server URLs
+- Session affinity requirements may bypass load balancer
+- Some EWS operations require direct server access
+
+To avoid this requirement, ensure:
+- Load balancer VIP is the published Exchange URL (e.g., mail.contoso.com)
+- EWS virtual directory URLs point to load balancer VIP
+- Certificate on load balancer matches Exchange certificate
+- Session persistence is properly configured on load balancer
 
 ---
 

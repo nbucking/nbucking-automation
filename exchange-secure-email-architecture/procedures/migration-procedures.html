@@ -560,10 +560,16 @@
                         <td>EWS backend connection</td>
                     </tr>
                     <tr>
-                        <td>Application Servers</td>
+                        <td>Application Servers (EWS clients)</td>
+                        <td>Exchange CAS Servers</td>
+                        <td>TCP/443</td>
+                        <td>Direct EWS access (if Autodiscover returns CAS URLs or no session persistence)</td>
+                    </tr>
+                    <tr>
+                        <td>Admin/Test workstations</td>
                         <td>Exchange CAS Servers</td>
                         <td>TCP/587, 465, 443</td>
-                        <td>Direct access (bypass) - optional for testing</td>
+                        <td>Direct access for testing/troubleshooting (optional)</td>
                     </tr>
                 </tbody>
             </table>
@@ -571,6 +577,23 @@
             <div class="alert-box info">
                 <span class="alert-icon">💡</span>
                 <strong>Tip:</strong> If Exchange servers already have firewall rules for Port 25 from the load balancer, you can modify those rules to include ports 587, 465, and 443 instead of creating new rules.
+            </div>
+            
+            <div class="alert-box warning">
+                <span class="alert-icon">⚠️</span>
+                <strong>EWS Direct Access:</strong> Application servers using EWS typically need direct access to Exchange CAS servers (TCP/443) because:
+                <ul style="margin-top: 10px;">
+                    <li>Autodiscover may return individual CAS server URLs</li>
+                    <li>Session affinity requirements may bypass load balancer</li>
+                    <li>Some EWS operations require direct server access</li>
+                </ul>
+                <p style="margin-top: 10px;">To avoid this, ensure:</p>
+                <ul>
+                    <li>Load balancer VIP is the published Exchange URL (e.g., mail.contoso.com)</li>
+                    <li>EWS virtual directory URLs point to load balancer VIP</li>
+                    <li>Certificate on load balancer matches Exchange certificate</li>
+                    <li>Session persistence is properly configured on load balancer</li>
+                </ul>
             </div>
         </div>
         
@@ -610,13 +633,25 @@
                 
                 <div class="step">
                     <span class="step-number">3</span>
-                    <strong>Optional: Direct Access for Testing</strong>
+                    <strong>Application Servers to Exchange CAS (Direct EWS Access)</strong>
                     <ul style="margin-top: 10px;">
-                        <li><strong>Source:</strong> Test/admin workstations</li>
+                        <li><strong>Source:</strong> Application servers using EWS</li>
+                        <li><strong>Destination:</strong> All Exchange CAS server IPs</li>
+                        <li><strong>Ports:</strong> TCP 443</li>
+                        <li><strong>Purpose:</strong> Direct EWS access for Autodiscover redirects or non-load-balanced sessions</li>
+                        <li><strong>Note:</strong> Required unless all EWS URLs point exclusively to load balancer VIP</li>
+                    </ul>
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <strong>Optional: Admin/Test Direct Access</strong>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Source:</strong> Admin/test workstations</li>
                         <li><strong>Destination:</strong> Exchange CAS server IPs</li>
                         <li><strong>Ports:</strong> TCP 587, TCP 465, TCP 443</li>
-                        <li><strong>Purpose:</strong> Allow direct testing bypassing load balancer</li>
-                        <li><strong>Note:</strong> Can be removed after successful migration</li>
+                        <li><strong>Purpose:</strong> Direct testing and troubleshooting bypassing load balancer</li>
+                        <li><strong>Note:</strong> Can be temporary for migration period</li>
                     </ul>
                 </div>
                 
