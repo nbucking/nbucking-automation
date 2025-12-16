@@ -5,6 +5,35 @@ This document provides step-by-step procedures for configuring AVI load balancer
 
 ---
 
+## Firewall Requirements
+
+### Required Firewall Rules
+
+**⚠️ IMPORTANT:** Submit firewall change requests 1-2 weeks before planned configuration to account for change approval processes.
+
+#### 1. Application Servers to Load Balancer VIP
+- **Source**: All application server subnets/IPs
+- **Destination**: AVI Load Balancer VIP
+- **Ports**: TCP 587, TCP 465 (optional), TCP 443
+- **Purpose**: Allow applications to connect to secure SMTP and EWS endpoints
+
+#### 2. AVI Service Engines to Exchange CAS Servers
+- **Source**: AVI Service Engine subnet (e.g., 10.10.50.0/24)
+- **Destination**: All Exchange CAS server IPs
+- **Ports**: TCP 587, TCP 465 (optional), TCP 443
+- **Purpose**: Allow load balancer to reach Exchange backend servers
+
+#### 3. Optional: Direct Access for Testing
+- **Source**: Test/admin workstations
+- **Destination**: Exchange CAS server IPs
+- **Ports**: TCP 587, TCP 465, TCP 443
+- **Purpose**: Allow direct testing bypassing load balancer
+- **Note**: Can be removed after successful migration
+
+**💡 Tip:** If Exchange servers already have firewall rules for Port 25 from the load balancer, you can modify those rules to include ports 587, 465, and 443 instead of creating new rules.
+
+---
+
 ## Procedure 1: SMTPS L4 Passthrough Configuration
 
 ### Purpose

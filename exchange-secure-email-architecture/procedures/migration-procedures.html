@@ -504,11 +504,127 @@
                     </tr>
                 </tbody>
             </table>
+            
+            <h3>Firewall Requirements</h3>
+            
+            <div class="alert-box warning">
+                <span class="alert-icon">🔥</span>
+                <strong>Important:</strong> Submit firewall change requests before beginning configuration.
+            </div>
+            
+            <h4>Required Firewall Rules</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Destination</th>
+                        <th>Protocol/Port</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Application Servers</td>
+                        <td>AVI Load Balancer VIP</td>
+                        <td>TCP/587 (STARTTLS)</td>
+                        <td>SMTPS relay from applications</td>
+                    </tr>
+                    <tr>
+                        <td>Application Servers</td>
+                        <td>AVI Load Balancer VIP</td>
+                        <td>TCP/465 (Implicit TLS)</td>
+                        <td>SMTPS relay from legacy apps</td>
+                    </tr>
+                    <tr>
+                        <td>Application Servers</td>
+                        <td>AVI Load Balancer VIP</td>
+                        <td>TCP/443 (HTTPS)</td>
+                        <td>EWS mailbox processing</td>
+                    </tr>
+                    <tr>
+                        <td>AVI Service Engines</td>
+                        <td>Exchange CAS Servers</td>
+                        <td>TCP/587</td>
+                        <td>SMTPS backend connection</td>
+                    </tr>
+                    <tr>
+                        <td>AVI Service Engines</td>
+                        <td>Exchange CAS Servers</td>
+                        <td>TCP/465</td>
+                        <td>SMTPS backend connection (optional)</td>
+                    </tr>
+                    <tr>
+                        <td>AVI Service Engines</td>
+                        <td>Exchange CAS Servers</td>
+                        <td>TCP/443</td>
+                        <td>EWS backend connection</td>
+                    </tr>
+                    <tr>
+                        <td>Application Servers</td>
+                        <td>Exchange CAS Servers</td>
+                        <td>TCP/587, 465, 443</td>
+                        <td>Direct access (bypass) - optional for testing</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="alert-box info">
+                <span class="alert-icon">💡</span>
+                <strong>Tip:</strong> If Exchange servers already have firewall rules for Port 25 from the load balancer, you can modify those rules to include ports 587, 465, and 443 instead of creating new rules.
+            </div>
         </div>
         
         <!-- AVI Tab -->
         <div id="avi" class="tab-content">
             <h2>🔀 AVI Load Balancer Configuration</h2>
+            
+            <div class="procedure-section">
+                <h3>Procedure 0: Submit Firewall Change Requests</h3>
+                
+                <div class="alert-box warning">
+                    <span class="alert-icon">🔥</span>
+                    <strong>Prerequisites:</strong> Submit firewall requests BEFORE configuring AVI or Exchange.
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>Application Servers to Load Balancer VIP</strong>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Source:</strong> All application server subnets/IPs</li>
+                        <li><strong>Destination:</strong> AVI Load Balancer VIP</li>
+                        <li><strong>Ports:</strong> TCP 587, TCP 465 (optional), TCP 443</li>
+                        <li><strong>Purpose:</strong> Allow applications to connect to secure SMTP and EWS endpoints</li>
+                    </ul>
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>AVI Service Engines to Exchange CAS Servers</strong>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Source:</strong> AVI Service Engine subnet (e.g., 10.10.50.0/24)</li>
+                        <li><strong>Destination:</strong> All Exchange CAS server IPs</li>
+                        <li><strong>Ports:</strong> TCP 587, TCP 465 (optional), TCP 443</li>
+                        <li><strong>Purpose:</strong> Allow load balancer to reach Exchange backend servers</li>
+                    </ul>
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <strong>Optional: Direct Access for Testing</strong>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Source:</strong> Test/admin workstations</li>
+                        <li><strong>Destination:</strong> Exchange CAS server IPs</li>
+                        <li><strong>Ports:</strong> TCP 587, TCP 465, TCP 443</li>
+                        <li><strong>Purpose:</strong> Allow direct testing bypassing load balancer</li>
+                        <li><strong>Note:</strong> Can be removed after successful migration</li>
+                    </ul>
+                </div>
+                
+                <div class="alert-box info">
+                    <span class="alert-icon">⏱️</span>
+                    <strong>Timeline:</strong> Submit firewall requests 1-2 weeks before planned configuration date to account for change approval processes.
+                </div>
+            </div>
             
             <div class="procedure-section">
                 <h3>Procedure 1: SMTPS L4 Passthrough (Ports 587/465)</h3>
@@ -1022,6 +1138,22 @@ foreach (Item item in findResults.Items)
             <div class="alert-box info">
                 <span class="alert-icon">ℹ️</span>
                 <strong>Instructions:</strong> Use this page to track your migration progress. Check off items as you complete them.
+            </div>
+            
+            <h3>Phase 0: Firewall Requests</h3>
+            <div class="progress-tracker">
+                <div class="progress-item">
+                    <input type="checkbox" class="progress-checkbox" id="fw1">
+                    <label for="fw1">Submit firewall request: Applications to Load Balancer VIP (587, 465, 443)</label>
+                </div>
+                <div class="progress-item">
+                    <input type="checkbox" class="progress-checkbox" id="fw2">
+                    <label for="fw2">Submit firewall request: AVI SE to Exchange CAS (587, 465, 443)</label>
+                </div>
+                <div class="progress-item">
+                    <input type="checkbox" class="progress-checkbox" id="fw3">
+                    <label for="fw3">Verify firewall rules are implemented</label>
+                </div>
             </div>
             
             <h3>Phase 1: Infrastructure Setup</h3>
