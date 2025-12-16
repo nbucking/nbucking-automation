@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Server SE: Email Protocol Modernization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .meta {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            border-bottom: 3px solid #e9ecef;
+        }
+        
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .meta-label {
+            font-weight: bold;
+            color: #2a5298;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+        }
+        
+        h2 {
+            color: #1e3c72;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        h3 {
+            color: #2a5298;
+            font-size: 1.5em;
+            margin: 30px 0 15px 0;
+        }
+        
+        .executive-summary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .key-finding {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 5px solid white;
+        }
+        
+        .decision-tree {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .tree-node {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .tree-question {
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            display: inline-block;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        
+        .tree-branches {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            flex-wrap: wrap;
+        }
+        
+        .branch {
+            flex: 1;
+            min-width: 250px;
+            max-width: 400px;
+        }
+        
+        .branch-label {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .protocol-card {
+            background: white;
+            border: 3px solid;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .protocol-card.smtps {
+            border-color: #4CAF50;
+        }
+        
+        .protocol-card.ews {
+            border-color: #2196F3;
+        }
+        
+        .protocol-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .protocol-card.smtps .protocol-title {
+            color: #4CAF50;
+        }
+        
+        .protocol-card.ews .protocol-title {
+            color: #2196F3;
+        }
+        
+        .protocol-purpose {
+            color: #666;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        
+        .feature-list {
+            list-style: none;
+            margin: 15px 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .comparison-table tr:hover {
+            background: #e3f2fd;
+        }
+        
+        .architecture-flow {
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .flow-box {
+            background: white;
+            border: 2px solid #00838f;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .flow-arrow {
+            text-align: center;
+            font-size: 2em;
+            color: #00838f;
+            margin: 10px 0;
+        }
+        
+        .flow-title {
+            font-weight: bold;
+            color: #00838f;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .phase-timeline {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .phase {
+            flex: 1;
+            min-width: 250px;
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .phase-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .phase h4 {
+            margin-top: 15px;
+            color: #1e3c72;
+            margin-bottom: 15px;
+        }
+        
+        .alert-box {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 5px solid;
+        }
+        
+        .alert-box.warning {
+            background: #fff3cd;
+            border-color: #ff9800;
+        }
+        
+        .alert-box.info {
+            background: #e3f2fd;
+            border-color: #2196F3;
+        }
+        
+        .alert-box.success {
+            background: #d4edda;
+            border-color: #4CAF50;
+        }
+        
+        .alert-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        
+        .recommendations {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+        
+        .recommendations h3 {
+            color: white;
+            border-bottom: 2px solid white;
+            padding-bottom: 10px;
+        }
+        
+        .recommendations ol {
+            margin-top: 20px;
+            padding-left: 25px;
+        }
+        
+        .recommendations li {
+            padding: 10px 0;
+            font-size: 1.1em;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin: 5px 5px 5px 0;
+        }
+        
+        .badge.tls {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .badge.port {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .badge.protocol {
+            background: #9c27b0;
+            color: white;
+        }
+        
+        .badge.required {
+            background: #f44336;
+            color: white;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 1.1em;
+        }
+        
+        footer {
+            background: #1e3c72;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+            }
+        }
+        
+        .lb-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .lb-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .lb-card h4 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔒 Exchange Server SE</h1>
+            <p>Email Protocol Modernization Strategy</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">Transitioning from Plaintext SMTP to Secure Messaging</p>
+        </header>
+        
+        <div class="meta">
+            <div class="meta-grid">
+                <div class="meta-item">
+                    <span class="meta-label">📅 Date:</span>
+                    <span>December 16, 2025</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">🎯 Target:</span>
+                    <span>Infrastructure Architects</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">🌐 Environment:</span>
+                    <span>On-Premises/Air-Gapped</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">📦 Version:</span>
+                    <span>Exchange Server SE</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <div class="executive-summary">
+                    <h2 style="color: white; border: none;">Executive Summary</h2>
+                    <p>This whitepaper outlines the technical requirements and architectural impact of replacing legacy plaintext SMTP (Port 25) with secure alternatives in Exchange Server Subscription Edition (SE). While Exchange SE maintains support for legacy methods, 2025 security standards and Windows Extended Protection (EP) necessitate a shift toward Exchange Web Services (EWS) for mailbox management and SMTPS (Secure SMTP) for notifications.</p>
+                    
+                    <div class="key-finding">
+                        <strong>⚠️ KEY FINDING:</strong> Disabling plaintext SMTP is a "breaking change." All applications must be updated to support TLS 1.2+ and Modern Authentication or be transitioned to a secure relay.
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">100+</div>
+                        <div class="stat-label">Applications to Migrate</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">2</div>
+                        <div class="stat-label">Secure Protocols</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Migration Phases</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Downtime Required</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🔀 Protocol Selection Logic</h2>
+                
+                <div class="decision-tree">
+                    <div class="tree-node">
+                        <div class="tree-question">Does the application need mailbox processing? (Move/Delete)</div>
+                        
+                        <div class="tree-branches">
+                            <div class="branch">
+                                <div class="branch-label">❌ NO</div>
+                                <div class="protocol-card smtps">
+                                    <div class="protocol-title">SMTPS</div>
+                                    <div class="protocol-purpose">Outbound notifications/alerts only</div>
+                                    
+                                    <div>
+                                        <span class="badge port">Port 587/465</span>
+                                        <span class="badge tls">TLS 1.2+</span>
+                                    </div>
+                                    
+                                    <ul class="feature-list">
+                                        <li>No mailbox required</li>
+                                        <li>Secure relay model</li>
+                                        <li>IP-based trust</li>
+                                        <li>L4 passthrough on load balancer</li>
+                                    </ul>
+                                    
+                                    <div class="alert-box info">
+                                        <span class="alert-icon">💡</span>
+                                        <strong>Use Case:</strong> Server alerts, monitoring systems, backup reports
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="branch">
+                                <div class="branch-label">✅ YES</div>
+                                <div class="protocol-card ews">
+                                    <div class="protocol-title">EWS</div>
+                                    <div class="protocol-purpose">Advanced mailbox processing</div>
+                                    
+                                    <div>
+                                        <span class="badge port">HTTPS</span>
+                                        <span class="badge tls">TLS 1.2+</span>
+                                        <span class="badge required">Mailbox Required</span>
+                                    </div>
+                                    
+                                    <ul class="feature-list">
+                                        <li>Dedicated mailbox required</li>
+                                        <li>Native MoveItem operation</li>
+                                        <li>Modern authentication</li>
+                                        <li>L7 bridging on load balancer</li>
+                                    </ul>
+                                    
+                                    <div class="alert-box success">
+                                        <span class="alert-icon">⚡</span>
+                                        <strong>Advantage:</strong> Single-step move (vs IMAP copy-then-delete)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Protocol</th>
+                            <th>Purpose</th>
+                            <th>Mailbox Requirement</th>
+                            <th>Move/Delete Support</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>SMTPS</strong></td>
+                            <td>Outbound notifications/alerts</td>
+                            <td>❌ No (Secure Relay)</td>
+                            <td>❌ No</td>
+                        </tr>
+                        <tr>
+                            <td><strong>EWS</strong></td>
+                            <td>Advanced mailbox processing</td>
+                            <td>✅ Yes (Dedicated Mailbox)</td>
+                            <td>✅ Yes (Native Move)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="section">
+                <h2>🏗️ Architecture: SMTPS Secure Relay</h2>
+                
+                <div class="architecture-flow">
+                    <div class="flow-box">
+                        <div class="flow-title">Application Servers (100+)</div>
+                        <p>Legacy applications sending notifications</p>
+                        <div style="margin-top: 10px;">
+                            <span class="badge port">Port 587 (STARTTLS)</span>
+                            <span class="badge port">Port 465 (Implicit TLS)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flow-arrow">⬇️</div>
+                    
+                    <div class="flow-box">
+                        <div class="flow-title">Avi Load Balancer</div>
+                        <ul class="feature-list">
+                            <li><strong>Strategy:</strong> Layer 4 (L4) Passthrough</li>
+                            <li><strong>SSL:</strong> Passthrough (no termination)</li>
+                            <li><strong>SNAT:</strong> Enabled</li>
+                            <li><strong>Benefit:</strong> Direct TLS handshake preserves Extended Protection</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="flow-arrow">⬇️</div>
+                    
+                    <div class="flow-box">
+                        <div class="flow-title">Exchange Server SE - Secure Connector</div>
+                        <ul class="feature-list">
+                            <li><strong>Authentication:</strong> IP-based trust (Avi SE subnet only)</li>
+                            <li><strong>Encryption:</strong> TLS 1.2+ enforced</li>
+                            <li><strong>Management:</strong> Single subnet trust (vs 100+ individual IPs)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="alert-box success">
+                    <span class="alert-icon">🎯</span>
+                    <strong>Key Benefit:</strong> SNAT consolidates trust from 100+ individual server IPs to a single Avi Service Engine subnet.
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🏗️ Architecture: EWS Mailbox Processing</h2>
+                
+                <div class="architecture-flow">
+                    <div class="flow-box">
+                        <div class="flow-title">Processing Applications</div>
+                        <p>Applications requiring mailbox folder operations</p>
+                        <div style="margin-top: 10px;">
+                            <span class="badge protocol">HTTPS</span>
+                            <span class="badge tls">TLS 1.2+</span>
+                            <span class="badge required">Modern Auth</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flow-arrow">⬇️</div>
+                    
+                    <div class="flow-box">
+                        <div class="flow-title">Avi Load Balancer</div>
+                        <ul class="feature-list">
+                            <li><strong>Strategy:</strong> Layer 7 (L7) Bridging</li>
+                            <li><strong>SSL:</strong> Bridging (terminate and re-encrypt)</li>
+                            <li><strong>Health Check:</strong> /ews/healthcheck.htm</li>
+                            <li><strong>Requirement:</strong> Certificate must match Exchange</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="flow-arrow">⬇️</div>
+                    
+                    <div class="flow-box">
+                        <div class="flow-title">Exchange Server SE - EWS Virtual Directory</div>
+                        <ul class="feature-list">
+                            <li><strong>Extended Protection:</strong> Enabled and enforced</li>
+                            <li><strong>Operations:</strong> MoveItem, CopyItem, DeleteItem</li>
+                            <li><strong>Security:</strong> Certificate synchronization required</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="flow-arrow">⬇️</div>
+                    
+                    <div class="flow-box">
+                        <div class="flow-title">Dedicated Mailbox</div>
+                        <p><strong>Native folder operations:</strong> Inbox → Processed, Archive, etc.</p>
+                        <div class="alert-box info" style="margin-top: 15px;">
+                            <span class="alert-icon">✨</span>
+                            <strong>Single-step MoveItem</strong> is more reliable than IMAP's copy-then-delete pattern
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>⚖️ Load Balancer Strategy Comparison</h2>
+                
+                <div class="lb-comparison">
+                    <div class="lb-card">
+                        <h4>SMTPS (Port 587/465)</h4>
+                        <p><strong>Strategy:</strong> L4 Passthrough + SNAT</p>
+                        
+                        <p style="margin: 15px 0;"><strong>Why?</strong></p>
+                        <ul class="feature-list">
+                            <li>Preserves Extended Protection Channel Binding</li>
+                            <li>Direct client-to-Exchange TLS handshake</li>
+                            <li>No certificate termination needed</li>
+                            <li>Simplifies trust model via SNAT</li>
+                        </ul>
+                        
+                        <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 5px;">
+                            <strong>Configuration:</strong><br>
+                            • Virtual Service: L4<br>
+                            • SSL Profile: Passthrough<br>
+                            • SNAT: Enabled<br>
+                            • Health Monitor: TCP
+                        </div>
+                    </div>
+                    
+                    <div class="lb-card">
+                        <h4>EWS (HTTPS)</h4>
+                        <p><strong>Strategy:</strong> L7 Bridging + Certificate Sync</p>
+                        
+                        <p style="margin: 15px 0;"><strong>Why?</strong></p>
+                        <ul class="feature-list">
+                            <li>Requires session persistence</li>
+                            <li>Deep application health monitoring</li>
+                            <li>HTTP header manipulation capabilities</li>
+                            <li>Content-based routing if needed</li>
+                        </ul>
+                        
+                        <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 5px;">
+                            <strong>Configuration:</strong><br>
+                            • Virtual Service: L7<br>
+                            • SSL Profile: Bridging<br>
+                            • Certificate: Must match Exchange<br>
+                            • Health Monitor: /ews/healthcheck.htm
+                        </div>
+                    </div>
+                </div>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>SMTPS (L4 Passthrough)</th>
+                            <th>EWS (L7 Bridging)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>SSL Handling</strong></td>
+                            <td>Passthrough (no termination)</td>
+                            <td>Terminate and re-encrypt</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Extended Protection</strong></td>
+                            <td>✅ Fully compatible</td>
+                            <td>✅ Compatible (with cert sync)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Certificate Requirement</strong></td>
+                            <td>Exchange only</td>
+                            <td>Avi + Exchange (must match)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Health Monitoring</strong></td>
+                            <td>TCP port check</td>
+                            <td>HTTP endpoint (/ews/healthcheck.htm)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Session Persistence</strong></td>
+                            <td>Not required</td>
+                            <td>Required</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="section">
+                <h2>🚀 Migration Phases (Zero-Downtime Strategy)</h2>
+                
+                <div class="phase-timeline">
+                    <div class="phase">
+                        <div class="phase-number">1</div>
+                        <h4>Coexistence</h4>
+                        <p><strong>Duration:</strong> 30-60 days</p>
+                        
+                        <div style="margin: 15px 0;">
+                            <p><strong>Active Endpoints:</strong></p>
+                            <ul class="feature-list">
+                                <li>Port 25 (restricted IPs only)</li>
+                                <li>Port 587 (new secure relay)</li>
+                                <li>EWS/HTTPS (mailbox processing)</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="alert-box warning">
+                            <span class="alert-icon">⚠️</span>
+                            <strong>Action:</strong> Deploy new connectors while maintaining legacy support
+                        </div>
+                    </div>
+                    
+                    <div class="phase">
+                        <div class="phase-number">2</div>
+                        <h4>Migration</h4>
+                        <p><strong>Duration:</strong> 60-90 days</p>
+                        
+                        <div style="margin: 15px 0;">
+                            <p><strong>Priority Order:</strong></p>
+                            <ol style="padding-left: 20px;">
+                                <li>High-risk/high-volume apps → EWS</li>
+                                <li>Simple relay apps → SMTPS</li>
+                                <li>Legacy/complex apps → Assess & update</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="alert-box info">
+                            <span class="alert-icon">📊</span>
+                            <strong>Goal:</strong> Port 25 traffic reduces from 100% → 0%
+                        </div>
+                    </div>
+                    
+                    <div class="phase">
+                        <div class="phase-number">3</div>
+                        <h4>Decommission</h4>
+                        <p><strong>Duration:</strong> 30 days validation</p>
+                        
+                        <div style="margin: 15px 0;">
+                            <p><strong>Validation Criteria:</strong></p>
+                            <ul class="feature-list">
+                                <li>Port 25 traffic = 0 for 30+ days</li>
+                                <li>All apps migrated and validated</li>
+                                <li>Security audit complete</li>
+                                <li>Rollback plan documented</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="alert-box success">
+                            <span class="alert-icon">✅</span>
+                            <strong>Action:</strong> Disable Port 25 connector entirely
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>📜 Licensing & Compliance (2025 Model)</h2>
+                
+                <div class="architecture-flow">
+                    <div class="flow-box">
+                        <div class="flow-title">Exchange Server SE Subscription Model</div>
+                        <table class="comparison-table">
+                            <tbody>
+                                <tr>
+                                    <td><strong>Internet Required?</strong></td>
+                                    <td>❌ NO (Air-gapped supported)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Manual Product Key Entry</strong></td>
+                                    <td>✅ YES (Subscription keys)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Security Updates</strong></td>
+                                    <td>✅ Manual download/apply</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="alert-box warning">
+                        <span class="alert-icon">⚠️</span>
+                        <strong>The CU1/CU2 Gate:</strong> You can stay on RTM and apply Security Updates (SUs) manually. However, once CU2 is released, the RTM version becomes <strong>unsupported</strong>. You must move to CU1+ to continue receiving security patches.
+                    </div>
+                    
+                    <div class="flow-box">
+                        <div class="flow-title">CAL Requirements</div>
+                        <p style="margin-bottom: 15px;">Every authenticating entity (user or application) needs:</p>
+                        <ul class="feature-list">
+                            <li>Valid Exchange CAL</li>
+                            <li>Active Software Assurance</li>
+                        </ul>
+                        <p style="margin-top: 15px;"><strong>Applies to:</strong> SMTPS authentication + EWS mailbox access</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🎯 Security Impact Summary</h2>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Security Aspect</th>
+                            <th>Before (Legacy)</th>
+                            <th>After (2025)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Encryption</strong></td>
+                            <td>❌ Plaintext SMTP</td>
+                            <td>✅ TLS 1.2+ enforced</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Extended Protection</strong></td>
+                            <td>❌ Disabled</td>
+                            <td>✅ Enforced on all endpoints</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Trust Model</strong></td>
+                            <td>⚠️ 100+ individual server IPs</td>
+                            <td>✅ Avi SE subnet (simplified)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mailbox Operations</strong></td>
+                            <td>⚠️ IMAP copy-then-delete (2 steps)</td>
+                            <td>✅ EWS native MoveItem (1 step)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Authentication</strong></td>
+                            <td>⚠️ Anonymous/basic auth</td>
+                            <td>✅ Modern auth / certificate-based</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="section">
+                <div class="recommendations">
+                    <h3>✅ Final Recommendations</h3>
+                    <ol>
+                        <li><strong>Deploy EWS for all applications requiring "Inbox-to-Folder" movement.</strong> The native MoveItem operation is superior to IMAP's copy-then-delete pattern.</li>
+                        
+                        <li><strong>Deploy SMTPS (L4 Passthrough) on Avi for all outbound relay needs.</strong> This preserves Extended Protection while simplifying configuration.</li>
+                        
+                        <li><strong>Synchronize Certificates across Avi and Exchange</strong> to allow L7 Bridging for EWS without breaking Extended Protection.</li>
+                        
+                        <li><strong>Consolidate Trust by using SNAT on the Load Balancer.</strong> This reduces Receive Connector management from 100+ IPs to a single subnet of Avi Service Engines.</li>
+                        
+                        <li><strong>Follow the three-phase migration strategy</strong> to ensure zero downtime and proper validation at each stage.</li>
+                        
+                        <li><strong>Maintain compliance with Exchange SE licensing requirements,</strong> including CALs for all authenticating entities and timely CU updates.</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>📋 Quick Reference: Decision Matrix</h2>
+                
+                <div class="decision-tree">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Answer</th>
+                                <th>Protocol</th>
+                                <th>Key Requirements</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td rowspan="2"><strong>Does the application move emails between folders?</strong></td>
+                                <td>✅ YES</td>
+                                <td><strong>EWS</strong></td>
+                                <td>
+                                    • Dedicated mailbox<br>
+                                    • Modern authentication<br>
+                                    • L7 bridging on Avi<br>
+                                    • Certificate sync
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>❌ NO</td>
+                                <td><strong>SMTPS</strong></td>
+                                <td>
+                                    • No mailbox needed<br>
+                                    • TLS 1.2+ support<br>
+                                    • L4 passthrough on Avi<br>
+                                    • SNAT configuration
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p><strong>Exchange Server Subscription Edition (SE)</strong></p>
+            <p>Infrastructure Architects & Security Operations Guide</p>
+            <p style="margin-top: 15px; opacity: 0.8;">December 16, 2025 | On-Premises/Air-Gapped Deployment</p>
+        </footer>
+    </div>
+</body>
+</html>
