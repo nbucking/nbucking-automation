@@ -123,12 +123,17 @@
 
 ### EWS Service Accounts
 
-- [ ] Create mailbox for EWS processing: ewsprocessing@contoso.com
-- [ ] Hide mailbox from GAL
-- [ ] Grant ApplicationImpersonation role (if needed)
+**Note:** If you already have IMAP mailboxes, you can reuse them for EWS. No need to create new ones!
+
+- [ ] Identify existing mailboxes used for IMAP processing
+- [ ] Verify EWS is enabled on existing mailboxes: Get-CASMailbox <mailbox> | Select EwsEnabled
+- [ ] If needed: Enable EWS on existing mailboxes
+- [ ] Verify existing service account permissions apply to EWS
+- [ ] Optional: Create NEW mailbox only if you need one that doesn't exist
+- [ ] Optional: Grant ApplicationImpersonation role (if needed for multi-mailbox access)
 - [ ] Optional: Create custom throttling policy for EWS service accounts
-- [ ] Document service account credentials in password vault
-- [ ] **Service Account: ___________________ Password Vault Location: ___________________**
+- [ ] Document all mailboxes being used for EWS processing
+- [ ] **Mailboxes using EWS: ___________________________________________________**
 
 ### Port 25 Monitoring Setup
 

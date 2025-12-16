@@ -235,10 +235,27 @@ Set-OrganizationConfig -OAuth2ClientProfileEnabled $true
 Get-WebServicesVirtualDirectory | Select Server, OAuthAuthentication
 ```
 
-#### 2.5 Create Service Account for EWS Applications
+#### 2.5 Verify/Configure EWS Service Accounts
+
+**Note:** If you already have mailboxes used for IMAP processing, you can reuse them for EWS. The same mailbox works with both protocols. You do NOT need to create new mailboxes.
+
+**Option A: Reuse Existing IMAP Mailboxes (Recommended)**
 
 ```powershell
-# Create mailbox for EWS processing (if not exists)
+# Verify existing mailbox has EWS enabled (usually enabled by default)
+Get-CASMailbox invoices@contoso.com | Select DisplayName, ImapEnabled, EwsEnabled
+
+# If EWS is disabled, enable it
+Set-CASMailbox invoices@contoso.com -EwsEnabled $true
+
+# Verify existing permissions still apply to EWS
+Get-MailboxPermission invoices@contoso.com | Where-Object {$_.User -like "*service*"}
+```
+
+**Option B: Create New Mailbox (Only if Needed)**
+
+```powershell
+# Only create if you need a NEW mailbox that didn't exist before
 New-Mailbox -UserPrincipalName ewsprocessing@contoso.com `
     -Alias ewsprocessing `
     -Name "EWS Processing Service Account" `
