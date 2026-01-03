@@ -1,0 +1,130 @@
+#cloud-config
+# Nicklab03 - PostgreSQL Datastore Server
+# Oracle Cloud Instance: 1 OCPU, 6GB RAM, 50GB disk
+
+hostname: nicklab03
+fqdn: nicklab03.localdomain
+
+# Update packages on first boot
+package_update: true
+package_upgrade: true
+
+packages:
+  - postgresql15-server
+  - postgresql15-contrib
+  - postgresql-client
+
+# Create swap file
+swap:
+  filename: /.swapfile
+  size: 4294967296  # 4GB
+  maxsize: 4294967296
+
+# Run commands after package installation
+runcmd:
+  # Initialize PostgreSQL
+  - /usr/pgsql-15/bin/postgresql-15-setup initdb
+  
+  # Configure PostgreSQL for K3s
+  - |
+    cat >> /var/lib/pgsql/15/data/postgresql.conf << 'PGCONF'
+    # K3s optimizations
+    listen_addresses = '*'
+    max_connections = 200
+    shared_buffers = 256MB
+    effective_cache_size = 2GB
+    maintenance_work_mem = 64MB
+    checkpoint_completion_target = 0.9
+    wal_buffers = 16MB
+    default_statistics_target = 100
+    random_page_cost = 1.1
+    effective_io_concurrency = 200
+    work_mem = 2621kB
+    min_wal_size = 1GB
+    max_wal_size = 4GB
+    PGCONF
+  
+  # Configure pg_hba.conf for K3s nodes
+  - echo "host k3s k3s 10.0.0.0/24 scram-sha-256" >> /var/lib/pgsql/15/data/pg_hba.conf
+  
+  # Enable and start PostgreSQL
+  - systemctl enable postgresql-15
+  - systemctl start postgresql-15
+  
+  # Wait for PostgreSQL to be ready
+  - sleep 5
+  
+  # Create K3s database and user
+  - |
+    sudo -u postgres psql -c "CREATE DATABASE k3s;"
+    sudo -u postgres psql -c "CREATE USER k3s WITH PASSWORD 'K3sP0stgr3sSecr3t!';"
+    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE k3s TO k3s;"
+  
+  # Configure firewall
+  - firewall-cmd --permanent --add-service=postgresql
+  - firewall-cmd --permanent --add-service=ssh
+  - firewall-cmd --reload
+  
+  # Remove PCP (not needed)
+  - dnf remove -y pcp pcp-system-tools pcp-pmda-* python3-pcp pcp-doc pcp-selinux 2>/dev/null || true
+  - rm -rf /var/lib/pcp /etc/pcp /var/log/pcp
+  
+  # Clean up
+  - dnf clean all
+  - journalctl --vacuum-time=7d
+
+# Set timezone
+timezone: UTC
+
+# Write additional files
+write_files:
+  - path: /etc/motd
+    content: |
+      ╔═══════════════════════════════════════════╗
+      ║       Nicklab03 - PostgreSQL Server       ║
+      ║     K3s Datastore for HA Cluster          ║
+      ╚═══════════════════════════════════════════╝
+      
+      PostgreSQL 15 for K3s cluster
+      Database: k3s
+      User: k3s
+      
+      Connection string:
+      postgres://k3s:PASSWORD@<this-ip>:5432/k3s?sslmode=disable
+      
+    permissions: '0644'
+  
+  - path: /root/postgresql-info.txt
+    content: |
+      PostgreSQL Configuration
+      ========================
+      Database: k3s
+      User: k3s
+      Password: K3sP0stgr3sSecr3t!
+      Port: 5432
+      
+      Connection String:
+      export DATASTORE_ENDPOINT="postgres://k3s:K3sP0stgr3sSecr3t!@NICKLAB03_IP:5432/k3s?sslmode=disable"
+      
+      Test Connection:
+      psql -h localhost -U k3s -d k3s -c "SELECT version();"
+      
+      Backup Database:
+      sudo -u postgres pg_dump k3s > k3s-backup-$(date +%Y%m%d).sql
+      
+      Monitor Connections:
+      sudo -u postgres psql -c "SELECT * FROM pg_stat_activity WHERE datname='k3s';"
+    permissions: '0600'
+
+final_message: |
+  ╔═══════════════════════════════════════════╗
+  ║  Nicklab03 PostgreSQL Setup Complete!    ║
+  ╚═══════════════════════════════════════════╝
+  
+  PostgreSQL 15 is running and ready for K3s
+  Connection info: /root/postgresql-info.txt
+  
+  Next steps:
+  1. Note this instance's IP address
+  2. Test connection from K3s nodes
+  3. Use connection string when installing K3s
